@@ -34,7 +34,7 @@ from oauth2client.file import Storage
 from oauth2client.tools import argparser, run_flow
 
 CLIENT_SECRETS_FILE = "client_secrets.json"
-MISSING_CLIENT_SECRETS_MESSAGE = "Oh, no. Try looking at %s" % os.path.abspath(os.path.join(os.path.dirname(__file__), CLIENT_SECRETS_FILE))
+# MISSING_CLIENT_SECRETS_MESSAGE = "Oh, no. Try looking at %s" % os.path.abspath(os.path.join(os.path.dirname(__file__), CLIENT_SECRETS_FILE))
 YOUTUBE_READ_WRITE_SCOPE = "https://www.googleapis.com/auth/youtube"
 YOUTUBE_API_SERVICE_NAME = "youtube"
 YOUTUBE_API_VERSION = "v3"

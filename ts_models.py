@@ -23,7 +23,7 @@ from flask import Flask
 from flask.ext.sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://bqqytgjxunnpub:iKDOMPBtbGW_iYh3APj_J9-fdG@ec2-54-221-236-207.compute-1.amazonaws.com:5432/d2dq69kou4rdn0'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost:5432/Duylam'
 
 # instantiates sqlalchemy class with postgres uri
 db = SQLAlchemy(app)
@@ -66,17 +66,12 @@ db.Model.synch = synch
 # Classes for Database Models
 #
 class User(db.Model):
+    __tablename__ = 'User'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80))
     email = db.Column(db.String(80))
-    # token = db.Column()
-    # phone_number_id = db.Column(db.Integer, db.ForeignKey('phone_number.id'), nullable=False)
-    # location_history = db.relationship('LocationHistory', backref='user', lazy='dynamic')
-    # affiliation_id = db.Column(db.Integer, db.ForeignKey('affiliation.id'))
-    # platform_id = db.Column(db.Integer, db.ForeignKey('platform.id'))
 
-    def __init__ (self, uid, name, email):
-        self.uid = uid
+    def __init__ (self, name, email):
         self.name = name
         self.email = email
 
@@ -85,28 +80,40 @@ class User(db.Model):
 
     def get_watch_history():
         return "get watch history"
+#
+# class Playlist(db.Model):
+#     def __init__ (self):
+#         pass
+#     def __repr__(self):
+#         return "playlist"
+#
+# class PlaylistSongs(db.Model):
+#     def __init__ (self):
+#         pass
+#     def __repr__(self):
+#         return "songs"
+#
+# class Bumps(db.Model):
+#     def __init__ (self):
+#         pass
+#     def __repr__(self):
+#         return "bumps"
+#
+# class ListeningHistory(db.Model):
+#     def __init__ (self):
+#         pass
+#     def __repr__(self):
+#         return "history"
+#
+# class Generator():
+#     def __init__ (self):
+#         pass
+#     def __repr__(self):
+#         return "generator"
 
-class Playlist(db.Model):
-    def __init__ (self):
-    def __repr__(self):
-        return "playlist"
-
-class PlaylistSongs(db.Model):
-    def __init__ (self):
-    def __repr__(self):
-        return "songs"
-
-class Bumps(db.Model):
-    def __init__ (self):
-    def __repr__(self):
-        return "bumps"
-
-class ListeningHistory(db.Model):
-    def __init__ (self):
-    def __repr__(self):
-        return "history"
-
-class Generator():
-    def __init__ (self):
-    def __repr__(self):
-        return "generator"
+def get_user(email=None):
+    """ Return a User if one is associated with user.id or PhoneNumber. """
+    if email:
+        return User.query.filter(User.email==email).first()
+    else:
+        return None
