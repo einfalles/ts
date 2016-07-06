@@ -35,10 +35,10 @@ def index():
         return redirect(url_for('login'))
     else:
         http_auth = credentials.authorize(httplib2.Http())
-        recommender = tsr.Recommender(http_auth)
-        history = recommender.get_watch_history()
-        print history
-        sys.stdout.flush()
+        # recommender = tsr.Recommender(http_auth)
+        # history = recommender.get_watch_history()
+        # print history
+        # sys.stdout.flush()
         return "credentials found"
 
 
