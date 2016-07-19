@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/normalize.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/skeleton.css') }}">
+  <link rel="icon" type="image/png" href="images/favicon.png">
+</head>
+<body>
+<div class="container">
+  <div class="mobile row h-100-vp">
+    <div class="twelve columns display-center h-100-vp">
+      <h4>TuneSmash</h4>
+      <a class="primary-button pink" href="/loading/search" data-uid="{{user_id}}" data-email="{{user_email}}" data-name="{{user_name}}" id="submit">
+        <button>Make A Playlist</button>
+      </a>
+      <a href="/playlist/management/{{user_id}}" class="primary-button purple" href="/">
+        <button>Manage Playlist</button>
+      </a>
+      <a class="primary-button orange" href="/">
+        <button>Edit Avatar</button>
+      </a>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

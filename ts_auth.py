@@ -23,6 +23,8 @@ import httplib2
 import os
 import sys
 import csv
+import json
+from ts_models import User, db
 from flask import Flask, render_template, request, redirect, jsonify, session, url_for,current_app
 from oauth2client.contrib.flask_util import UserOAuth2
 from oauth2client.client import OAuth2WebServerFlow
@@ -70,7 +72,8 @@ class OAuthSignIn(object):
 class GoogleSignIn(OAuthSignIn):
     def __init__(self):
         super(GoogleSignIn, self).__init__('google')
-        self.flow = OAuth2WebServerFlow(client_id=self.consumer_id,client_secret=self.consumer_secret,scope=['https://www.googleapis.com/auth/youtube','https://www.googleapis.com/auth/userinfo.profile'],redirect_uri='http://localhost:5000/auth')
+        self.flow = OAuth2WebServerFlow(client_id=self.consumer_id,client_secret=self.consumer_secret,scope=['https://www.googleapis.com/auth/youtube','https://www.googleapis.com/auth/userinfo.profile'],redirect_uri='http://localhost:5000/auth',prompt='consent')
+        self.flow.params['access_type'] = 'offline'
 
     def authorize(self):
         return self.flow.step1_get_authorize_url()
@@ -80,8 +83,9 @@ class GoogleSignIn(OAuthSignIn):
             return None, None, None
         code = request.args.get('code')
         credentials = self.flow.step2_exchange(code)
-        session['credentials'] = credentials.to_json()
-        return session['credentials']
+        print("access_token: %s" % credentials.access_token)
+        print("refres_token: %s" % credentials.refresh_token)
+        return credentials
 
 # Authorize the request and store authorization credentials.
 def get_authenticated_service(user):
@@ -114,7 +118,7 @@ def get_watch_history(youtube):
                   if len(history_temp) > 1:
                       retrieved_history.append(str(video_title).rsplit('-',1))
                   else:
-                      print history_temp
+                      print(history_temp)
         playlistitems_list_request = youtube.playlistItems().list_next(playlistitems_list_request, playlistitems_list_response)
         count = count + 1
     return retrieved_history

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>TuneSmash</title>
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <script src="https://www.gstatic.com/firebasejs/3.1.0/firebase.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/normalize.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/skeleton.css') }}">
+  <link rel="icon" type="image/png" href="images/favicon.png">
+
+</head>
+<body>
+  <div class="container">
+    <div class="mobile row h-100-vp">
+      <div class="twelve columns display-center h-100-vp">
+        <h4>TuneSmash</h4>
+        <h6>Users nearby</h6>
+        <ul>
+          <li><a data-id="5">Francis and the lights</a></li>
+          <li><a data-id="6">Kanye west</a></li>
+          <li><a data-id="7">Bon iver</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+<script>
+var GLOBAL_LAT = 0;
+var GLOBAL_LON = 0;
+var GLOBAL_EMAIL = "";
+var GLOBAL_UID = {{user_id}};
+var GLOBAL_NAME = "";
+var GLOBAL_TIME = 0;
+var config = {
+  apiKey: "AIzaSyBKX1xmfY8JuhIbgOxhO2APg6f4VcCZWXI",
+  authDomain: "luminous-inferno-9831.firebaseapp.com",
+  databaseURL: "https://luminous-inferno-9831.firebaseio.com",
+  storageBucket: "luminous-inferno-9831.appspot.com",
+};
+firebase.initializeApp(config);
+var bumpsRef = firebase.database().ref('bumps/');
+var timeLimit = "this value should be the current time minus 5 minutes";
+bumpsRef.orderByChild("time").startAt(1468707770420).on('child_added', function(data) {
+  bumps = data.val();
+  console.log(bumps);
+  if (bumps['to'] == 7) {
+    alert("yas");
+    postData = {
+      'uone':7,
+      'utwo':bumps['to']
+    }
+    // clear html and move user to "match found"
+    // then clear html and move user to "generating playlist"
+    $.ajax({
+      url: '/algorithm/generation',
+      data: postData,
+      type: 'POST',
+      success: function(response) {
+        // algorithm must generate playlist, then insert playlist into table so we can call it later
+        // after success we will navigate user to /playlist/playlist_id
+        location.href = '/playlist/'+response.playlist_id.toString();
+      },
+      error: function(error) {
+        // alert("NO");
+        alert('something broke');
+      }
+    });
+  }
+});
+function writeNewPost(data) {
+  var updates = {};
+  var bumpPostKey = firebase.database().ref().child('bumps').push().key;
+  updates['/bumps/' + bumpPostKey] = data;
+  return firebase.database().ref().update(updates);
+}
+
+$(document).ready(function(){
+  var options = {
+    enableHighAccuracy: true,
+    timeout: 5000,
+    maximumAge: 0
+  };
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(success, failure, options);
+  } else {
+    alert("We need your location");
+  }
+  function success(position) {
+    GLOBAL_LAT = position.coords.latitude;
+    GLOBAL_LON = position.coords.longitude;
+    console.log("achieved position");
+    console.log(GLOBAL_LAT + " / " + GLOBAL_LON)
+  }
+  function failure(err){
+    console.warn('ERROR(' + err.code + '): ' + err.message);
+  }
+  $("a").on('click',function(event){
+    event.preventDefault();
+    var d = new Date();
+    var diss = $(this);
+    GLOBAL_TIME = d.getTime();
+    GLOBAL_TO = parseInt(diss.attr('data-id'));
+    var postData = {
+      "from": GLOBAL_UID,
+      "to": GLOBAL_TO,
+      "lat": GLOBAL_LAT,
+      "lon": GLOBAL_LON,
+      "time": GLOBAL_TIME
+    };
+    firePost = writeNewPost(postData).then(function(){
+      alert('this is when we would clear the html');
+    });
+  });
+});
+</script>
+</body>
+</html>

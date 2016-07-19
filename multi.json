@@ -1,0 +1,66 @@
+{
+  "data": [
+    {
+      "credential": {
+        "_class": "OAuth2Credentials",
+        "_module": "oauth2client.client",
+        "access_token": "ya29.Ci8jAzK1eSSDJZwUaHrzLz0U0VMpKv-etdSmFe4xIDN2H5ysMxSH-XGR0ebCiEyIkQ",
+        "client_id": "423012525826-6gjm74kkcin3bikkv9vremubpqvhvic9.apps.googleusercontent.com",
+        "client_secret": "YWOQPqAzgRs2pKAtBS9TV5oV",
+        "id_token": null,
+        "invalid": false,
+        "refresh_token": "1/gU17rBkAbZKngiltNOcois28foyY071iCHuyHKUN2Io",
+        "revoke_uri": "https://accounts.google.com/o/oauth2/revoke",
+        "scopes": [
+          "https://www.googleapis.com/auth/youtube"
+        ],
+        "token_expiry": "2016-07-17T19:15:00Z",
+        "token_info_uri": "https://www.googleapis.com/oauth2/v3/tokeninfo",
+        "token_response": {
+          "access_token": "ya29.Ci8jAzK1eSSDJZwUaHrzLz0U0VMpKv-etdSmFe4xIDN2H5ysMxSH-XGR0ebCiEyIkQ",
+          "expires_in": 3600,
+          "refresh_token": "1/gU17rBkAbZKngiltNOcois28foyY071iCHuyHKUN2Io",
+          "token_type": "Bearer"
+        },
+        "token_uri": "https://accounts.google.com/o/oauth2/token",
+        "user_agent": null
+      },
+      "key": {
+        "clientId": "eat@rad.kitchen",
+        "scope": "https://www.googleapis.com/auth/youtube https://www.googleapis.com/auth/userinfo.profile",
+        "userAgent": "app"
+      }
+    },
+    {
+      "credential": {
+        "_class": "OAuth2Credentials",
+        "_module": "oauth2client.client",
+        "access_token": "ya29.CjAlA41bI-EcdsUd75P0e3f3-LscilCaA4iQygatfNP6oLKrANt-IUBuSEgM9Sq4Zow",
+        "client_id": "423012525826-6gjm74kkcin3bikkv9vremubpqvhvic9.apps.googleusercontent.com",
+        "client_secret": "YWOQPqAzgRs2pKAtBS9TV5oV",
+        "id_token": null,
+        "invalid": false,
+        "refresh_token": "1/gU17rBkAbZKngiltNOcois28foyY071iCHuyHKUN2Io",
+        "revoke_uri": "https://accounts.google.com/o/oauth2/revoke",
+        "scopes": [
+          "https://www.googleapis.com/auth/youtube"
+        ],
+        "token_expiry": "2016-07-19T09:24:37Z",
+        "token_info_uri": "https://www.googleapis.com/oauth2/v3/tokeninfo",
+        "token_response": {
+          "access_token": "ya29.CjAlA41bI-EcdsUd75P0e3f3-LscilCaA4iQygatfNP6oLKrANt-IUBuSEgM9Sq4Zow",
+          "expires_in": 3600,
+          "token_type": "Bearer"
+        },
+        "token_uri": "https://accounts.google.com/o/oauth2/token",
+        "user_agent": null
+      },
+      "key": {
+        "clientId": "dlamnguyen@gmail.com",
+        "scope": "https://www.googleapis.com/auth/youtube https://www.googleapis.com/auth/userinfo.profile",
+        "userAgent": "app"
+      }
+    }
+  ],
+  "file_version": 1
+}
