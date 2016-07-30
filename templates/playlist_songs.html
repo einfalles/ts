@@ -10,16 +10,37 @@
   <script src="https://www.gstatic.com/firebasejs/3.1.0/firebase.js"></script>
 </head>
 <body>
-<div class="container">
-  <div class="row">
-    <div class="one-half column" style="margin-top: 10%">
-      <h4>TuneSmash</h4>
-      <h6>songs</h6>
-      <p>{{songs}}</p>
+  <div class="container">
+    <div class="mobile row h-100-vp">
+      <div class="twelve columns display-center h-100-vp">
+      <h3>Songs</h3>
+      <ul class="w-100 no-of" id="easyPaginate">
+      {% for song in songs %}
+          <li>
+            <div class="avatar-wrapper">
+              <img src="http://img.youtube.com/vi/{{song.2}}/default.jpg">
+            </div>
+            <div class="content-wrapper">
+              <a href="https://youtube.com/watch?v={{song.2}}&amp;index={{loop.index}}&amp;list={{pl}}">{{song.0}}</a>
+              <p>{{song.1}}</p>
+            </div>
+
+          </li>
+      {% endfor %}
+      </ul>
+      </div>
     </div>
   </div>
-</div>
 <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
-
+<script src="{{ url_for('static', filename='js/jquery.easyPaginate.js') }}"></script>
+<script>
+$(document).ready(function(){
+  $('#easyPaginate').easyPaginate({
+    paginateElement: 'li',
+    elementsPerPage: 5,
+    effect: 'climb'
+  });
+});
+</script>
 </body>
 </html>

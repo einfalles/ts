@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 
 ts_models.py
@@ -22,18 +21,13 @@ import datetime
 from flask import Flask
 from flask.ext.sqlalchemy import SQLAlchemy
 from oauth2client.contrib.sqlalchemy import CredentialsType
+from sqlalchemy.orm import relationship
+
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost:5432/rachelgoree'
-
-# instantiates sqlalchemy class with postgres uri
 db = SQLAlchemy(app)
-
-# creates all tables…defined where though?
 db.create_all()
 
-#
-# Utilities.
-#
 
 # Extend the functionality of the Model class.
 def create(self):
@@ -70,8 +64,6 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80))
     email = db.Column(db.String(80))
-    credentials = db.Column(db.String(100))
-
     def __init__ (self, name, email):
         self.name = name
         self.email = email
@@ -93,9 +85,34 @@ class User(db.Model):
 
     def get_id(self):
         try:
-            return unicode(self.id)  # python 2
+            return self.id  # python 2
         except NameError:
             return str(self.id)  # python 3
+
+class History(db.Model):
+    __tablename__ = 'History'
+    id = db.Column(db.Integer, primary_key=True)
+    uid = db.Column(db.Integer, db.ForeignKey('User.id'))
+    sid = db.Column(db.Integer, db.ForeignKey('Song.id'))
+    user_id = relationship('User', foreign_keys=[uid])
+    song_id = relationship('Song', foreign_keys=[sid])
+    time = db.Column(db.BigInteger)
+    
+
+    def __init__ (self,uid,sid,time):
+        self.uid = uid
+        self.sid = sid
+        self.time = time
+
+    def __repr__(self):
+        return "history"
+
+def get_history(uid=None,uemail=None):
+    if uid:
+        results = History.query.filter_by(uid=uid).order_by(History.time.desc()).first()
+        return results
+    else:
+        return None
 
 class Playlist(db.Model):
     __tablename__ = 'Playlist'
@@ -116,38 +133,6 @@ class Playlist(db.Model):
     def __repr__(self):
         return "User one: %r // User two: %r" % (self.uone, self.utwo)
 
-def get_all_playlists(user_id=None,user_email=None):
-    playlists = []
-    user_id = int(user_id)
-    if user_id:
-        result = Playlist.query.filter(db.or_(Playlist.uone==user_id, Playlist.utwo==user_id)).all()
-        for i in result:
-            match = 0
-            if i.uone == user_id:
-                match = i.utwo
-            if i.utwo == user_id:
-                match = i.uone
-            playlists.append((i.id,match,i.time,i.url))
-        db.session.close()
-        return playlists
-
-    if user_email:
-        user = User.query.filter_by(email=user_email).first()
-        user_id = user.id
-        result = Playlist.query.filter(db.or_(Playlist.uone==user_id, Playlist.utwo==user_id)).all()
-        db.session.close()
-        return result
-    return None
-
-def get_playlist_songs(pl_id=None):
-    songs = []
-    if pl_id:
-        playlist = PlaylistSong.query.filter(PlaylistSong.pl_id==pl_id).all()
-        for i in playlist:
-            song = Song.query.filter(Song.id==i.song_id).first()
-            songs.append((song.track, song.artist, song.art, song.spotify_uri))
-    return songs
-
 class PlaylistSong(db.Model):
     __tablename__ = 'PlaylistSong'
     id = db.Column(db.Integer, primary_key=True)
@@ -166,38 +151,65 @@ class Song(db.Model):
     spotify_uri = db.Column(db.String(100))
     track = db.Column(db.String(100))
     artist = db.Column(db.String(100))
-    art = db.Column(db.String(100))
+    yt_uri = db.Column(db.String(100))
 
-    def __init__ (self,spotify_uri,track,artist,art):
+    def __init__ (self,spotify_uri,track,artist,yt_uri):
         self.spotify_uri = spotify_uri
         self.track = track
         self.artist = artist
-        self.art = art
+        self.yt_uri = yt_uri
 
     def __repr__(self):
-        return "Track %r / Arist %r / URI %r", (self.track, self.artist, self.spotify_uri)
-#
-# class Bumps(db.Model):
-#     def __init__ (self):
-#         pass
-#     def __repr__(self):
-#         return "bumps"
-#
-# class ListeningHistory(db.Model):
-#     def __init__ (self):
-#         pass
-#     def __repr__(self):
-#         return "history"
-#
-# class Generator():
-#     def __init__ (self):
-#         pass
-#     def __repr__(self):
-#         return "generator"
+        return "Song"
 
-def get_user(email=None):
+def get_user(email=None,uid=None):
     """ Return a User if one is associated with user.id or PhoneNumber. """
     if email:
         return User.query.filter(User.email==email).first()
+    if uid:
+        return User.query.filter(User.id==uid).first()
+    else:
+        return None
+
+def get_all_playlists(user_id=None,user_email=None):
+    playlists = []
+    user_id = int(user_id)
+    if user_id:
+        result = Playlist.query.filter(db.or_(Playlist.uone==user_id, Playlist.utwo==user_id)).all()
+        for i in result:
+            match = 0
+            if i.uone == user_id:
+                match = i.utwo
+            if i.utwo == user_id:
+                match = i.uone
+            user = get_user(uid=match)
+            playlists.append((i.id,user.id,user.name,user.email,i.time,i.url))
+        db.session.close()
+        return playlists
+
+    if user_email:
+        user = User.query.filter_by(email=user_email).first()
+        user_id = user.id
+        result = Playlist.query.filter(db.or_(Playlist.uone==user_id, Playlist.utwo==user_id)).all()
+        db.session.close()
+        return result
+    return None
+
+def get_playlist_songs(pl_id=None):
+    songs = []
+    if pl_id:
+        playlist = PlaylistSong.query.filter(PlaylistSong.pl_id==pl_id).all()
+        for i in playlist:
+            song = Song.query.filter(Song.id==i.song_id).first()
+            songs.append((song.track, song.artist, song.yt_uri, song.spotify_uri))
+    else:
+        return None
+    return songs
+
+
+def get_playlist_url(pl_id=None):
+    if pl_id:
+        url = Playlist.query.filter(Playlist.id==pl_id).first()
+        return url
     else:
         return None

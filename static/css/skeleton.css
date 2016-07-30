@@ -43,6 +43,42 @@
 .row {
   width: 100%;
 }
+.w-100 {
+  width: 100%;
+}
+.no-of {
+  overflow: hidden;
+}
+#playlist li,
+#songs li,
+#easyPaginate li{
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+}
+.easyPaginateNav{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.easyPaginateNav a {
+  margin: 0 0.3rem;
+}
+.avatar-wrapper {
+  flex: 0 0 25%;
+}
+.avatar-wrapper img {
+  width: 100%;
+}
+.content-wrapper {
+  flex: 0 0 75%;
+  display: flex;
+  flex-direction: column;
+  padding-left: 1.25rem;
+}
+.content-wrapper p {
+  margin: 0;
+}
 .h-100-vp {
   height: 100vh;
 }

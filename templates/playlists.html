@@ -10,19 +10,26 @@
   <script src="https://www.gstatic.com/firebasejs/3.1.0/firebase.js"></script>
 </head>
 <body>
-<div class="container">
-  <div class="row">
-    <div class="one-half column" style="margin-top: 10%">
-      <h4>TuneSmash</h4>
-      <h6>playlist</h6>
-      <ul>
+  <div class="container">
+    <div class="mobile row h-100-vp">
+      <div class="twelve columns display-center h-100-vp">
+      <h3>Playlists</h3>
+      <ul class="w-100 no-of" id="playlist">
       {% for song in playlists %}
-          <li><a href="/playlist/{{song.0}}">Playlist with {{song.1}}</a></li>
+          <li>
+            <div class="avatar-wrapper">
+              <img src="http://thecatapi.com/api/images/get?format=src&amp;type=gif">
+            </div>
+            <div class="content-wrapper">
+              <a href="/playlist/{{song.0}}">{{song.2}}</a>
+              <p>Created on {{song.4}}</p>
+            </div>
+          </li>
       {% endfor %}
       </ul>
+      </div>
     </div>
   </div>
-</div>
 <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
 
 </body>
