@@ -12,6 +12,7 @@ import time
 import pprint
 import jsonify
 import datetime
+import pyrebase
 import ts_auth as tsa
 import ts_recommendations as tsr
 import ts_models as tsm
@@ -36,7 +37,14 @@ app.config['OAUTH_CREDENTIALS'] = {
         'secret':'e2oBEpfgl3HVwU94UjFolXL8'
     }
 }
-
+config = {
+  "apiKey": "AIzaSyBKX1xmfY8JuhIbgOxhO2APg6f4VcCZWXI",
+  "authDomain": "luminous-inferno-9831.firebaseapp.com",
+  "databaseURL": "https://luminous-inferno-9831.firebaseio.com",
+  "storageBucket": "luminous-inferno-9831.appspot.com",
+};
+firebase = pyrebase.initialize_app(config)
+fdb = firebase.database()
 # FLASK LOGIN CONFIG
 lm = LoginManager()
 lm.init_app(app)
@@ -129,6 +137,17 @@ def load_search():
         tsm.db.session.close()
         return render_template('search.html',user_id=user.id,user_email=user.email,user_name=user.name)
 
+@app.route('/loading/match/to/<uid>',methods=['GET','POST'])
+def load_match(uid):
+    if request.method == "POST":
+        return jsonify({'status':'ok'})
+    if request.method == "GET":
+        user = tsm.get_user(email=session['credentials']['id_token']['email'])
+        other = tsm.get_user(uid=uid)
+        tsm.db.session.close()
+        return render_template('matched.html',user_id=user.id,user_email=user.email,user_name=user.name,to_id=other.id,to_email=other.email,to_name=other.name)
+
+
 @app.route('/algorithm/generation', methods=['POST'])
 def algo_generation():
     time = request.json['time']
@@ -154,6 +173,13 @@ def algo_generation():
         tsm.db.session.add(pl_relation)
         tsm.db.session.commit()
     tsm.db.session.close()
+    fdbdata = {
+    'time':request.json['time'],
+    'from':request.json['from'],
+    'to':request.json['to'],
+    'plid':plid
+    }
+    fdb.child("notification").push(fdbdata)
     return jsonify({'status':'ok','payload':plid})
 
 

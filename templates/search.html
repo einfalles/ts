@@ -20,9 +20,6 @@
         <h4>TuneSmash</h4>
         <h6>Users nearby</h6>
         <ul>
-          <li><a data-email="mombot" data-id="5">Francis and the lights</a></li>
-          <li><a data-email="dn@rad.kithen" data-id="6">Kanye west</a></li>
-          <li><a data-email="musky@x.com" data-id="4">Bon iver</a></li>
         </ul>
       </div>
     </div>
@@ -42,52 +39,12 @@ var config = {
   storageBucket: "luminous-inferno-9831.appspot.com",
 };
 firebase.initializeApp(config);
-var bumpsRef = firebase.database().ref('bumps/');
-var timeLimit = "this value should be the current time minus 5 minutes";
-var options = {
-  enableHighAccuracy: true,
-  timeout: 5000,
-  maximumAge: 0
-};
-if (navigator.geolocation) {
-  navigator.geolocation.getCurrentPosition(success, failure, options);
-} else {
-  alert("We need your location");
-}
-function success(position) {
-  GLOBAL_LAT = position.coords.latitude;
-  GLOBAL_LON = position.coords.longitude;
-  console.log("achieved position");
-  console.log(GLOBAL_LAT + " / " + GLOBAL_LON)
-}
-function failure(err){
-  console.warn('ERROR(' + err.code + '): ' + err.message);
-}
+var d = new Date()
+var chat = firebase.database().ref('/chat');
+var vistor = {'uid':"{{user_id}}",'email':"{{user_email}}",'name':"{{user_name}}",'time':d.getTime(),'location':000}
+var vistorRef = chat.push(vistor);
+vistorRef.onDisconnect().remove();
 
-
-bumpsRef.orderByChild("time").startAt(1468707770420).on('child_added', function(data) {
-  bumps = data.val();
-  console.log(bumps);
-  if (bumps['to']['email'] == GLOBAL_EMAIL) {
-    postData = {
-      'uone':bumps['to'],
-      'utwo':bumps['from']
-    }
-    // clear html and move user to "match found"
-    // then clear html and move user to "generating playlist"
-    // $.ajax({
-    //   url: '/algorithm/generation',
-    //   data: postData,
-    //   type: 'POST',
-    //   success: function(response) {
-    //     location.href = '/playlist/'+response.playlist_id.toString();
-    //   },
-    //   error: function(error) {
-    //     alert('something broke');
-    //   }
-    // });
-  }
-});
 function writeNewPost(data) {
   var updates = {};
   var bumpPostKey = firebase.database().ref().child('bumps').push().key;
@@ -95,9 +52,20 @@ function writeNewPost(data) {
   return firebase.database().ref().update(updates);
 }
 
-$(document).ready(function(){
-
-  $("a").on('click',function(event){
+$(document).on('ready',function(){
+  count = 0;
+  chat.on('child_added',function (snapshot){
+    $('ul').append('<li id="'+ snapshot.key+'">'+'<a class="clickbait" data-email="'+ snapshot.val()['email']+'" data-id="'+snapshot.val()['uid'] +'"'+'>'+snapshot.val()['name']+'</a></li>');
+    // $('.clickbait').on('click',yo);
+    count = count + 1;
+    console.log(count);
+  });
+  chat.on('child_removed', function (snapshot) {
+    setTimeout(function(){
+      $('#' + snapshot.key).remove(); 
+    },300000);
+  });
+  $('ul').on('click', 'li a.clickbait', function(event) {
     event.preventDefault();
     var d = new Date();
     var diss = $(this);
@@ -113,30 +81,7 @@ $(document).ready(function(){
       "time": GLOBAL_TIME
     };
     firePost = writeNewPost(postData).then(function(){
-      // alert('this is when we would clear the html');
-      var dddata = {
-        'uone':{'id':7,'email':'dlamnguyen@gmail.com'},
-        'utwo':{'id':8,'email':'eat@rad.kitchen'},
-        'time': GLOBAL_TIME,
-        'location': 'yup'
-      }
-      $.ajax({
-        url: '/algorithm/generation',
-        data: JSON.stringify(dddata),
-        contentType:"application/json",
-        // issue here.....
-        type: 'POST',
-        success: function(response) {
-          // algorithm must generate playlist, then insert playlist into table so we can call it later
-          // after success we will navigate user to /playlist/playlist_id
-          location.href = '/playlist/'+response.payload.toString();
-        },
-        error: function(error) {
-          // alert("NO");
-          console.log(error)
-          alert('something broke');
-        }
-      });
+      location.href = '/loading/match/to/'+GLOBAL_TO_ID;
     });
   });
 });

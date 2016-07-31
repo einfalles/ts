@@ -1,53 +1,126 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
-  <!-- Basic Page Needs
-  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <meta charset="utf-8">
   <title>TuneSmash</title>
   <meta name="description" content="">
   <meta name="author" content="">
-
-  <!-- Mobile Specific Metas
-  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <script src="https://www.gstatic.com/firebasejs/3.1.0/firebase.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <!-- FONT
-  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
-
-  <!-- CSS
-  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/normalize.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/skeleton.css') }}">
-
-  <!-- Favicon
-  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <link rel="icon" type="image/png" href="images/favicon.png">
 
 </head>
 <body>
-
-  <!-- Primary Page Layout
-  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <div class="container">
-    <div class="row">
-      <div class="one-half column" style="margin-top: 10%">
-        <img src="https://d13yacurqjgara.cloudfront.net/users/25514/screenshots/1774285/loading-bar-music-interface-app-ramotion.gif"/>
+    <div class="mobile row h-100-vp">
+      <div class="twelve columns display-center h-100-vp">
+        <h4>matching</h4>
+        <h6></h6>
       </div>
     </div>
   </div>
-<script   src="https://code.jquery.com/jquery-3.1.0.min.js"   integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s="   crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
 <script>
-$(document).ready(function(){
-  var user = "{{channel}}";
-  var data = {{data|safe}};
-  console.log(data);
-  //
+var config = {
+  apiKey: "AIzaSyBKX1xmfY8JuhIbgOxhO2APg6f4VcCZWXI",
+  authDomain: "luminous-inferno-9831.firebaseapp.com",
+  databaseURL: "https://luminous-inferno-9831.firebaseio.com",
+  storageBucket: "luminous-inferno-9831.appspot.com",
+};
+firebase.initializeApp(config);
+var d = new Date();
+d = d.getTime();
+var startTime = d-300000;
+var bumps = firebase.database().ref('bumps/');
+var matches = firebase.database().ref('matches/');
+var notification = firebase.database().ref('notification');
+var from = 0;
+var to = 0;
+if ({{user_id}} > {{to_id}}) {
+  from = {{user_id}};
+  ef = "{{user_email}}";
+  to = {{to_id}};
+  et = "{{to_email}}";
+} else {
+  to = {{user_id}};
+  et = "{{user_email}}";
+  from = {{to_id}};
+  ef = "{{to_email}}";
+}
+bumps.orderByChild("time").startAt(startTime).on('child_added', function(snapshot) {
+  data = snapshot.val();
+  if (data['to']['id'] == parseInt({{user_id}})) {
+    var postData = {
+      'from': from,
+      'to': to,
+      'uone':{'id':from,'email':ef},
+      'utwo':{'id':to,'email':et},
+      'time': 140002,
+      'location': 'yup'
+    }
+
+    matches.orderByChild("from").equalTo(from).once('value',function(snapshot){
+      var meow = snapshot;
+      count = 0;
+      meow.forEach(function(i){
+        count = count + 1;
+      });
+      if (count < 1) {
+        matchPost = newMatch(postData).then(function(){
+          // remove match reference
+          $.ajax({
+            url: '/algorithm/generation',
+            data: JSON.stringify(postData),
+            contentType:"application/json",
+            type: 'POST',
+            success: function(response) {
+              location.href = '/playlist/' + response.payload.toString();
+            },
+            error: function(error) {
+              console.log(error)
+              alert('something broke');
+            }
+          });
+        });
+      } else {
+        notification.orderByChild("from").equalTo(from).on('child_added',function(snapshot){
+          var d = snapshot.val();
+          if (d['to'] == to) {
+            console.log(snapshot.key);
+            notification.child(snapshot.key).remove();
+            location.href = '/playlist/' + d['plid'].toString();
+          }
+        });
+      }
+    });
+
+  }
+});
+
+function newMatch(data) {
+  var updates = {};
+  var matchPostKey = firebase.database().ref().child('matches').push().key;
+  updates['/matches/' + matchPostKey] = data;
+  return firebase.database().ref().update(updates);
+}
+
+$(document).on('ready',function(){
+  var count = 0;
+  // matches.orderByChild("time").startAt(startTime).on('child_added',function (snapshot){
+  //   count = count + 1;
+  //   var data = snapshot.val();
+  //   data['major'] = snapshot.key;
+  //   if (count > 1) {
+  //     if (data['to'] == parseInt({{user_id}})) {
+  //       matches.child(data['major']).remove();
+  //     } 
+  //   }
+  //   console.log(data);
+  // });
 });
 </script>
-<!-- End Document
-  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
 </body>
 </html>

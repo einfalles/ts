@@ -164,6 +164,7 @@ def get_authenticated_service(user):
     return youtube
 
 def generate_yt_playlist(yt,uone,utwo):
+    print(uone)
     playlist = yt.playlists().insert(
         part="snippet,status",
         body=dict(
@@ -172,7 +173,7 @@ def generate_yt_playlist(yt,uone,utwo):
                 description="Tunesmash"
             ),
             status=dict(
-                privacyStatus="public"
+                privacyStatus="private"
             )
         )
     ).execute()
@@ -220,7 +221,10 @@ def run_generation(uone=None, utwo=None,hone=None,htwo=None,location=None, time=
     tunesmash = add_audio_features(tunesmash)
     tunesmash = bell_sort(tunesmash)
     tunesmash = remove_ids(tunesmash)
-    youtube = get_authenticated_service(uone['email'])
+    if uone['email'] == 'eat@rad.kitchen':
+        youtube = get_authenticated_service(utwo['email'])
+    else:
+        youtube = get_authenticated_service(uone['email'])
     yt_playlist_id = generate_yt_playlist(yt=youtube,uone=uone['email'],utwo=utwo['email'])
     songs = populate_playlist(youtube,tunesmash,yt_playlist_id)
     data = {
