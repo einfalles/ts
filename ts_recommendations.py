@@ -29,7 +29,9 @@ def get_watch_history(user):
 
     playlistitems_list_response = playlistitems_list_request.execute()
     for plitem in playlistitems_list_response["items"]:
+        print("this is vid id")
         vid = plitem["snippet"]["resourceId"]["videoId"]
+        print(vid)
         vreq = youtube.videos().list(part="snippet",id=vid)
         vres = vreq.execute()
         for vitem in vres["items"]:
@@ -43,6 +45,7 @@ def get_watch_history(user):
                             song = results['tracks']['items'][0]
                             return (track[0],track[1],vid,song['id'])
                     except spotipy.SpotifyException:
+                        print(track)
                         print(spotipy.SpotifyException)
                         pass
     # playlistitems_list_request = youtube.playlistItems().list_next(playlistitems_list_request, playlistitems_list_response)

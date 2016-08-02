@@ -83,6 +83,7 @@ def auth():
     session['credentials'] = json.loads(credentials.to_json())
     user_email = session['credentials']['id_token']['email']
     user_name = session['credentials']['id_token']['name']
+    print(user_email)
     user = tsm.get_user(email=user_email)
     store = oams.get_credential_storage(filename='multi.json',client_id=user_email,user_agent='app',scope=['https://www.googleapis.com/auth/userinfo.profile','https://www.googleapis.com/auth/youtube'])
     store.put(credentials)
