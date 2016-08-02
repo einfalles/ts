@@ -20,7 +20,6 @@ Copyright (c) Rad Kitchen Inc. All rights reserved.
 import datetime
 from flask import Flask
 from flask.ext.sqlalchemy import SQLAlchemy
-from oauth2client.contrib.sqlalchemy import CredentialsType
 from sqlalchemy.orm import relationship
 
 app = Flask(__name__)
