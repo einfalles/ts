@@ -96,14 +96,15 @@ def auth():
 
     history = tsr.get_watch_history(user_email)
     song = tsm.Song.query.filter_by(spotify_uri=history[3]).first()
-
+    sid = 0;
     if song == None:
         song = tsm.Song(spotify_uri=history[3],track=history[1],artist=history[0],yt_uri=history[2])
-        tsm.db.session.expunge(song)
         tsm.db.session.add(song)
         tsm.db.session.commit()
+        tsm.db.session.expunge(song)
+        sid = song.id
 
-    h = tsm.History(uid=user.id,sid=song.id,time=time.time())
+    h = tsm.History(uid=user.id,sid=sid,time=time.time())
     tsm.db.session.add(h)
     tsm.db.session.commit()
     tsm.db.session.close()
