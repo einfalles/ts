@@ -101,8 +101,8 @@ def auth():
         song = tsm.Song(spotify_uri=history[3],track=history[1],artist=history[0],yt_uri=history[2])
         tsm.db.session.add(song)
         tsm.db.session.commit()
-        tsm.db.session.expunge(song)
         sid = song.id
+        tsm.db.session.expunge(song)
 
     h = tsm.History(uid=user.id,sid=sid,time=time.time())
     tsm.db.session.add(h)
