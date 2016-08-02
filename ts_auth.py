@@ -26,8 +26,8 @@ CLIENT_SECRETS_FILE = "client_secrets.json"
 YOUTUBE_READ_WRITE_SCOPE = "https://www.googleapis.com/auth/youtube"
 YOUTUBE_API_SERVICE_NAME = "youtube"
 YOUTUBE_API_VERSION = "v3"
-
-
+PROD_AUTH = 'http://tunesmash.herokuapp.com/auth'
+DEV_AUTH = 'http://localhost:5000/auth'
 class OAuthSignIn(object):
     providers = None
     def __init__(self, provider_name):
@@ -57,7 +57,7 @@ class OAuthSignIn(object):
 class GoogleSignIn(OAuthSignIn):
     def __init__(self):
         super(GoogleSignIn, self).__init__('google')
-        self.flow = OAuth2WebServerFlow(client_id=self.consumer_id,client_secret=self.consumer_secret,scope=['https://www.googleapis.com/auth/userinfo.profile','https://www.googleapis.com/auth/youtube'],redirect_uri='http://tunesmash.herokuapp.com/auth',prompt='consent')      
+        self.flow = OAuth2WebServerFlow(client_id=self.consumer_id,client_secret=self.consumer_secret,scope=['https://www.googleapis.com/auth/userinfo.profile','https://www.googleapis.com/auth/youtube'],redirect_uri=DEV_AUTH,prompt='consent')      
         self.flow.params['access_type'] = 'offline'
 
     def authorize(self):
