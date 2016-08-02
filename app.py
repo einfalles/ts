@@ -89,15 +89,16 @@ def auth():
 
     if user == None:
         user = tsm.User(user_name,user_email)
+        tsm.db.session.expunge(user)
         tsm.db.session.add(user)
         tsm.db.session.commit()
-        tsm.db.session.expunge(user)
 
     history = tsr.get_watch_history(user_email)
     song = tsm.Song.query.filter_by(spotify_uri=history[3]).first()
 
     if song == None:
         song = tsm.Song(spotify_uri=history[3],track=history[1],artist=history[0],yt_uri=history[2])
+        tsm.db.session.expunge(song)
         tsm.db.session.add(song)
         tsm.db.session.commit()
 
@@ -105,8 +106,6 @@ def auth():
     tsm.db.session.add(h)
     tsm.db.session.commit()
     tsm.db.session.close()
-    
-
     return redirect("/")
 
 @app.route('/login')

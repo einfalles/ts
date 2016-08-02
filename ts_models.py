@@ -16,14 +16,15 @@ date of last edit:
 Copyright (c) Rad Kitchen Inc. All rights reserved.
 
 """
-
+PRODUCTION = 'postgres://ksualenqkvlhjj:h84hpFPOi4boL6QYl6EOwRyP6T@ec2-54-243-204-195.compute-1.amazonaws.com:5432/de1brda8ltt7bd'
+DEVELOPMENT = 'postgresql://localhost:5432/rachelgoree'
 import datetime
 from flask import Flask
 from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost:5432/rachelgoree'
+app.config['SQLALCHEMY_DATABASE_URI'] = PRODUCTION
 db = SQLAlchemy(app)
 db.create_all()
 
