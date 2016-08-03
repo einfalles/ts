@@ -18,7 +18,7 @@ import ts_recommendations as tsr
 import ts_models as tsm
 from oauth2client import client
 from flask_sse import sse
-from flask import Flask, render_template, request, redirect, jsonify, session, url_for,flash
+from flask import Flask, render_template, request, redirect, jsonify, session, url_for,send_file
 from oauth2client.client import OAuth2Credentials
 from oauth2client.contrib import multistore_file as oams
 from flask.ext.login import login_user, logout_user, current_user, login_required,LoginManager
@@ -27,7 +27,7 @@ from flask.ext.login import LoginManager
 #
 # CONSTANTS
 #
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='')
 app.debug = True
 app.config['REFRESH_LIMIT'] = 15
 app.secret_key = 'duylamduylam'
@@ -60,6 +60,11 @@ def load_user(email):
 #
 # ROUTING
 #
+@app.route('/loaderio-c54d3912e32128c85bd19987caf3561e')
+def loaderio():
+    return send_file('/js/loaderio-c54d3912e32128c85bd19987caf3561e.txt', attachment_filename='loaderio-c54d3912e32128c85bd19987caf3561e.txt')
+
+
 @app.route('/')
 def index():
     # https://developers.google.com/api-client-library/python/auth/web-app#example
