@@ -2,3 +2,4 @@
 2) make sure songs are not full albums...do a time check on each video
 3) tunesmash.herokuapp.com takes an unusually long time to load
 4)  is not bound to a Session; attribute refresh operation cannot proceed
+5) loaded history with chinelo, but it did not record air high school lover as a song and did not insert a history object for chinelo
