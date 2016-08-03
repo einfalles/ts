@@ -202,6 +202,7 @@ def populate_playlist(yt, recommendations, playlist_id):
     videos = []
     print("******* populating playlist *********")
     for song in recommendations:
+        print(song)
         try:
             q = song[0] + " " + song[1]
             yt_request = yt.search().list(part="snippet",q=q,type="video")

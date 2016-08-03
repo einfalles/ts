@@ -71,7 +71,19 @@ def index():
             credentials.refresh(httplib2.Http())
         if credentials.invalid == True:
             return redirect('/login')
-        tsm.db.session.close()
+
+        history = tsr.get_watch_history(user.email)
+        song = tsm.Song.query.filter_by(spotify_uri=history[3]).first()
+        if song == None:
+            song = tsm.Song(spotify_uri=history[3],track=history[1],artist=history[0],yt_uri=history[2])
+            tsm.db.session.add(song)
+            tsm.db.session.commit()
+            tsm.db.session.expunge(song)
+
+        h = tsm.History(uid=user.id,sid=song.id,time=time.time())
+        tsm.db.session.add(h)
+        tsm.db.session.commit()
+        
         return render_template('home.html',user_name=user.name,user_email=user.email,user_id=user.id)
     if 'credentials' not in session:
         return render_template('index.html')
@@ -94,18 +106,6 @@ def auth():
         tsm.db.session.add(user)
         tsm.db.session.commit()
 
-    history = tsr.get_watch_history(user_email)
-    song = tsm.Song.query.filter_by(spotify_uri=history[3]).first()
-    if song == None:
-        song = tsm.Song(spotify_uri=history[3],track=history[1],artist=history[0],yt_uri=history[2])
-        tsm.db.session.add(song)
-        tsm.db.session.commit()
-        tsm.db.session.expunge(song)
-
-    h = tsm.History(uid=user.id,sid=song.id,time=time.time())
-    tsm.db.session.add(h)
-    tsm.db.session.commit()
-    tsm.db.session.close()
     return redirect("/")
 
 @app.route('/login')
@@ -116,14 +116,14 @@ def login():
 @app.route('/playlist/management/<uid>', methods=['GET','POST'])
 def manage_playlist(uid):
     playlists = tsm.get_all_playlists(user_id=uid)
-    tsm.db.session.close()
+    
     return render_template('playlists.html',playlists=playlists)
 
 @app.route('/playlist/<pl_id>')
 def view_playlist(pl_id):
     songs = tsm.get_playlist_songs(pl_id=pl_id)
     url = tsm.get_playlist_url(pl_id=pl_id)
-    tsm.db.session.close()
+    
     return render_template('playlist_songs.html', songs=songs,pl=url.url)
 
 
@@ -133,7 +133,7 @@ def load_search():
         return jsonify({'status':'ok'})
     if request.method == "GET":
         user = tsm.get_user(email=session['credentials']['id_token']['email'])
-        tsm.db.session.close()
+        
         return render_template('search.html',user_id=user.id,user_email=user.email,user_name=user.name)
 
 @app.route('/loading/match/to/<uid>',methods=['GET','POST'])
@@ -143,7 +143,7 @@ def load_match(uid):
     if request.method == "GET":
         user = tsm.get_user(email=session['credentials']['id_token']['email'])
         other = tsm.get_user(uid=uid)
-        tsm.db.session.close()
+        
         return render_template('matched.html',user_id=user.id,user_email=user.email,user_name=user.name,to_id=other.id,to_email=other.email,to_name=other.name)
 
 
@@ -171,7 +171,7 @@ def algo_generation():
         pl_relation = tsm.PlaylistSong(playlist.id,song.id)
         tsm.db.session.add(pl_relation)
         tsm.db.session.commit()
-    tsm.db.session.close()
+    
     fdbdata = {
     'time':request.json['time'],
     'from':request.json['from'],
