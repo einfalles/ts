@@ -68,32 +68,31 @@ def loaderio():
 @app.route('/')
 def index():
     # https://developers.google.com/api-client-library/python/auth/web-app#example
-    # if 'credentials' in session:
-    #     user = tsm.get_user(email=session['credentials']['id_token']['email'])
-    #     store = oams.get_credential_storage(filename='multi.json',client_id=user.email,user_agent='app',scope=['https://www.googleapis.com/auth/userinfo.profile','https://www.googleapis.com/auth/youtube'])
-    #     credentials = store.get()
-    #     if (credentials.token_expiry - datetime.datetime.utcnow()) < datetime.timedelta(minutes=app.config['REFRESH_LIMIT']):
-    #         credentials.refresh(httplib2.Http())
-    #     if credentials.invalid == True:
-    #         return redirect('/login')
+    if 'credentials' in session:
+        user = tsm.get_user(email=session['credentials']['id_token']['email'])
+        store = oams.get_credential_storage(filename='multi.json',client_id=user.email,user_agent='app',scope=['https://www.googleapis.com/auth/userinfo.profile','https://www.googleapis.com/auth/youtube'])
+        credentials = store.get()
+        if (credentials.token_expiry - datetime.datetime.utcnow()) < datetime.timedelta(minutes=app.config['REFRESH_LIMIT']):
+            credentials.refresh(httplib2.Http())
+        if credentials.invalid == True:
+            return redirect('/login')
 
-    #     history = tsr.get_watch_history(user.email)
-    #     song = tsm.Song.query.filter_by(spotify_uri=history[3]).first()
-    #     if song == None:
-    #         song = tsm.Song(spotify_uri=history[3],track=history[1],artist=history[0],yt_uri=history[2])
-    #         tsm.db.session.add(song)
-    #         tsm.db.session.expunge(song)
-    #         print(song)
-    #         tsm.db.session.commit()
+        history = tsr.get_watch_history(user.email)
+        song = tsm.Song.query.filter_by(spotify_uri=history[3]).first()
+        if song == None:
+            song = tsm.Song(spotify_uri=history[3],track=history[1],artist=history[0],yt_uri=history[2])
+            tsm.db.session.add(song)
+            tsm.db.session.expunge(song)
+            print(song)
+            tsm.db.session.commit()
 
-    #     h = tsm.History(uid=user.id,sid=song.id,time=time.time())
-    #     tsm.db.session.add(h)
-    #     tsm.db.session.commit()
+        h = tsm.History(uid=user.id,sid=song.id,time=time.time())
+        tsm.db.session.add(h)
+        tsm.db.session.commit()
         
-    #     return render_template('home.html',user_name=user.name,user_email=user.email,user_id=user.id)
-    # if 'credentials' not in session:
-    #     return render_template('index.html')
-    return render_template('index.html')
+        return render_template('home.html',user_name=user.name,user_email=user.email,user_id=user.id)
+    if 'credentials' not in session:
+        return render_template('index.html')
 
 @app.route('/auth')
 def auth():
