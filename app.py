@@ -77,18 +77,18 @@ def index():
         if credentials.invalid == True:
             return redirect('/login')
 
-        history = tsr.get_watch_history(user.email)
-        song = tsm.Song.query.filter_by(spotify_uri=history[3]).first()
-        if song == None:
-            song = tsm.Song(spotify_uri=history[3],track=history[1],artist=history[0],yt_uri=history[2])
-            tsm.db.session.add(song)
-            tsm.db.session.expunge(song)
-            print(song)
-            tsm.db.session.commit()
+        # history = tsr.get_watch_history(user.email)
+        # song = tsm.Song.query.filter_by(spotify_uri=history[3]).first()
+        # if song == None:
+        #     song = tsm.Song(spotify_uri=history[3],track=history[1],artist=history[0],yt_uri=history[2])
+        #     tsm.db.session.add(song)
+        #     tsm.db.session.expunge(song)
+        #     print(song)
+        #     tsm.db.session.commit()
 
-        h = tsm.History(uid=user.id,sid=song.id,time=time.time())
-        tsm.db.session.add(h)
-        tsm.db.session.commit()
+        # h = tsm.History(uid=user.id,sid=song.id,time=time.time())
+        # tsm.db.session.add(h)
+        # tsm.db.session.commit()
         
         return render_template('home.html',user_name=user.name,user_email=user.email,user_id=user.id)
     if 'credentials' not in session:

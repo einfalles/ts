@@ -25,7 +25,7 @@ from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = PRODUCTION
+app.config['SQLALCHEMY_DATABASE_URI'] = DEVELOPMENT
 db = SQLAlchemy(app)
 db.create_all()
 

@@ -1,33 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="description" content="">
-  <meta name="author" content="">
-  <script src="https://www.gstatic.com/firebasejs/3.1.0/firebase.js"></script>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href='https://fonts.googleapis.com/css?family=Press+Start+2P' rel='stylesheet' type='text/css'>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/normalize.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/skeleton.css') }}">
-  <link rel="icon" type="image/png" href="images/favicon.png">
-
-</head>
-<body>
-  <div class="container">
-    <div class="mobile row h-100-vp">
-      <div class="twelve columns display-start h-100-vp">
-        <header class="header w-100 display-center">
-          <h2 class="page-header">Users Nearby</h2>
-        </header>
-        <main class="m-t-auto">
-          <ul></ul>
-        </main>
-        <footer class="h-0"></footer>
-      </div>
-    </div>
-  </div>
-<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
-<script type="text/javascript">
 var GLOBAL_LAT = 0;
 var GLOBAL_LON = 0;
 var GLOBAL_EMAIL = "{{user_email}}";
@@ -87,6 +57,3 @@ $(document).on('ready',function(){
     });
   });
 });
-</script>
-</body>
-</html>

@@ -148,8 +148,23 @@ footer {
 button {
   width: 100% !important;
 }
-.primary-button {
+.m-b-5 {
+  margin-bottom: 1rem;
+}
+.primary-button{
   width: 80%;
+  margin: 0 auto;
+  border: 0;
+  color: white;
+}
+.pink {
+  background-color: rgb(249,77,124);
+}
+.purple {
+  background-color: rgb(85,85,250);
+}
+.orange {
+  background-color: #fb9423;
 }
 .column,
 .columns {
