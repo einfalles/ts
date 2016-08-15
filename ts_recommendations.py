@@ -29,9 +29,7 @@ def get_watch_history(user):
 
     playlistitems_list_response = playlistitems_list_request.execute()
     for plitem in playlistitems_list_response["items"]:
-        print("this is vid id")
         vid = plitem["snippet"]["resourceId"]["videoId"]
-        print(vid)
         vreq = youtube.videos().list(part="snippet",id=vid)
         vres = vreq.execute()
         for vitem in vres["items"]:
@@ -43,7 +41,6 @@ def get_watch_history(user):
                         results = SP.search(q='artist:'+track[0] + ' AND ' + 'track:'+track[1], type='track')
                         if len(results['tracks']['items'])>0:
                             song = results['tracks']['items'][0]
-                            print(song)
                             return (track[0],track[1],vid,song['id'])
                     except spotipy.SpotifyException:
                         print(track)
@@ -75,10 +72,8 @@ def sp_add_spid(history):
             title = song[1]
             results = SP.search(q='artist:'+ artist +' AND '+'track:'+ title,type='track')
             items = results['tracks']['items']
-            print(items)
             if len(items)>0:
                 for i in items:
-                    print(i)
                     song.append(str(i['id']))
         except:
             print(song)
@@ -89,6 +84,7 @@ def generate_recommendations(seed_one, seed_two,limit):
     recommendations = []
     unireq = {}
     seeds = [seed_one,seed_two]
+
     results = SP.recommendations(seed_tracks=seeds,max_popularity=limit,limit=60)
     results = results['tracks']
 
@@ -167,13 +163,12 @@ def get_authenticated_service(user):
     youtube = build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION, http=creds.authorize(httplib2.Http()))
     return youtube
 
-def generate_yt_playlist(yt,uone,utwo):
-    print(uone)
+def generate_yt_playlist(yt,uone,utwo,t):
     playlist = yt.playlists().insert(
         part="snippet,status",
         body=dict(
             snippet=dict(
-                title=str(time.time())+" * " + uone  + " and " + utwo,
+                title=str(t)+" * " + uone  + " and " + utwo,
                 description="Tunesmash"
             ),
             status=dict(
@@ -203,7 +198,6 @@ def populate_playlist(yt, recommendations, playlist_id):
     videos = []
     print("******* populating playlist *********")
     for song in recommendations:
-        print(song)
         try:
             q = song[0] + " " + song[1]
             yt_request = yt.search().list(part="snippet",q=q,type="video")
@@ -221,7 +215,7 @@ def populate_playlist(yt, recommendations, playlist_id):
         recommendations[i] = tuple(r)
     return recommendations
 
-def run_generation(uoemail=None, utemail=None,uone=None,utwo=None,hone=None,htwo=None,location=None, time=None,popularity_limit=60):
+def run_generation(uone=None,utwo=None,hone=None,htwo=None,location=None, time=None,popularity_limit=60):
     tunesmash = generate_recommendations(hone,htwo,popularity_limit)
     tunesmash = add_audio_features(tunesmash)
     tunesmash = bell_sort(tunesmash)
@@ -231,7 +225,7 @@ def run_generation(uoemail=None, utemail=None,uone=None,utwo=None,hone=None,htwo
         youtube = get_authenticated_service(utwo['email'])
     else:
         youtube = get_authenticated_service(uone['email'])
-    yt_playlist_id = generate_yt_playlist(yt=youtube,uone=uone['email'],utwo=utwo['email'])
+    yt_playlist_id = generate_yt_playlist(yt=youtube,uone=uone['email'],utwo=utwo['email'],t=time)
     songs = populate_playlist(youtube,tunesmash,yt_playlist_id)
     data = {
         'playlist_url': yt_playlist_id,

@@ -19,26 +19,27 @@ CREATE TABLE users (
 
 -- define a user, people with the app and people that are just numbers
 CREATE TABLE history (
-    h_id    SERIAL PRIMARY KEY NOT NULL,
+    h_id          SERIAL PRIMARY KEY NOT NULL,
     uid           integer REFERENCES users(id),
     sid           integer REFERENCES songs(s_id),
     created_at    timestamptz
 );
 
 -- geospatial coordinates
-CREATE TABLE playlist (
-   p_id         SERIAL PRIMARY KEY NOT NULL,
-   uone          integer REFERENCES users(id),
-   utwo          integer REFERENCES users(id),
-   created_at    timestampz NOT NULL DEFAULT,
+CREATE TABLE playlists (
+   p_id          SERIAL PRIMARY KEY NOT NULL,
+   uo_id          integer REFERENCES users(id),
+   ut_id          integer REFERENCES users(id),
+   created_at    timestamptz NOT NULL,
    url           varchar(200) UNIQUE,
    location      varchar(200)
 );
 
 -- maintain a history of coordinates
 CREATE TABLE playlist_songs (
-    pl_id   integer REFERENCES playlist(p_id),
-    s_id    integer REFERENCES song(s_id)
+    id      SERIAL PRIMARY KEY NOT NULL,
+    pl_id   integer REFERENCES playlists(p_id),
+    s_id    integer REFERENCES songs(s_id)
 );
 
 -- manage the currently live flights
