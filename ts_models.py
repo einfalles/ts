@@ -21,11 +21,12 @@ DEVELOPMENT = 'postgresql://localhost:5432/rachelgoree'
 
 import datetime
 from flask import Flask
-from flask.ext.sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = DEVELOPMENT
+app.config['SQLALCHEMY_DATABASE_URI'] = PRODUCTION
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 db.create_all()
 
@@ -63,8 +64,8 @@ db.Model.synch = synch
 class User(db.Model):
     __tablename__ = 'User'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(80))
-    email = db.Column(db.String(80))
+    name = db.Column(db.String())
+    email = db.Column(db.String())
     def __init__ (self, name, email):
         self.name = name
         self.email = email
@@ -98,7 +99,7 @@ class History(db.Model):
     user_id = relationship('User', foreign_keys=[uid])
     song_id = relationship('Song', foreign_keys=[sid])
     time = db.Column(db.BigInteger)
-    
+
 
     def __init__ (self,uid,sid,time):
         self.uid = uid
@@ -178,6 +179,7 @@ def get_all_playlists(user_id=None,user_email=None):
     if user_id:
         result = Playlist.query.filter(db.or_(Playlist.uone==user_id, Playlist.utwo==user_id)).all()
         for i in result:
+            print(i)
             match = 0
             if i.uone == user_id:
                 match = i.utwo
@@ -186,7 +188,7 @@ def get_all_playlists(user_id=None,user_email=None):
             user = get_user(uid=match)
             playlists.append((i.id,user.id,user.name,user.email,i.time,i.url))
         db.session.close()
-        return playlists
+        return "playlists"
 
     if user_email:
         user = User.query.filter_by(email=user_email).first()

@@ -43,6 +43,7 @@ def get_watch_history(user):
                         results = SP.search(q='artist:'+track[0] + ' AND ' + 'track:'+track[1], type='track')
                         if len(results['tracks']['items'])>0:
                             song = results['tracks']['items'][0]
+                            print(song)
                             return (track[0],track[1],vid,song['id'])
                     except spotipy.SpotifyException:
                         print(track)
@@ -220,11 +221,12 @@ def populate_playlist(yt, recommendations, playlist_id):
         recommendations[i] = tuple(r)
     return recommendations
 
-def run_generation(uone=None, utwo=None,hone=None,htwo=None,location=None, time=None,popularity_limit=60):
+def run_generation(uoemail=None, utemail=None,uone=None,utwo=None,hone=None,htwo=None,location=None, time=None,popularity_limit=60):
     tunesmash = generate_recommendations(hone,htwo,popularity_limit)
     tunesmash = add_audio_features(tunesmash)
     tunesmash = bell_sort(tunesmash)
     tunesmash = remove_ids(tunesmash)
+
     if uone['email'] == 'eat@rad.kitchen':
         youtube = get_authenticated_service(utwo['email'])
     else:
