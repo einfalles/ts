@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="icon" type="image/png" href="images/favicon.png">
+  <script src="https://www.gstatic.com/firebasejs/3.1.0/firebase.js"></script>
+  <style>
+  script {
+    display: none;
+  }
+  style {
+    display: none;
+  }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="mobile row h-100-vp">
+      <div class="twelve columns display-start h-100-vp">
+        <header class="header w-100 display-center">
+          <h2 class="page-header">TuneSmash</h2>
+        </header>
+        <main class="m-t-auto w-100">
+          <ul class="w-100 no-of" id="easyPaginate"> <li> <div
+          class="avatar-wrapper"> <img
+          src="http://img.youtube.com/vi/mNaMR8AyeWc/default.jpg"> </div> <div
+          class="content-wrapper"> <a
+          href="https://youtube.com/watch?v=mNaMR8AyeWc&amp;index=1&amp;list=PLmxJpeX5HNCKZ-PQc2xWJcQ7zNIAngeE0">E.I.</a>
+          <p>Nelly</p> </div> </li> <li> <div class="avatar-wrapper"> <img
+          src="http://img.youtube.com/vi/pbt0_M9wTf8/default.jpg"> </div> <div
+          class="content-wrapper"> <a
+          href="https://youtube.com/watch?v=pbt0_M9wTf8&amp;index=2&amp;list=PLmxJpeX5HNCKZ-PQc2xWJcQ7zNIAngeE0">Nope
+          (feat. T.I.)</a> <p>Young Dro</p> </div>
+
+              </li>
+
+              <li> <div class="avatar-wrapper"> <img
+              src="http://img.youtube.com/vi/bxJQd0LT3fo/default.jpg"> </div> <div
+              class="content-wrapper"> <a
+              href="https://youtube.com/watch?v=bxJQd0LT3fo&amp;index=3&amp;list=PLmxJpeX5HNCKZ-PQc2xWJcQ7zNIAngeE0">Shooting
+              Star</a> <p>Young Thug</p> </div>
+
+              </li>
+
+              <li> <div class="avatar-wrapper"> <img
+              src="http://img.youtube.com/vi/_voEGQWwlDk/default.jpg"> </div> <div
+              class="content-wrapper"> <a
+              href="https://youtube.com/watch?v=_voEGQWwlDk&amp;index=4&amp;list=PLmxJpeX5HNCKZ-PQc2xWJcQ7zNIAngeE0">Fuck
+              LA</a> <p>ScHoolboy Q</p> </div>
+
+              </li>
+
+              <li> <div class="avatar-wrapper"> <img
+              src="http://img.youtube.com/vi/sxYsxVEywaY/default.jpg"> </div> <div
+              class="content-wrapper"> <a
+              href="https://youtube.com/watch?v=sxYsxVEywaY&amp;index=5&amp;list=PLmxJpeX5HNCKZ-PQc2xWJcQ7zNIAngeE0">Round
+              n Round</a> <p>Travis Porter</p> </div>
+
+              </li>
+
+              <li> <div class="avatar-wrapper"> <img
+              src="http://img.youtube.com/vi/udz_Y5dPLOY/default.jpg"> </div> <div
+              class="content-wrapper"> <a
+              href="https://youtube.com/watch?v=udz_Y5dPLOY&amp;index=6&amp;list=PLmxJpeX5HNCKZ-PQc2xWJcQ7zNIAngeE0">Gunwalk</a>
+              <p>Lil Wayne</p> </div>
+
+              </li>
+
+              <li> <div class="avatar-wrapper"> <img
+              src="http://img.youtube.com/vi/LRyHj8n1yI8/default.jpg"> </div> <div
+              class="content-wrapper"> <a
+              href="https://youtube.com/watch?v=LRyHj8n1yI8&amp;index=7&amp;list=PLmxJpeX5HNCKZ-PQc2xWJcQ7zNIAngeE0">General</a>
+              <p>Yo Gotti</p> </div>
+
+              </li>
+
+              <li> <div class="avatar-wrapper"> <img
+              src="http://img.youtube.com/vi/2CgX6hr4FaY/default.jpg"> </div> <div
+              class="content-wrapper"> <a
+              href="https://youtube.com/watch?v=2CgX6hr4FaY&amp;index=8&amp;list=PLmxJpeX5HNCKZ-PQc2xWJcQ7zNIAngeE0">Nothin
+              On Ya (feat. Wiz Khalifa)</a> <p>Gucci Mane</p> </div>
+
+              </li>
+
+              <li> <div class="avatar-wrapper"> <img
+              src="http://img.youtube.com/vi/NXX3mxDA26s/default.jpg"> </div> <div
+              class="content-wrapper"> <a
+              href="https://youtube.com/watch?v=NXX3mxDA26s&amp;index=9&amp;list=PLmxJpeX5HNCKZ-PQc2xWJcQ7zNIAngeE0">100
+              Joints</a> <p>2 Chainz</p> </div>
+
+              </li>
+
+              <li> <div class="avatar-wrapper"> <img
+              src="http://img.youtube.com/vi/NcDa2-LrJO0/default.jpg"> </div> <div
+              class="content-wrapper"> <a
+              href="https://youtube.com/watch?v=NcDa2-LrJO0&amp;index=10&amp;list=PLmxJpeX5HNCKZ-PQc2xWJcQ7zNIAngeE0">Violent</a>
+              <p>Juicy J</p> </div>
+
+              </li>
+
+              <li> <div class="avatar-wrapper"> <img
+              src="http://img.youtube.com/vi/yliogpZ1Y5s/default.jpg"> </div> <div
+              class="content-wrapper"> <a
+              href="https://youtube.com/watch?v=yliogpZ1Y5s&amp;index=11&amp;list=PLmxJpeX5HNCKZ-PQc2xWJcQ7zNIAngeE0">Someone
+              To Love</a> <p>Mike WiLL Made-It</p> </div>
+
+              </li>
+
+              <li> <div class="avatar-wrapper"> <img
+              src="http://img.youtube.com/vi/kZHycUA_42M/default.jpg"> </div> <div
+              class="content-wrapper"> <a
+              href="https://youtube.com/watch?v=kZHycUA_42M&amp;index=12&amp;list=PLmxJpeX5HNCKZ-PQc2xWJcQ7zNIAngeE0">Glitta</a>
+              <p>Tyga</p> </div>
+
+              </li>
+
+          </ul>
+        </main>
+        <footer>
+        </footer>
+      </div>
+    </div>
+  </div>
+  <link href='https://fonts.googleapis.com/css?family=Press+Start+2P' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="/css/normalize.css">
+  <link rel="stylesheet" href="/css/skeleton.css">
+  <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+  <script src="/js/jquery.easyPaginate.js"></script>
+  <script>
+  $(document).ready(function(){
+    $('#easyPaginate').easyPaginate({
+      paginateElement: 'li',
+      elementsPerPage: 5,
+      effect: 'climb'
+    });
+    $('.easyPaginateNav').appendTo('footer');
+  });
+  </script>
+</body>
+</html>

@@ -55,6 +55,19 @@
   display: flex;
   flex-direction: row;
   width: 100%;
+  flex-grow:1;
+}
+#easyPaginate{
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-content: flex-end;
+  flex-wrap: wrap;
+  flex-flow: column wrap;
+  justify-content: space-around;
+}
+.page.current {
+  color: rebeccapurple;
 }
 .easyPaginateNav{
   display: flex;
@@ -63,6 +76,7 @@
 }
 .easyPaginateNav a {
   margin: 0 0.3rem;
+  text-decoration: none;
 }
 .avatar-wrapper {
   flex: 0 0 25%;

@@ -74,6 +74,10 @@ def load_user(email):
 def loaderio():
     return send_file('/js/loaderio-c54d3912e32128c85bd19987caf3561e.txt', attachment_filename='loaderio-c54d3912e32128c85bd19987caf3561e.txt')
 
+@app.route('/hardcode')
+def pagi():
+    return render_template('hardcode.html')
+
 @app.route('/')
 def index():
     # https://developers.google.com/api-client-library/python/auth/web-app#example
@@ -141,14 +145,18 @@ def login():
 @app.route('/playlist/management/<uid>', methods=['GET','POST'])
 def manage_playlist(uid):
     playlists = tsm.get_all_playlists(user_id=uid)
-    return render_template('playlists.html',playlists=playlists)
+    return render_template('playlists.html',playlists=playlists,uid=uid)
 
 @app.route('/playlist/<pl_id>')
 def view_playlist(pl_id):
     songs = tsm.get_playlist_songs(pl_id=pl_id)
     url = tsm.get_playlist_url(pl_id=pl_id)
-    return render_template('playlist_songs.html', songs=songs,pl=url.url)
-# 
+    user = session['credentials']['id_token']
+    other = songs[0]['uone']
+    if str(user['ts_uid']) == str(other.id):
+        other = songs[0]['utwo'].name
+    return render_template('playlist_songs.html', songs=songs,pl=url.url,other=other)
+#
 # @app.route('/profile/management/<uid>')
 # def profile_management(uid):
 #     user = session['credentials']['id_token']

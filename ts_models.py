@@ -102,7 +102,7 @@ class Playlist(db.Model):
         self.url = url
 
     def __repr__(self):
-        return "User one: %r // User two: %r" % (self.uone, self.utwo)
+        return "User one: %r // User two: %r" % (self.uo_id, self.ut_id)
 
 
 class PlaylistSong(db.Model):
@@ -154,11 +154,16 @@ def get_all_playlists(user_id=None,user_email=None):
     user_id = int(user_id)
     if user_id:
         result = Playlist.query.filter(db.or_(Playlist.uo_id==user_id, Playlist.ut_id==user_id)).all()
+
         for i in result:
-            user = get_user(uid=user_id)
-            playlists.append((i.p_id,user.id,user.name,user.email,i.created_at,i.url))
+            playlists.append({'id': i.p_id,
+                    'time':i.created_at.date().isoformat(),
+                    'uone':i.uone,
+                    'utwo':i.utwo
+                }
+            )
         db.session.close()
-        return result
+        return playlists
 
     if user_email:
         user = User.query.filter_by(email=user_email).first()
@@ -172,22 +177,26 @@ def get_all_playlists(user_id=None,user_email=None):
 def get_playlist_songs(pl_id=None):
     songs = []
     if pl_id:
-        playlist = PlaylistSong.query.filter(PlaylistSong.pl_id==pl_id).all()
-        for i in playlist:
-            song = Song.query.filter(Song.id==i.s_id).first()
-            songs.append((song.track, song.artist, song.yt_uri, song.spotify_uri))
+        result = PlaylistSong.query.filter(PlaylistSong.pl_id==pl_id).all()
+        for i in result:
+            songs.append({
+                # 'art': i.song.art,
+                'uone':i.playlist.uone,
+                'utwo':i.playlist.utwo,
+                'track': i.song.track,
+                'artist': i.song.artist,
+                'yt_url': i.song.yt_uri
+            })
+        return songs
     else:
         return None
-    return songs
-
 
 def get_playlist_url(pl_id=None):
     if pl_id:
-        url = Playlist.query.filter(Playlist.id==pl_id).first()
+        url = Playlist.query.filter(Playlist.p_id==pl_id).first()
         return url
     else:
         return None
-
 
 def get_history(uid=None,uemail=None):
     if uid:

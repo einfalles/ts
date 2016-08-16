@@ -3,34 +3,67 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/normalize.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/skeleton.css') }}">
+
   <link rel="icon" type="image/png" href="images/favicon.png">
   <script src="https://www.gstatic.com/firebasejs/3.1.0/firebase.js"></script>
+  <style>
+    style {
+      display: none;
+    }
+    script {
+      display: none;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
     <div class="mobile row h-100-vp">
-      <div class="twelve columns display-center h-100-vp">
-      <h3>Playlists</h3>
-      <ul class="w-100 no-of" id="playlist">
-      {% for song in playlists %}
-          <li>
-            <div class="avatar-wrapper">
-              <img src="http://thecatapi.com/api/images/get?format=src&amp;type=gif">
-            </div>
-            <div class="content-wrapper">
-              <a href="/playlist/{{song.0}}">{{song.2}}</a>
-              <p>Created on {{song.4}}</p>
-            </div>
-          </li>
-      {% endfor %}
-      </ul>
+      <div class="twelve columns display-start h-100-vp">
+        <header class="header w-100 display-center">
+          <h3 class="page-header">Your Playlists</h3>
+        </header>
+        <main class="m-t-auto w-100">
+          <ul class="w-100 no-of" id="playlist">
+          {% for song in playlists %}
+              {% if song['uone'].id|string() == uid|string() %}
+                {% set other = song['utwo'].name %}
+              {% else %}
+                {% set other = song['uone'].name %}
+              {% endif %}
+              <li>
+                <div class="avatar-wrapper">
+                  <img src="http://thecatapi.com/api/images/get?format=src&amp;type=gif">
+                </div>
+                <div class="content-wrapper">
+                  <a href="/playlist/{{song['id']}}">{{other}}</a>
+                  <p>Created on {{song['time']}}</p>
+                </div>
+              </li>
+          {% endfor %}
+          </ul>
+        </main>
+        <footer>
+        </footer>
       </div>
     </div>
   </div>
-<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
 
+  <link href='https://fonts.googleapis.com/css?family=Press+Start+2P' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="/css/normalize.css">
+  <link rel="stylesheet" href="/css/skeleton.css">
+  <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+  <script src="/js/jquery.easyPaginate.js"></script>
+  <script>
+  $(document).ready(function(){
+    $('#easyPaginate').easyPaginate({
+      paginateElement: 'li',
+      elementsPerPage: 5,
+      effect: 'climb',
+      firstButton: false,
+      lastButton: false
+    });
+    $('.easyPaginateNav').appendTo('footer');
+  });
+  </script>
 </body>
 </html>
