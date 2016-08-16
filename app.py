@@ -3,7 +3,7 @@
 # 8 bitify album art / youtube preview image
 # write js to remove and add html to loading/search
 # write rules to clean up youtube data
-# t
+# separate ui from tasks even further...
 
 import json
 import httplib2
@@ -46,6 +46,7 @@ app.config['OAUTH_CREDENTIALS'] = {
 }
 app.config['PROFILE'] = True
 app.wsgi_app = ProfilerMiddleware(app.wsgi_app, restrictions=[30])
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 604800
 config = {
   "apiKey": "AIzaSyBKX1xmfY8JuhIbgOxhO2APg6f4VcCZWXI",
   "authDomain": "luminous-inferno-9831.firebaseapp.com",
@@ -116,15 +117,21 @@ def auth():
     session['credentials'] = json.loads(credentials.to_json())
     user_email = session['credentials']['id_token']['email']
     user_name = session['credentials']['id_token']['name']
-    user = tsm.get_user(email=user_email)
+    session['credentials']['id_token']['new'] = False
     store = oams.get_credential_storage(filename='multi.json',client_id=user_email,user_agent='app',scope=['https://www.googleapis.com/auth/userinfo.profile','https://www.googleapis.com/auth/youtube'])
     store.put(credentials)
 
+    user = tsm.get_user(email=user_email)
     if user == None:
+        session['credentials']['id_token']['new'] = True
         user = tsm.User(user_name,user_email,'http://thecatapi.com/api/images/get?format=src&amp;type=gif')
         tsm.db.session.add(user)
         tsm.db.session.commit()
+        # return redirect('/setup')
     return redirect("/")
+
+# @app.route('/setup')
+
 
 @app.route('/login')
 def login():
@@ -141,6 +148,38 @@ def view_playlist(pl_id):
     songs = tsm.get_playlist_songs(pl_id=pl_id)
     url = tsm.get_playlist_url(pl_id=pl_id)
     return render_template('playlist_songs.html', songs=songs,pl=url.url)
+
+@app.route('/profile/management/<uid>')
+def profile_management(uid):
+    user = session['credentials']['id_token']
+    return render_template('profile.html', user_avatar=user['avatar'],user_name=user['name'])
+
+@app.route('/profile/management/name')
+def profile_name():
+    user = session['credentials']['id_token']
+    return render_template('profile_name.html',user_name=user['name'])
+
+@app.route('/profile/management/avatar')
+def avatar_gender():
+    return render_template('avatars.html')
+
+@app.route('/profile/management/avatar/<gender>')
+def avatar_selection(gender):
+    if gender == 'male':
+        # get all male images
+        # render template with male images
+    if gender == 'female':
+        # get all female images
+        # render template with female images
+
+@app.route('/profile/update/<edit>/<uid>', methods=['POST'])
+def avatar_update(edit, uid):
+    if edit == 'name':
+        tsm.User.query.filter_by(User.id==uid).update({'name':request.json['name']})
+        return jsonify({'status':'done'})
+    if edit == 'avatar':
+        tsm.User.query.filter_by(User.id==uid).update({'avatar':request.json['avatar']})
+        return jsonify({'status':'done'})
 
 
 @app.route('/loading/search', methods=['GET','POST'])
@@ -161,38 +200,28 @@ def load_match(uid):
         return render_template('matched.html',user_id=user['ts_uid'],user_email=user['email'],user_name=user['name'],to_id=other.id,to_email=other.email,to_name=other.name)
 
 
-@app.route('/algorithm/generation/<uone>/<utwo>/<uoemail>/<utemail>', methods=['GET'])
-def algo_generation(uone,utwo,uoemail,utemail):
-    # time = request.json['time']
-    # time = 140001
-    # location = request.json['location']
-    # uone = request.json['uone']
-    # utwo = request.json['utwo']
-    # hone = tsm.get_history(uone['id'])
-    # htwo = tsm.get_history(utwo['id'])
+@app.route('/algorithm/generation', methods=['POST'])
+def algo_generation():
     time = moment.utcnow().datetime.isoformat()
-    # time = 140001
-    location = "cambodia"
-    # hone = tsm.get_history(uone)
-    # htwo = tsm.get_history(utwo)
-    uone = {'email':uoemail,'id':uone}
-    utwo = {'email':utemail,'id':utwo}
-    hone = tsm.get_history(uid=uone['id'])
-    htwo = tsm.get_history(uid=uone['id'])
+    location = request.json['location']
+    uone = request.json['uone']
+    utwo = request.json['utwo']
+    hone = tsm.get_history(uone['id'])
+    htwo = tsm.get_history(utwo['id'])
     data = tsr.run_generation(uone,utwo,hone.song.sp_uri,htwo.song.sp_uri,location,time,60)
     playlist = tsm.Playlist(uone['id'],utwo['id'],time,location,data['playlist_url'])
     tsm.db.session.add(playlist)
     tsm.db.session.flush()
     plid = playlist.p_id
     songs = data['songs']
-    # thr = Thread(target=song_run, args=[songs,plid])
-    # thr.start()
-    song_run(songs,plid)
+    thr = Thread(target=song_run, args=[songs,plid])
+    thr.start()
+
     fdbdata = {
-    'time':time,
-    'from':uone,
-    'to':utwo,
-    'plid':plid
+        'time':time,
+        'from':uone,
+        'to':utwo,
+        'plid':plid
     }
     fdb.child("notification").push(fdbdata)
     tsm.db.session.commit()
