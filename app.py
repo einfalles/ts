@@ -148,38 +148,34 @@ def view_playlist(pl_id):
     songs = tsm.get_playlist_songs(pl_id=pl_id)
     url = tsm.get_playlist_url(pl_id=pl_id)
     return render_template('playlist_songs.html', songs=songs,pl=url.url)
-
-@app.route('/profile/management/<uid>')
-def profile_management(uid):
-    user = session['credentials']['id_token']
-    return render_template('profile.html', user_avatar=user['avatar'],user_name=user['name'])
-
-@app.route('/profile/management/name')
-def profile_name():
-    user = session['credentials']['id_token']
-    return render_template('profile_name.html',user_name=user['name'])
-
-@app.route('/profile/management/avatar')
-def avatar_gender():
-    return render_template('avatars.html')
-
-@app.route('/profile/management/avatar/<gender>')
-def avatar_selection(gender):
-    if gender == 'male':
-        # get all male images
-        # render template with male images
-    if gender == 'female':
-        # get all female images
-        # render template with female images
-
-@app.route('/profile/update/<edit>/<uid>', methods=['POST'])
-def avatar_update(edit, uid):
-    if edit == 'name':
-        tsm.User.query.filter_by(User.id==uid).update({'name':request.json['name']})
-        return jsonify({'status':'done'})
-    if edit == 'avatar':
-        tsm.User.query.filter_by(User.id==uid).update({'avatar':request.json['avatar']})
-        return jsonify({'status':'done'})
+# 
+# @app.route('/profile/management/<uid>')
+# def profile_management(uid):
+#     user = session['credentials']['id_token']
+#     return render_template('profile.html', user_avatar=user['avatar'],user_name=user['name'])
+#
+# @app.route('/profile/management/name')
+# def profile_name():
+#     user = session['credentials']['id_token']
+#     return render_template('profile_name.html',user_name=user['name'])
+#
+# @app.route('/profile/management/avatar')
+# def avatar_gender():
+#     return render_template('avatars.html')
+#
+# @app.route('/profile/management/avatar/<gender>')
+# def avatar_selection(gender):
+#     if gender == 'male':
+#     if gender == 'female':
+#
+# @app.route('/profile/update/<edit>/<uid>', methods=['POST'])
+# def avatar_update(edit, uid):
+#     if edit == 'name':
+#         tsm.User.query.filter_by(User.id==uid).update({'name':request.json['name']})
+#         return jsonify({'status':'done'})
+#     if edit == 'avatar':
+#         tsm.User.query.filter_by(User.id==uid).update({'avatar':request.json['avatar']})
+#         return jsonify({'status':'done'})
 
 
 @app.route('/loading/search', methods=['GET','POST'])
