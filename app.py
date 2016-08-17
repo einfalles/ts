@@ -26,7 +26,7 @@ from oauth2client.client import OAuth2Credentials
 from oauth2client.contrib import multistore_file as oams
 from flask_login import login_user, logout_user, current_user, login_required,LoginManager
 from flask_login import LoginManager
-# from werkzeug.contrib.profiler import ProfilerMiddleware
+from werkzeug.contrib.profiler import ProfilerMiddleware
 
 
 #
@@ -44,8 +44,8 @@ app.config['OAUTH_CREDENTIALS'] = {
         'secret':'e2oBEpfgl3HVwU94UjFolXL8'
     }
 }
-app.config['PROFILE'] = False
-# app.wsgi_app = ProfilerMiddleware(app.wsgi_app, restrictions=[30])
+app.config['PROFILE'] = True
+app.wsgi_app = ProfilerMiddleware(app.wsgi_app, restrictions=[30])
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 604800
 config = {
   "apiKey": "AIzaSyBKX1xmfY8JuhIbgOxhO2APg6f4VcCZWXI",
@@ -88,6 +88,7 @@ def index():
         user = tsm.get_user(email=session['credentials']['id_token']['email'])
         session['credentials']['id_token']['ts_uid'] = user.id
         session['credentials']['id_token']['avatar'] = user.avatar
+        session.permanent = True
         store = oams.get_credential_storage(filename='multi.json',client_id=user.email,user_agent='app',scope=['https://www.googleapis.com/auth/userinfo.profile','https://www.googleapis.com/auth/youtube'])
         credentials = store.get()
 
@@ -133,6 +134,7 @@ def auth():
         tsm.db.session.add(user)
         tsm.db.session.commit()
         # return redirect('/setup')
+    session.permanent = True
     return redirect("/")
 
 # @app.route('/setup')
@@ -252,4 +254,4 @@ def song_run(songs,pl):
     tsm.db.session.commit()
 
 if __name__ == "__main__":
-    app.run(debug = False)
+    app.run(debug = True)
