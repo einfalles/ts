@@ -72,7 +72,7 @@ bumps.orderByChild("time").startAt(startTime).on('child_added', function(snapsho
         matchPost = newMatch(postData).then(function(){
           // remove match reference
           $.ajax({
-            url: '/algorithm/generation',
+            url: '/profile/update/name/{{uid}}',
             data: JSON.stringify(postData),
             contentType:"application/json",
             type: 'POST',
@@ -116,7 +116,7 @@ $(document).on('ready',function(){
   //   if (count > 1) {
   //     if (data['to'] == parseInt({{user_id}})) {
   //       matches.child(data['major']).remove();
-  //     } 
+  //     }
   //   }
   //   console.log(data);
   // });

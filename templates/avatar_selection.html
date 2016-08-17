@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/png" href="images/favicon.png">
+  <script src="https://www.gstatic.com/firebasejs/3.1.0/firebase.js"></script>
+  <style>
+  script {
+    display: none;
+  }
+  style {
+    display: none;
+  }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="mobile row h-100-vp">
+      <div class="twelve columns display-start h-100-vp">
+        <header class="header w-100 display-center">
+          <h4 class="display-center">Pick An Avatar</h4>
+        </header>
+        <main class="m-t-auto w-100">
+          <ul>
+          {% for avatar in f%}
+            <li data-id="{{avatar}}">
+              <img src="/images/{{gender}}/{{avatar}}.png"/>
+            </li>
+          {% endfor %}
+          </ul>
+          <button id="submit">
+            Done
+          </button>
+        </main>
+        <footer>
+        </footer>
+      </div>
+    </div>
+  </div>
+  <style>
+  ul {
+    display: flex;
+overflow: hidden;
+width: 100%;
+flex-wrap: wrap;
+  }
+  li {
+    margin-bottom: 1rem;
+    width: 84px;
+    height: 84px;
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .active {
+    outline: 2px solid green;
+  }
+  </style>
+  <link href='https://fonts.googleapis.com/css?family=Press+Start+2P' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="/css/normalize.css">
+  <link rel="stylesheet" href="/css/skeleton.css">
+  <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+  <script src="/js/jquery.easyPaginate.js"></script>
+  <script>
+  $(document).ready(function(){
+    $('li').on('click',function(){
+       $('li').removeClass('active');
+        $(this).addClass('active');
+    });
+    $('#submit').on('click',function(){
+      var id = $('.active').data('id');
+      var a = {{uid}};
+      var avatar = '/images/{{gender}}/'+id.toString()+'.png';
+      var postData = {
+        'avatar': avatar
+      };
+      $.ajax({
+        method: 'POST',
+        url: '/profile/update/avatar/'+a.toString(),
+        data: JSON.stringify(postData),
+        contentType:"application/json",
+        success: function(response) {
+          alert('Saved! Thanks');
+          location.href = '/profile/management/'+a.toString();
+        },
+        error: function(error) {
+          console.log(error)
+          alert('something broke');
+        }
+      });
+
+    });
+  });
+  </script>
+</body>
+</html>

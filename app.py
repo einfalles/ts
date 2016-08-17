@@ -26,7 +26,7 @@ from oauth2client.client import OAuth2Credentials
 from oauth2client.contrib import multistore_file as oams
 from flask_login import login_user, logout_user, current_user, login_required,LoginManager
 from flask_login import LoginManager
-from werkzeug.contrib.profiler import ProfilerMiddleware
+# from werkzeug.contrib.profiler import ProfilerMiddleware
 
 
 #
@@ -44,8 +44,8 @@ app.config['OAUTH_CREDENTIALS'] = {
         'secret':'e2oBEpfgl3HVwU94UjFolXL8'
     }
 }
-app.config['PROFILE'] = True
-app.wsgi_app = ProfilerMiddleware(app.wsgi_app, restrictions=[30])
+app.config['PROFILE'] = False
+# app.wsgi_app = ProfilerMiddleware(app.wsgi_app, restrictions=[30])
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 604800
 config = {
   "apiKey": "AIzaSyBKX1xmfY8JuhIbgOxhO2APg6f4VcCZWXI",
@@ -87,6 +87,7 @@ def index():
     if 'credentials' in session:
         user = tsm.get_user(email=session['credentials']['id_token']['email'])
         session['credentials']['id_token']['ts_uid'] = user.id
+        session['credentials']['id_token']['avatar'] = user.avatar
         store = oams.get_credential_storage(filename='multi.json',client_id=user.email,user_agent='app',scope=['https://www.googleapis.com/auth/userinfo.profile','https://www.googleapis.com/auth/youtube'])
         credentials = store.get()
 
@@ -156,34 +157,42 @@ def view_playlist(pl_id):
     if str(user['ts_uid']) == str(other.id):
         other = songs[0]['utwo'].name
     return render_template('playlist_songs.html', songs=songs,pl=url.url,other=other)
-#
-# @app.route('/profile/management/<uid>')
-# def profile_management(uid):
-#     user = session['credentials']['id_token']
-#     return render_template('profile.html', user_avatar=user['avatar'],user_name=user['name'])
-#
-# @app.route('/profile/management/name')
-# def profile_name():
-#     user = session['credentials']['id_token']
-#     return render_template('profile_name.html',user_name=user['name'])
-#
-# @app.route('/profile/management/avatar')
-# def avatar_gender():
-#     return render_template('avatars.html')
-#
-# @app.route('/profile/management/avatar/<gender>')
-# def avatar_selection(gender):
-#     if gender == 'male':
-#     if gender == 'female':
-#
-# @app.route('/profile/update/<edit>/<uid>', methods=['POST'])
-# def avatar_update(edit, uid):
-#     if edit == 'name':
-#         tsm.User.query.filter_by(User.id==uid).update({'name':request.json['name']})
-#         return jsonify({'status':'done'})
-#     if edit == 'avatar':
-#         tsm.User.query.filter_by(User.id==uid).update({'avatar':request.json['avatar']})
-#         return jsonify({'status':'done'})
+
+@app.route('/profile/management/<uid>')
+def profile_management(uid):
+    # user = session['credentials']['id_token']
+    user = tsm.get_user(uid=uid)
+    return render_template('profile.html', uid=uid,user_avatar=user.avatar,user_name=user.name)
+
+@app.route('/profile/management/name')
+def profile_name():
+    user = session['credentials']['id_token']
+    print(user['ts_uid'])
+    return render_template('profile_name.html',user_name=user['name'],uid=user['ts_uid'])
+
+@app.route('/profile/management/avatar')
+def avatar_gender():
+    user = session['credentials']['id_token']
+    return render_template('avatars.html')
+
+@app.route('/profile/management/avatar/<gender>')
+def avatar_selection(gender):
+    f = list(range(0,20))
+    user = session['credentials']['id_token']
+    return render_template('avatar_selection.html',uid=user['ts_uid'],gender=gender,f=f)
+
+@app.route('/profile/update/<edit>/<uid>', methods=['POST'])
+def avatar_update(edit, uid):
+    if edit == 'name':
+        tsm.User.query.filter(tsm.User.id==uid).update({'name':request.json['name']})
+        tsm.db.session.commit()
+        session['credentials']['id_token']['name'] = request.json['name']
+        return jsonify({'status':'ok'})
+    if edit == 'avatar':
+        tsm.User.query.filter(tsm.User.id==uid).update({'avatar':request.json['avatar']})
+        tsm.db.session.commit()
+        session['credentials']['id_token']['avatar'] = request.json['avatar']
+        return jsonify({'status':'ok'})
 
 
 @app.route('/loading/search', methods=['GET','POST'])
@@ -243,4 +252,4 @@ def song_run(songs,pl):
     tsm.db.session.commit()
 
 if __name__ == "__main__":
-    app.run(debug = True)
+    app.run(debug = False)
