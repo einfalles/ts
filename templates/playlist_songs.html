@@ -3,8 +3,6 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/png" href="images/favicon.png">
-  <script src="https://www.gstatic.com/firebasejs/3.1.0/firebase.js"></script>
   <style>
   script {
     display: none;
@@ -19,10 +17,10 @@
     <div class="mobile row h-100-vp">
       <div class="twelve columns display-start h-100-vp">
         <header class="header w-100 display-center">
-          <h2 class="page-header">Made with {{other}}</h2>
+          <h3 class="page-header">Made with {{other}}</h3>
         </header>
         <main class="m-t-auto w-100">
-          <ul class="w-100 no-of" id="easyPaginate">
+          <ul class="w-100 ">
           {% for song in songs %}
               <li>
                 <div class="avatar-wrapper">
@@ -45,18 +43,5 @@
   <link rel="stylesheet" href="/css/normalize.css">
   <link rel="stylesheet" href="/css/skeleton.css">
   <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
-  <script src="/js/jquery.easyPaginate.js"></script>
-  <script>
-  $(document).ready(function(){
-    $('#easyPaginate').easyPaginate({
-      paginateElement: 'li',
-      elementsPerPage: 5,
-      effect: 'climb',
-      firstButton: false,
-      lastButton: false
-    });
-    $('.easyPaginateNav').appendTo('footer');
-  });
-  </script>
 </body>
 </html>

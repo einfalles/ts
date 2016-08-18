@@ -17,7 +17,7 @@
     <div class="mobile row h-100-vp">
       <div class="twelve columns display-start h-100-vp">
         <header class="header w-100 display-center">
-          <h2 class="page-header">Users Nearby</h2>
+          <h3 class="page-header">Nearby Friends</h3>
         </header>
         <main class="m-t-auto">
           <ul></ul>
@@ -64,7 +64,7 @@ $(document).on('ready',function(){
   });
   chat.on('child_removed', function (snapshot) {
     setTimeout(function(){
-      $('#' + snapshot.key).remove(); 
+      $('#' + snapshot.key).remove();
     },300000);
   });
   $('ul').on('click', 'li a.clickbait', function(event) {
