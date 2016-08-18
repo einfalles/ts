@@ -26,16 +26,16 @@
           <ul class="w-100 no-of" id="playlist">
           {% for song in playlists %}
               {% if song['uone'].id|string() == uid|string() %}
-                {% set other = song['utwo'].name %}
+                {% set other = song['utwo'] %}
               {% else %}
-                {% set other = song['uone'].name %}
+                {% set other = song['uone'] %}
               {% endif %}
               <li>
                 <div class="avatar-wrapper">
-                  <img src="http://thecatapi.com/api/images/get?format=src&amp;type=gif">
+                  <img src="{{other.avatar}}">
                 </div>
                 <div class="content-wrapper">
-                  <a href="/playlist/{{song['id']}}">{{other}}</a>
+                  <a href="/playlist/{{song['id']}}">{{other.name}}</a>
                   <p>Created on {{song['time']}}</p>
                 </div>
               </li>
