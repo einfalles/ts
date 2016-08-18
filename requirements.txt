@@ -24,7 +24,7 @@ psycopg2==2.6.2
 pyasn1==0.1.9
 pyasn1-modules==0.0.8
 Pyrebase==3.0.5
-pytesseract==0.1.6
+raygun4py==3.1.2
 redis==2.10.5
 requests==2.10.0
 rsa==3.4.2

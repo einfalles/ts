@@ -11,7 +11,6 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/normalize.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/skeleton.css') }}">
   <link rel="icon" type="image/png" href="images/favicon.png">
-
 </head>
 <body>
   <div class="container">
@@ -58,7 +57,7 @@ bumps.orderByChild("time").startAt(startTime).on('child_added', function(snapsho
       'to': to,
       'uone':{'id':from,'email':ef},
       'utwo':{'id':to,'email':et},
-      'time': 140002,
+      'time': d,
       'location': 'yup'
     }
 
@@ -72,7 +71,7 @@ bumps.orderByChild("time").startAt(startTime).on('child_added', function(snapsho
         matchPost = newMatch(postData).then(function(){
           // remove match reference
           $.ajax({
-            url: '/profile/update/name/{{uid}}',
+            url: '/generate/three',
             data: JSON.stringify(postData),
             contentType:"application/json",
             type: 'POST',
@@ -107,20 +106,6 @@ function newMatch(data) {
   return firebase.database().ref().update(updates);
 }
 
-$(document).on('ready',function(){
-  var count = 0;
-  // matches.orderByChild("time").startAt(startTime).on('child_added',function (snapshot){
-  //   count = count + 1;
-  //   var data = snapshot.val();
-  //   data['major'] = snapshot.key;
-  //   if (count > 1) {
-  //     if (data['to'] == parseInt({{user_id}})) {
-  //       matches.child(data['major']).remove();
-  //     }
-  //   }
-  //   console.log(data);
-  // });
-});
 </script>
 </body>
 </html>

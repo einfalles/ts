@@ -1,9 +1,5 @@
-# give every user a fake avatar
-# let users choose avatar
 # 8 bitify album art / youtube preview image
 # write js to remove and add html to loading/search
-# write rules to clean up youtube data
-# separate ui from tasks even further...
 
 import json
 import httplib2
@@ -18,14 +14,13 @@ import ts_recommendations as tsr
 import ts_models as tsm
 import moment
 
+from raygun4py import raygunprovider
 from threading import Thread
 from oauth2client import client
 from flask_sse import sse
 from flask import Flask, render_template, request, redirect, jsonify, session, url_for,send_file
 from oauth2client.client import OAuth2Credentials
 from oauth2client.contrib import multistore_file as oams
-from flask_login import login_user, logout_user, current_user, login_required,LoginManager
-from flask_login import LoginManager
 from werkzeug.contrib.profiler import ProfilerMiddleware
 
 
@@ -35,6 +30,8 @@ from werkzeug.contrib.profiler import ProfilerMiddleware
 
 app = Flask(__name__, static_url_path='')
 app.debug = True
+raygun = raygunprovider.RaygunSender("aR9aPioLxr1y42IN3HqSnw==")
+
 app.config['REFRESH_LIMIT'] = 15
 
 app.secret_key = 'duylamduylam'
@@ -55,16 +52,6 @@ config = {
 };
 firebase = pyrebase.initialize_app(config)
 fdb = firebase.database()
-# FLASK LOGIN CONFIG
-lm = LoginManager()
-lm.init_app(app)
-lm.login_view = "login"
-lm.login_message = u"Please log in to access this page."
-lm.refresh_view = "reauth"
-
-@lm.user_loader
-def load_user(email):
-    return tsm.User.query.filter(email==email).first()
 
 
 #
@@ -116,6 +103,7 @@ def history_run(uid=None,uemail=None):
     tsm.db.session.add(h)
     tsm.db.session.commit()
 
+# sign in
 @app.route('/auth')
 def auth():
     oauth = tsa.OAuthSignIn.get_provider("google")
@@ -137,14 +125,12 @@ def auth():
     session.permanent = True
     return redirect("/")
 
-# @app.route('/setup')
-
-
 @app.route('/login')
 def login():
     oauth = tsa.OAuthSignIn.get_provider("google")
     return redirect(oauth.authorize())
 
+# manage playlists
 @app.route('/playlist/management/<uid>', methods=['GET','POST'])
 def manage_playlist(uid):
     playlists = tsm.get_all_playlists(user_id=uid)
@@ -160,9 +146,9 @@ def view_playlist(pl_id):
         other = songs[0]['utwo'].name
     return render_template('playlist_songs.html', songs=songs,pl=url.url,other=other)
 
+# manage account
 @app.route('/profile/management/<uid>')
 def profile_management(uid):
-    # user = session['credentials']['id_token']
     user = tsm.get_user(uid=uid)
     return render_template('profile.html', uid=uid,user_avatar=user.avatar,user_name=user.name)
 
@@ -196,50 +182,55 @@ def avatar_update(edit, uid):
         session['credentials']['id_token']['avatar'] = request.json['avatar']
         return jsonify({'status':'ok'})
 
-
-@app.route('/loading/search', methods=['GET','POST'])
-def load_search():
+# make a playlist
+@app.route('/generate/one', methods=['GET','POST'])
+def generate_select():
     if request.method == "POST":
         return jsonify({'status':'ok'})
     if request.method == "GET":
         user = session['credentials']['id_token']
-        return render_template('search.html',user_id=user['ts_uid'],user_email=user['email'],user_name=user['name'])
+        return render_template('generate_one.html',user_id=user['ts_uid'],user_email=user['email'],user_name=user['name'])
 
-@app.route('/loading/match/to/<uid>',methods=['GET','POST'])
-def load_match(uid):
+@app.route('/generate/two/<uid>',methods=['GET','POST'])
+def generate_match(uid):
     if request.method == "POST":
         return jsonify({'status':'ok'})
     if request.method == "GET":
         user = session['credentials']['id_token']
         other = tsm.get_user(uid=uid)
-        return render_template('matched.html',user_id=user['ts_uid'],user_email=user['email'],user_name=user['name'],to_id=other.id,to_email=other.email,to_name=other.name)
+        return render_template('generate_two.html',user_id=user['ts_uid'],user_email=user['email'],user_name=user['name'],to_id=other.id,to_email=other.email,to_name=other.name)
 
 
-@app.route('/algorithm/generation', methods=['POST'])
-def algo_generation():
+@app.route('/generate/three', methods=['POST'])
+def generate_recommendation():
+    # prepare data for run_generation
     time = moment.utcnow().datetime.isoformat()
     location = request.json['location']
     uone = request.json['uone']
     utwo = request.json['utwo']
     hone = tsm.get_history(uone['id'])
     htwo = tsm.get_history(utwo['id'])
+
+    # run_generation wraps all of the steps necessary to generate recommendation
     data = tsr.run_generation(uone,utwo,hone.song.sp_uri,htwo.song.sp_uri,location,time,60)
+
+    # create playlist model and store it in the database
     playlist = tsm.Playlist(uone['id'],utwo['id'],time,location,data['playlist_url'])
     tsm.db.session.add(playlist)
     tsm.db.session.flush()
     plid = playlist.p_id
+    tsm.db.session.commit()
     songs = data['songs']
     thr = Thread(target=song_run, args=[songs,plid])
     thr.start()
 
     fdbdata = {
         'time':time,
-        'from':uone,
-        'to':utwo,
+        'from':uone['id'],
+        'to':utwo['id'],
         'plid':plid
     }
     fdb.child("notification").push(fdbdata)
-    tsm.db.session.commit()
     return jsonify({'status':'ok','payload':plid})
 
 def song_run(songs,pl):
