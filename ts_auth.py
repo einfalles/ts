@@ -23,7 +23,7 @@ from oauth2client.client import OAuth2WebServerFlow, flow_from_clientsecrets
 from oauth2client.tools import run_flow
 
 PROD_AUTH = 'http://tunesmash.herokuapp.com/auth'
-APP_AUTH = 'http://app.tunesmash.org'
+APP_AUTH = 'http://app.tunesmash.org/auth'
 DEV_AUTH = 'http://localhost:5000/auth'
 
 class OAuthSignIn(object):
