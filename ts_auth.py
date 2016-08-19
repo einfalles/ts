@@ -23,6 +23,7 @@ from oauth2client.client import OAuth2WebServerFlow, flow_from_clientsecrets
 from oauth2client.tools import run_flow
 
 PROD_AUTH = 'http://tunesmash.herokuapp.com/auth'
+APP_AUTH = 'http://app.tunesmash.org'
 DEV_AUTH = 'http://localhost:5000/auth'
 
 class OAuthSignIn(object):
@@ -54,7 +55,7 @@ class OAuthSignIn(object):
 class GoogleSignIn(OAuthSignIn):
     def __init__(self):
         super(GoogleSignIn, self).__init__('google')
-        self.flow = OAuth2WebServerFlow(client_id=self.consumer_id,client_secret=self.consumer_secret,scope=['https://www.googleapis.com/auth/userinfo.profile','https://www.googleapis.com/auth/youtube'],redirect_uri=PROD_AUTH,prompt='consent')
+        self.flow = OAuth2WebServerFlow(client_id=self.consumer_id,client_secret=self.consumer_secret,scope=['https://www.googleapis.com/auth/userinfo.profile','https://www.googleapis.com/auth/youtube'],redirect_uri=APP_AUTH,prompt='consent')
         self.flow.params['access_type'] = 'offline'
 
     def authorize(self):
