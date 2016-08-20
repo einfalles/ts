@@ -60,42 +60,36 @@ bumps.orderByChild("time").startAt(startTime).on('child_added', function(snapsho
       'time': d,
       'location': 'yup'
     }
-
-    matches.orderByChild("from").equalTo(from).once('value',function(snapshot){
-      var meow = snapshot;
-      count = 0;
-      meow.forEach(function(i){
-        count = count + 1;
-      });
-      if (count < 1) {
-        matchPost = newMatch(postData).then(function(){
-          // remove match reference
-          $.ajax({
-            url: '/generate/three',
-            data: JSON.stringify(postData),
-            contentType:"application/json",
-            type: 'POST',
-            success: function(response) {
-              location.href = '/playlist/' + response.payload.toString();
-            },
-            error: function(error) {
-              console.log(error)
-              alert('something broke');
-            }
-          });
-        });
-      } else {
-        notification.orderByChild("from").equalTo(from).on('child_added',function(snapshot){
-          var d = snapshot.val();
-          if (d['to'] == to) {
-            console.log(snapshot.key);
-            notification.child(snapshot.key).remove();
-            location.href = '/playlist/' + d['plid'].toString();
+    if (from == {{user_id}}){
+      alert('hello this belongs to ' + from);
+      matchPost = newMatch(postData).then(function(){
+        $.ajax({
+          url: '/generate/three',
+          data: JSON.stringify(postData),
+          contentType:"application/json",
+          type: 'POST',
+          success: function(response) {
+            alert('Ready to Listen?');
+            console.log(response);
+            location.href = '/playlist/' + response.payload.toString();
+          },
+          error: function(error) {
+            alert('Close the app and restart');
+            console.log(error);
           }
         });
-      }
-    });
-
+      });
+    } else {
+      notification.orderByChild("from").equalTo(from).on('child_added',function(snapshot){
+        var d = snapshot.val();
+        if (d['to'] == to) {
+          alert('Ready to Listen?');
+          console.log(snapshot.key);
+          notification.child(snapshot.key).remove();
+          location.href = '/playlist/' + d['plid'].toString();
+        }
+      });
+    }
   }
 });
 

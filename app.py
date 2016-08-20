@@ -1,6 +1,3 @@
-# 8 bitify album art / youtube preview image
-# write js to remove and add html to loading/search
-
 import json
 import httplib2
 import gevent
@@ -13,6 +10,7 @@ import ts_auth as tsa
 import ts_recommendations as tsr
 import ts_models as tsm
 import moment
+import sys
 
 from raygun4py import raygunprovider
 from threading import Thread
@@ -21,7 +19,7 @@ from flask_sse import sse
 from flask import Flask, render_template, request, redirect, jsonify, session, url_for,send_file
 from oauth2client.client import OAuth2Credentials
 from oauth2client.contrib import multistore_file as oams
-from werkzeug.contrib.profiler import ProfilerMiddleware
+# from werkzeug.contrib.profiler import ProfilerMiddleware
 
 
 #
@@ -41,8 +39,8 @@ app.config['OAUTH_CREDENTIALS'] = {
         'secret':'e2oBEpfgl3HVwU94UjFolXL8'
     }
 }
-app.config['PROFILE'] = True
-app.wsgi_app = ProfilerMiddleware(app.wsgi_app, restrictions=[30])
+# app.config['PROFILE'] = True
+# app.wsgi_app = ProfilerMiddleware(app.wsgi_app, restrictions=[30])
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 604800
 config = {
   "apiKey": "AIzaSyBKX1xmfY8JuhIbgOxhO2APg6f4VcCZWXI",
@@ -73,6 +71,7 @@ def index():
 
     if 'credentials' in session:
         user = tsm.get_user(email=session['credentials']['id_token']['email'])
+        tsm.db.session.close()
         session['credentials']['id_token']['ts_uid'] = user.id
         session['credentials']['id_token']['avatar'] = user.avatar
         session.permanent = True
@@ -83,9 +82,9 @@ def index():
             credentials.refresh(httplib2.Http())
         if credentials.invalid == True:
             return redirect('/login')
-
-        thr = Thread(target=history_run,args=[user.id,user.email])
-        thr.start()
+        history_run(uid=user.id,uemail=user.email)
+        # thr = Thread(target=history_run,args=[user.id,user.email])
+        # thr.start()
         return render_template('home.html',user_name=user.name,user_email=user.email,user_id=user.id)
 
 def history_run(uid=None,uemail=None):
@@ -102,6 +101,7 @@ def history_run(uid=None,uemail=None):
     h = tsm.History(uid=uid,sid=song.s_id,created_at=t)
     tsm.db.session.add(h)
     tsm.db.session.commit()
+    tsm.db.session.close()
 
 # sign in
 @app.route('/auth')
@@ -134,6 +134,7 @@ def login():
 @app.route('/playlist/management/<uid>', methods=['GET','POST'])
 def manage_playlist(uid):
     playlists = tsm.get_all_playlists(user_id=uid)
+    tsm.db.session.close()
     return render_template('playlists.html',playlists=playlists,uid=uid)
 
 @app.route('/playlist/<pl_id>')
@@ -144,12 +145,14 @@ def view_playlist(pl_id):
     other = songs[0]['uone']
     if str(user['ts_uid']) == str(other.id):
         other = songs[0]['utwo'].name
+    tsm.db.session.close()
     return render_template('playlist_songs.html', songs=songs,pl=url.url,other=other)
 
 # manage account
 @app.route('/profile/management/<uid>')
 def profile_management(uid):
     user = tsm.get_user(uid=uid)
+    tsm.db.session.close()
     return render_template('profile.html', uid=uid,user_avatar=user.avatar,user_name=user.name)
 
 @app.route('/profile/management/name')
@@ -175,11 +178,13 @@ def avatar_update(edit, uid):
         tsm.User.query.filter(tsm.User.id==uid).update({'name':request.json['name']})
         tsm.db.session.commit()
         session['credentials']['id_token']['name'] = request.json['name']
+        tsm.db.session.close()
         return jsonify({'status':'ok'})
     if edit == 'avatar':
         tsm.User.query.filter(tsm.User.id==uid).update({'avatar':request.json['avatar']})
         tsm.db.session.commit()
         session['credentials']['id_token']['avatar'] = request.json['avatar']
+        tsm.db.session.close()
         return jsonify({'status':'ok'})
 
 # make a playlist
@@ -198,12 +203,14 @@ def generate_match(uid):
     if request.method == "GET":
         user = session['credentials']['id_token']
         other = tsm.get_user(uid=uid)
+        tsm.db.session.close()
         return render_template('generate_two.html',user_id=user['ts_uid'],user_email=user['email'],user_name=user['name'],to_id=other.id,to_email=other.email,to_name=other.name)
 
 
 @app.route('/generate/three', methods=['POST'])
 def generate_recommendation():
     # prepare data for run_generation
+    print('generating recommendation',file=sys.stderr)
     time = moment.utcnow().datetime.isoformat()
     location = request.json['location']
     uone = request.json['uone']
@@ -231,6 +238,7 @@ def generate_recommendation():
         'plid':plid
     }
     fdb.child("notification").push(fdbdata)
+    tsm.db.session.close()
     return jsonify({'status':'ok','payload':plid})
 
 def song_run(songs,pl):
