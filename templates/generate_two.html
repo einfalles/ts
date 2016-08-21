@@ -51,6 +51,7 @@ if ({{user_id}} > {{to_id}}) {
 }
 bumps.orderByChild("time").startAt(startTime).on('child_added', function(snapshot) {
   data = snapshot.val();
+  console.log(data);
   if (data['to']['id'] == parseInt({{user_id}})) {
     var postData = {
       'from': from,
