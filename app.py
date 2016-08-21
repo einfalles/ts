@@ -66,16 +66,17 @@ def pagi():
 @app.route('/')
 def index():
     # https://developers.google.com/api-client-library/python/auth/web-app#example
-    return ('index.html')
     if 'credentials' not in session:
         return render_template('index.html')
 
     if 'credentials' in session:
         user = tsm.get_user(email=session['credentials']['id_token']['email'])
+
         tsm.db.session.close()
         session['credentials']['id_token']['ts_uid'] = user.id
         session['credentials']['id_token']['avatar'] = user.avatar
         session.permanent = True
+
         store = oams.get_credential_storage(filename='multi.json',client_id=user.email,user_agent='app',scope=['https://www.googleapis.com/auth/userinfo.profile','https://www.googleapis.com/auth/youtube'])
         credentials = store.get()
 
@@ -85,7 +86,7 @@ def index():
             return redirect('/login')
         # if user is new then history run
         # if user hasn't signed in a day then thread history run
-        history_run(uid=user.id,uemail=user.email)
+        # history_run(uid=user.id,uemail=user.email)
         # thr = Thread(target=history_run,args=[user.id,user.email])
         # thr.start()
         return render_template('home.html',user_name=user.name,user_email=user.email,user_id=user.id)
@@ -136,14 +137,12 @@ def login():
 # manage playlists
 @app.route('/playlist/management/<uid>', methods=['GET','POST'])
 def manage_playlist(uid):
-    return render_template('playlists.html')
     playlists = tsm.get_all_playlists(user_id=uid)
     tsm.db.session.close()
     return render_template('playlists.html',playlists=playlists,uid=uid)
 
 @app.route('/playlist/<pl_id>')
 def view_playlist(pl_id):
-    return render_template('playlist_songs.html')
     songs = tsm.get_playlist_songs(pl_id=pl_id)
     url = tsm.get_playlist_url(pl_id=pl_id)
     user = session['credentials']['id_token']
@@ -156,34 +155,29 @@ def view_playlist(pl_id):
 # manage account
 @app.route('/profile/management/<uid>')
 def profile_management(uid):
-    return render_template('profile.html')
     user = tsm.get_user(uid=uid)
     tsm.db.session.close()
     return render_template('profile.html', uid=uid,user_avatar=user.avatar,user_name=user.name)
 
 @app.route('/profile/management/name')
 def profile_name():
-    return render_template('profile_name.html')
     user = session['credentials']['id_token']
     print(user['ts_uid'])
     return render_template('profile_name.html',user_name=user['name'],uid=user['ts_uid'])
 
 @app.route('/profile/management/avatar')
 def avatar_gender():
-    return render_template('avatars.html')
     user = session['credentials']['id_token']
     return render_template('avatars.html')
 
 @app.route('/profile/management/avatar/<gender>')
 def avatar_selection(gender):
-    return render_template('avatar_selection.html')
     f = list(range(0,20))
     user = session['credentials']['id_token']
     return render_template('avatar_selection.html',uid=user['ts_uid'],gender=gender,f=f)
 
 @app.route('/profile/update/<edit>/<uid>', methods=['POST'])
 def avatar_update(edit, uid):
-    return jsonify({'status':'ok'})
     if edit == 'name':
         tsm.User.query.filter(tsm.User.id==uid).update({'name':request.json['name']})
         tsm.db.session.commit()
@@ -200,7 +194,6 @@ def avatar_update(edit, uid):
 # make a playlist
 @app.route('/generate/one', methods=['GET','POST'])
 def generate_select():
-    return jsonify({'status':'ok'})
     if request.method == "POST":
         return jsonify({'status':'ok'})
     if request.method == "GET":
@@ -209,7 +202,6 @@ def generate_select():
 
 @app.route('/generate/two/<uid>',methods=['GET','POST'])
 def generate_match(uid):
-    return jsonify({'status':'ok'})
     if request.method == "POST":
         return jsonify({'status':'ok'})
     if request.method == "GET":
