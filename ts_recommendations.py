@@ -172,7 +172,7 @@ def generate_yt_playlist(yt,uone,utwo,t):
                 description="Tunesmash"
             ),
             status=dict(
-                privacyStatus="private"
+                privacyStatus="public"
             )
         )
     ).execute()

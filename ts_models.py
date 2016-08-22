@@ -180,6 +180,7 @@ def get_all_playlists(uid=None,user_email=None):
                 }
             playlists.append({
                     'pid': i.p_id,
+                    'url': i.url,
                     'time':i.created_at.date().isoformat(),
                     'other': other,
                     'uone': {

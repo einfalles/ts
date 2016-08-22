@@ -24,7 +24,6 @@
         </header>
         <main class="m-t-auto w-100">
           <ul class="w-100 no-of" id="playlist">
-              <!-- <li><div class="avatar-wrapper"><img src=""></div><div class="content-wrapper"><a href=""></a><p></p></div></li> -->
           </ul>
         </main>
         <footer>
@@ -66,7 +65,7 @@
       var list = $('#playlist');
       for (var i = 0; i < data.length; i++){
         list.append(
-          "<li><div class='avatar-wrapper'><img src='" + data[i]['other']['avatar'] +"'></div><div class='content-wrapper'><a href='/users/{{user_id}}/playlists/"+data[i]['pid']+"/"+data[i]['other']['name']+"'>"+data[i]['other']['name']+"</a><p>Created on "+data[i]['time']+"</p></div></li>"
+          "<li><div class='avatar-wrapper'><img src='" + data[i]['other']['avatar'] +"'></div><div class='content-wrapper'><a href='/users/{{user_id}}/playlists/"+data[i]['pid']+"/"+ data[i]['url']+"/"+data[i]['other']['name']+"'>"+data[i]['other']['name']+"</a><p>Created on "+data[i]['time']+"</p></div></li>"
         );
       }
     });

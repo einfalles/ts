@@ -70,26 +70,36 @@ flex-wrap: wrap;
     });
     $('#submit').on('click',function(){
       var id = $('.active').data('id');
-      var a = {{uid}};
       var avatar = '/images/{{gender}}/'+id.toString()+'.png';
+
       var postData = {
-        'avatar': avatar
+        'update': 'avatar',
+        'data': avatar
       };
+
       $.ajax({
-        method: 'POST',
-        url: '/profile/update/avatar/'+a.toString(),
-        data: JSON.stringify(postData),
+        async: true,
         contentType:"application/json",
-        success: function(response) {
-          alert('Saved! Thanks');
-          location.href = '/profile/management/'+a.toString();
+        url: '/ts/api/users/{{user_id}}/update',
+        dataType: 'json',
+        data: JSON.stringify(postData),
+        error: function(){
+          alert("Something went wrong. Please close the app and restart.");
         },
-        error: function(error) {
-          console.log(error)
-          alert('something broke');
+        method: 'POST',
+        statusCode: {
+          404: function(){
+            alert("Something is missing.");
+          },
+          500: function(){
+            alert("Server went down.");
+          }
+        },
+        success: function(response){
+          alert('Woop');
+          location.href = '/';
         }
       });
-
     });
   });
   </script>

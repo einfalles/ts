@@ -127,44 +127,41 @@ def view_playlists(user_id):
     t0 = time.time()
     return render_template('playlists_one.html',execution_time=time.time()-t0,user_id=user_id)
 
-@app.route('/users/<int:user_id>/playlists/<int:playlist_id>/<name>', methods=['GET'])
-def view_playlist_songs(user_id,playlist_id,name):
+@app.route('/users/<int:user_id>/playlists/<int:playlist_id>/<url>/<name>', methods=['GET'])
+def view_playlist_songs(user_id,playlist_id,url,name):
     t0 = time.time()
-    return render_template('playlists_two.html',execution_time=time.time()-t0,name=name)
+    return render_template('playlists_two.html',execution_time=time.time()-t0,pid=playlist_id,name=name,url=url)
 
 # *************************
 # manage account
 # *************************
 @app.route('/users/<int:user_id>/profile', methods=['GET'])
 def view_profile(user_id):
-    return render_template('profile.html')
+    return render_template('profile.html',user_avatar=session['credentials']['id_token']['avatar'],user_name=session['credentials']['id_token']['name'],user_id=user_id)
 
 @app.route('/users/<int:user_id>/profile/account', methods=['GET'])
 def view_profile_name(user_id):
-    return render_template('profile_name.html')
+    return render_template('profile_name.html',user_id=user_id)
 
 @app.route('/users/<int:user_id>/profile/avatar', methods=['GET'])
 def view_profile_avatar(user_id):
-    return render_template('profile_avatars.html')
+    return render_template('profile_avatars.html',user_id=user_id)
 
 @app.route('/users/<int:user_id>/profile/avatar/<gender>', methods=['GET'])
-def view_profile_avatar_gender(gender):
-    return render_template('profile_avatar_gender.html',gender=gender)
+def view_profile_avatar_gender(user_id,gender):
+    f  = list(range(0,20))
+    return render_template('profile_avatar_gender.html',user_id=user_id,gender=gender,f=f)
 
-@app.route('/profile/update/<edit>/<uid>', methods=['POST'])
-def avatar_update(edit, uid):
-    if edit == 'name':
-        tsm.User.query.filter(tsm.User.id==uid).update({'name':request.json['name']})
-        tsm.db.session.commit()
-        session['credentials']['id_token']['name'] = request.json['name']
-        tsm.db.session.close()
-        return jsonify({'status':'ok'})
-    if edit == 'avatar':
-        tsm.User.query.filter(tsm.User.id==uid).update({'avatar':request.json['avatar']})
-        tsm.db.session.commit()
-        session['credentials']['id_token']['avatar'] = request.json['avatar']
-        tsm.db.session.close()
-        return jsonify({'status':'ok'})
+@app.route('/ts/api/users/<int:user_id>/update', methods=['POST'])
+def avatar_update(user_id):
+    print(request.form)
+    field = request.json['update']
+    data = request.json['data']
+    tsm.User.query.filter(tsm.User.id==user_id).update({field:data})
+    tsm.db.session.commit()
+    session['credentials']['id_token'][field] = data
+    tsm.db.session.close()
+    return jsonify({'status':'ok'})
 
 # *************************
 # make a playlist
@@ -175,7 +172,8 @@ def generate_select():
 
 @app.route('/generate/two/<int:user_id>',methods=['GET'])
 def generate_match(user_id):
-    return render_template('generate_two.html')
+    match = tsm.get_user(uid=user_id)
+    return render_template('generate_two.html',match=match)
 
 
 @app.route('/generate/three', methods=['POST'])
@@ -282,7 +280,7 @@ def manage_playlist(user_id):
 @app.route('/ts/api/playlist/<int:p_id>', methods=['GET'])
 def view_playlist(p_id):
     a = time.clock()
-    songs = tsm.get_playlist_songs(pl_id=pl_id)
+    songs = tsm.get_playlist_songs(pl_id=p_id)
     b = time.clock()
     delta = b-a
     tsm.db.session.close()

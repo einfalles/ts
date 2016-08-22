@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <link rel="icon" type="image/png" href="images/favicon.png">
-  
+
   <style>
   script {
     display: none;
@@ -37,24 +37,34 @@
   <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
   <script>
   $(document).ready(function(){
-    var a = {{uid}};
     $('#submit').on('click',function(){
       var name = $('input').val();
       var postData = {
-        'name': name
+        'update': 'name',
+        'data': name
       };
+
       $.ajax({
-        method: 'POST',
-        url: '/profile/update/name/'+a.toString(),
-        data: JSON.stringify(postData),
+        async: true,
         contentType:"application/json",
-        success: function(response) {
-          alert('Saved! Thanks ' + name);
-          location.href = '/profile/management/'+a.toString();
+        url: '/ts/api/users/{{user_id}}/update',
+        dataType: 'json',
+        data: JSON.stringify(postData),
+        error: function(){
+          alert("Something went wrong. Please close the app and restart.");
         },
-        error: function(error) {
-          console.log(error)
-          alert('something broke');
+        method: 'POST',
+        statusCode: {
+          404: function(){
+            alert("Something is missing.");
+          },
+          500: function(){
+            alert("Server went down.");
+          }
+        },
+        success: function(response){
+          alert('Woop');
+          location.href = '/';
         }
       });
     });
