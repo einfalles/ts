@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="icon" type="image/png" href="images/favicon.png">
+
+  <style>
+    style {
+      display: none;
+    }
+    script {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="mobile row h-100-vp">
+      <div class="twelve columns display-start h-100-vp">
+        <header class="header w-100 display-center">
+          <h3 class="page-header">Your Playlists</h3>
+        </header>
+        <main class="m-t-auto w-100">
+          <ul class="w-100 no-of" id="playlist">
+              <!-- <li><div class="avatar-wrapper"><img src=""></div><div class="content-wrapper"><a href=""></a><p></p></div></li> -->
+          </ul>
+        </main>
+        <footer>
+          {{execution_time}}
+        </footer>
+      </div>
+    </div>
+  </div>
+
+  <link href='https://fonts.googleapis.com/css?family=Press+Start+2P' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="/css/normalize.css">
+  <link rel="stylesheet" href="/css/skeleton.css">
+  <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+  <script>
+  $(document).ready(function(){
+    $.ajax({
+      async: true,
+      cache: true,
+      context: document.getElementById('playlist'),
+      url: '/ts/api/users/{{user_id}}/playlists',
+      dataType: 'json',
+      error: function(){
+        alert("Something went wrong. Please close the app and restart.");
+      },
+      method: 'GET',
+      statusCode: {
+        404: function(){
+          alert("Something is missing.");
+        },
+        500: function(){
+          alert("Server went down.");
+        }
+      },
+      success: function(response){
+        console.log(response);
+      }
+    }).done(function(response){
+      var data = response['data'];
+      var list = $('#playlist');
+      for (var i = 0; i < data.length; i++){
+        list.append(
+          "<li><div class='avatar-wrapper'><img src='" + data[i]['other']['avatar'] +"'></div><div class='content-wrapper'><a href='/users/{{user_id}}/playlists/"+data[i]['pid']+"/"+data[i]['other']['name']+"'>"+data[i]['other']['name']+"</a><p>Created on "+data[i]['time']+"</p></div></li>"
+        );
+      }
+    });
+  });
+  </script>
+</body>
+</html>

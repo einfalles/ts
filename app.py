@@ -125,13 +125,12 @@ def login():
 @app.route('/users/<int:user_id>/playlists', methods=['GET'])
 def view_playlists(user_id):
     t0 = time.time()
+    return render_template('playlists_one.html',execution_time=time.time()-t0,user_id=user_id)
 
-    return render_template('playlists_all.html',execution_time=time.time()-t0)
-
-@app.route('/users/<int:user_id>/playlists/<int:playlist_id>', methods=['GET'])
-def view_playlist_songs(user_id,playlist_id):
+@app.route('/users/<int:user_id>/playlists/<int:playlist_id>/<name>', methods=['GET'])
+def view_playlist_songs(user_id,playlist_id,name):
     t0 = time.time()
-    return render_template('playlist_songs.html',execution_time=time.time()-t0)
+    return render_template('playlists_two.html',execution_time=time.time()-t0,name=name)
 
 # *************************
 # manage account
@@ -146,11 +145,11 @@ def view_profile_name(user_id):
 
 @app.route('/users/<int:user_id>/profile/avatar', methods=['GET'])
 def view_profile_avatar(user_id):
-    return render_template('avatars.html')
+    return render_template('profile_avatars.html')
 
 @app.route('/users/<int:user_id>/profile/avatar/<gender>', methods=['GET'])
 def view_profile_avatar_gender(gender):
-    return render_template('avatar_selection.html',gender=gender)
+    return render_template('profile_avatar_gender.html',gender=gender)
 
 @app.route('/profile/update/<edit>/<uid>', methods=['POST'])
 def avatar_update(edit, uid):

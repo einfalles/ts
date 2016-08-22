@@ -3,16 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <link rel="icon" type="image/png" href="images/favicon.png">
-
   <style>
-    style {
-      display: none;
-    }
-    script {
-      display: none;
-    }
+  script {
+    display: none;
+  }
+  style {
+    display: none;
+  }
   </style>
 </head>
 <body>
@@ -20,28 +17,29 @@
     <div class="mobile row h-100-vp">
       <div class="twelve columns display-start h-100-vp">
         <header class="header w-100 display-center">
-          <h3 class="page-header">Your Playlists</h3>
+          <h3 class="page-header">Made with {{name}}</h3>
         </header>
         <main class="m-t-auto w-100">
-          <ul class="w-100 no-of" id="playlist">
-              <!-- <li>
+          <ul class="w-100 ">
+          {% for song in songs %}
+              <li>
                 <div class="avatar-wrapper">
-                  <img src="">
+                  <img src="http://img.youtube.com/vi/{{song['yt_url']}}/default.jpg">
                 </div>
                 <div class="content-wrapper">
-                  <a href=""></a>
-                  <p></p>
+                  <a href="https://youtube.com/watch?v={{song['yt_url']}}&amp;index={{loop.index}}&amp;list={{pl}}">{{song['track']}}</a>
+                  <p>{{song['artist']}}</p>
                 </div>
-              </li> -->
+              </li>
+          {% endfor %}
           </ul>
         </main>
-        <footer>
+        <footer class="display-center">
           {{execution_time}}
         </footer>
       </div>
     </div>
   </div>
-
   <link href='https://fonts.googleapis.com/css?family=Press+Start+2P' rel='stylesheet' type='text/css'>
   <link rel="stylesheet" href="/css/normalize.css">
   <link rel="stylesheet" href="/css/skeleton.css">

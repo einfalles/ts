@@ -164,9 +164,24 @@ def get_all_playlists(uid=None,user_email=None):
         result = Playlist.query.filter(db.or_(Playlist.uo_id==uid, Playlist.ut_id==uid)).all()
 
         for i in result:
+            if i.uone.id == uid:
+                other = {
+                    'id':i.utwo.id,
+                    'avatar':i.utwo.avatar,
+                    'email':i.utwo.email,
+                    'name':i.utwo.name
+                }
+            else:
+                other = {
+                'id':i.uone.id,
+                'avatar':i.uone.avatar,
+                'email':i.uone.email,
+                'name':i.uone.name
+                }
             playlists.append({
                     'pid': i.p_id,
                     'time':i.created_at.date().isoformat(),
+                    'other': other,
                     'uone': {
                         'id':i.uone.id,
                         'avatar':i.uone.avatar,
