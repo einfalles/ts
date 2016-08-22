@@ -6,6 +6,14 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="TuneSmash">
+  <style>
+    style {
+      display: none;
+    }
+    script {
+      display: none;
+    }
+  </style>
 </head>
 <body>
 <div class="container">
@@ -18,14 +26,16 @@
           <a class="m-b-5" href="/generate/one" data-uid="{{user_id}}" data-email="{{user_email}}" data-name="{{user_name}}" id="submit">
             <button class="primary-button pink">Make A Playlist</button>
           </a>
-          <a class="m-b-5" href="/playlist/management/{{user_id}}"  href="/">
+          <a class="m-b-5" href="/users/{{user_id}}/playlists"  href="/">
             <button class="primary-button purple">Manage Playlist</button>
           </a>
-          <a class="m-b-5" href="/profile/management/{{user_id}}">
+          <a class="m-b-5" href="/users/{{user_id}}/profile">
             <button class="primary-button orange">Edit Avatar</button>
           </a>
         </main>
-        <footer class="h-0"></footer>
+        <footer class="h-0">
+          {{execution_time}}
+        </footer>
       </div>
   </div>
 </div>

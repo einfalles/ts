@@ -143,24 +143,42 @@ class Song(db.Model):
 # HELPER FUNCTIONS
 #
 def get_user(email=None,uid=None):
-    if email:
-        return User.query.filter(User.email==email).first()
-    if uid:
-        return User.query.filter(User.id==uid).first()
-    else:
-        return None
 
-def get_all_playlists(user_id=None,user_email=None):
+    if email:
+        user = User.query.filter(User.email==email).first()
+    if uid:
+        user = User.query.get(uid)
+
+    results = {
+        'id': user.id,
+        'avatar': user.avatar,
+        'email': user.email,
+        'name': user.name
+    }
+    return results
+
+def get_all_playlists(uid=None,user_email=None):
     playlists = []
-    user_id = int(user_id)
-    if user_id:
-        result = Playlist.query.filter(db.or_(Playlist.uo_id==user_id, Playlist.ut_id==user_id)).all()
+    uid = int(uid)
+    if uid:
+        result = Playlist.query.filter(db.or_(Playlist.uo_id==uid, Playlist.ut_id==uid)).all()
 
         for i in result:
-            playlists.append({'id': i.p_id,
+            playlists.append({
+                    'pid': i.p_id,
                     'time':i.created_at.date().isoformat(),
-                    'uone':i.uone,
-                    'utwo':i.utwo
+                    'uone': {
+                        'id':i.uone.id,
+                        'avatar':i.uone.avatar,
+                        'email':i.uone.email,
+                        'name':i.uone.name
+                    },
+                    'utwo':{
+                        'id':i.utwo.id,
+                        'avatar':i.utwo.avatar,
+                        'email':i.utwo.email,
+                        'name':i.utwo.name
+                    }
                 }
             )
         db.session.close()
@@ -182,8 +200,18 @@ def get_playlist_songs(pl_id=None):
         for i in result:
             songs.append({
                 # 'art': i.song.art,
-                'uone':i.playlist.uone,
-                'utwo':i.playlist.utwo,
+                'uone': {
+                    'id':i.playlist.uone.id,
+                    'name':i.playlist.uone.name,
+                    'avatar':i.playlist.uone.avatar,
+                    'email':i.playlist.uone.email
+                },
+                'utwo':{
+                    'id':i.playlist.utwo.id,
+                    'name':i.playlist.utwo.name,
+                    'avatar':i.playlist.utwo.avatar,
+                    'email':i.playlist.utwo.email
+                },
                 'track': i.song.track,
                 'artist': i.song.artist,
                 'yt_url': i.song.yt_uri

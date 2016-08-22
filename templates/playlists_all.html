@@ -24,25 +24,19 @@
         </header>
         <main class="m-t-auto w-100">
           <ul class="w-100 no-of" id="playlist">
-          {% for song in playlists %}
-              {% if song['uone'].id|string() == uid|string() %}
-                {% set other = song['utwo'] %}
-              {% else %}
-                {% set other = song['uone'] %}
-              {% endif %}
-              <li>
+              <!-- <li>
                 <div class="avatar-wrapper">
-                  <img src="{{other.avatar}}">
+                  <img src="">
                 </div>
                 <div class="content-wrapper">
-                  <a href="/playlist/{{song['id']}}">{{other.name}}</a>
-                  <p>Created on {{song['time']}}</p>
+                  <a href=""></a>
+                  <p></p>
                 </div>
-              </li>
-          {% endfor %}
+              </li> -->
           </ul>
         </main>
         <footer>
+          {{execution_time}}
         </footer>
       </div>
     </div>
