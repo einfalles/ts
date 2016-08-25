@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="icon" type="image/png" href="images/favicon.png">
+
+</head>
+<body>
+  <div class="container">
+    <div class="mobile row h-100-vp">
+      <div class="twelve columns display-start h-100-vp">
+        <header class="header w-100 display-center">
+          <h3 class="page-header">Nearby Friends</h3>
+        </header>
+        <main class="m-t-auto">
+          <ul></ul>
+        </main>
+        <footer class="h-0"></footer>
+      </div>
+    </div>
+  </div>
+  <script src="https://www.gstatic.com/firebasejs/3.1.0/firebase.js"></script>
+  <link href='https://fonts.googleapis.com/css?family=Press+Start+2P' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/normalize.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/skeleton.css') }}">
+  <style>
+  .hide {
+    display: none;
+  }
+  </style>
+  <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+  <script type="text/javascript">
+
+  var config = {
+    apiKey: "AIzaSyBKX1xmfY8JuhIbgOxhO2APg6f4VcCZWXI",
+    authDomain: "luminous-inferno-9831.firebaseapp.com",
+    databaseURL: "https://luminous-inferno-9831.firebaseio.com",
+    storageBucket: "luminous-inferno-9831.appspot.com",
+  };
+  firebase.initializeApp(config);
+  var d = new Date()
+  var chat = firebase.database().ref('/chat');
+  var vistor = {'uid':{{user_id}},'email':"{{user_email}}",'name':"{{user_name}}",'time':d.getTime(),'location':000}
+  var vistorRef = chat.push(vistor);
+  vistorRef.onDisconnect().remove();
+
+  $(document).on('ready',function(){
+    count = 0;
+    chat.on('child_added',function (snapshot){
+      var data = snapshot.val();
+      var one = {{user_id}};
+      var two = snapshot.val()['uid'];
+      var first = 0;
+      var second = 0;
+      if (one > two) {
+        first = one;
+        second = two;
+      } else {
+        first = two;
+        second = one;
+      }
+      console.log("***");
+      console.log(data);
+      console.log("^^^^^^")
+      var href = '/generate/two/'+ one.toString() +'/'+first+'/'+second;
+      $('ul').append('<li id="'+ snapshot.key+'">'+'<a class="clickbait"'+"href='" +href+"'"+' data-email="'+ data['email']+'" data-id="'+data['uid'] +'"'+'>'+data['name']+'</a></li>');
+      if (data['uid'] == {{user_id}}){
+        $('ul li').filter('#'+snapshot.key).remove();
+      }
+      if (data['uid'] == undefined) {
+        $('ul li').filter('#'+snapshot.key).remove();
+      }
+    });
+    chat.on('child_removed', function (snapshot) {
+      setTimeout(function(){
+        $('#' + snapshot.key).remove();
+      },300000);
+    });
+
+  });
+  </script>
+
+</body>
+</html>

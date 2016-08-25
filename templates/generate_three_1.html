@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>TuneSmash</title>
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+</head>
+<body>
+  <div class="container">
+    <div class="mobile row h-100-vp">
+      <div class="twelve columns display-center h-100-vp" data-step="1">
+        <h6>Welcome {{user_id}}</h6>
+        <h6>You {{status}}</h6>
+      </div>
+      <div class="twelve columns display-center h-100-vp" data-step="2">
+        <h4>matched with {{match}}</h4>
+      </div>
+      <div class="twelve columns display-center h-100-vp" data-step="3">
+        <h4>melding your listening preferences</h4>
+      </div>
+      <div class="twelve columns display-center h-100-vp" data-step="4">
+        <h4>generating tunes</h4>
+      </div>
+      <div class="twelve columns display-center h-100-vp" data-step="5">
+        <h4>putting the mixtape on youtube</h4>
+      </div>
+    </div>
+  </div>
+  <link href='https://fonts.googleapis.com/css?family=Press+Start+2P' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/normalize.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/skeleton.css') }}">
+  <style>
+  .hide {
+    display:none;
+  }
+  </style>
+  <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/3.1.0/firebase.js"></script>
+  <script>
+  $(document).ready(function(){
+    var status = "{{status}}";
+    var postData = {
+      'location':'South of France',
+      'uone': {
+        'id':{{user_id}},
+        'email':'dlamnguyen@gmail.com',
+        'name': "{{user_name}}"
+      },
+      'utwo': {
+        'id':{{other_id}},
+        'email':'dlamnguyen@gmail.com',
+        'name': "{{other_name}}"
+      }
+    }
+    if (status == "win") {
+      alert('Win {{user_id}}');
+      $.ajax({
+        async: true,
+        contentType:"application/json",
+        url: '/ts/api/generate/recommendation',
+        dataType: 'json',
+        data: JSON.stringify(postData),
+        error: function(error){
+          alert("{{user_email}} Recommendation: Something went wrong. Please close the app and restart.");
+          console.log(error);
+        },
+        method: 'POST',
+        success: function(response){
+          alert('Ready to Listen?');
+          console.log(response);
+          window.open('https://www.youtube.com/playlist?list=' + response['data']['playlist'].toString());
+        }
+      });
+
+    } else {
+      console.log('Wait up');
+    }
+
+    var config = {
+      apiKey: "AIzaSyBKX1xmfY8JuhIbgOxhO2APg6f4VcCZWXI",
+      authDomain: "luminous-inferno-9831.firebaseapp.com",
+      databaseURL: "https://luminous-inferno-9831.firebaseio.com",
+      storageBucket: "luminous-inferno-9831.appspot.com",
+    };
+
+    firebase.initializeApp(config);
+    var notification = firebase.database().ref('notification');
+    notification.orderByChild("recipient").equalTo({{user_id}}).on('child_added',function(snapshot){
+      var data = snapshot.val();
+      $('div.mobile').children().filter(function(){
+        if($(this).data('step') != data['step']) {
+          $(this).addClass('hide');
+        } else {
+          $(this).removeClass('hide');
+        }
+      });
+      notification.child(snapshot.key).remove();
+    });
+  });
+  </script>
+</body>
+</html>

@@ -70,23 +70,30 @@ $(document).on('ready',function(){
     },300000);
   });
   $('ul').on('click', 'li a.clickbait', function(event) {
-    event.preventDefault();
-    var d = new Date();
-    var diss = $(this);
-    GLOBAL_TIME = d.getTime();
-    GLOBAL_TO_EMAIL = diss.attr('data-email');
-    GLOBAL_TO_ID = parseInt(diss.attr('data-id'));
 
-    var postData = {
-      "from": {'id': GLOBAL_UID,'email':GLOBAL_EMAIL},
-      "to": {'id':GLOBAL_TO_ID,'email':GLOBAL_TO_EMAIL},
-      "lat": GLOBAL_LAT,
-      "lon": GLOBAL_LON,
-      "time": GLOBAL_TIME
-    };
-    firePost = writeNewPost(postData).then(function(){
-      location.href = '/generate/two/'+GLOBAL_TO_ID;
-    });
+    // $$$$$$$$$$$$$$$$$$$$ //
+    // 1 go to generate two
+    // 2 generate two receives variables from server that describe user 1 & user 2
+    // 3 generate two posts to server to store in database the bumps
+    // 4 generate two
+    // $$$$$$$$$$$$$$$$$$$$ //
+    // event.preventDefault();
+    // var d = new Date();
+    // var diss = $(this);
+    // GLOBAL_TIME = d.getTime();
+    // GLOBAL_TO_EMAIL = diss.attr('data-email');
+    // GLOBAL_TO_ID = parseInt(diss.attr('data-id'));
+    //
+    // var postData = {
+    //   "from": {'id': GLOBAL_UID,'email':GLOBAL_EMAIL},
+    //   "to": {'id':GLOBAL_TO_ID,'email':GLOBAL_TO_EMAIL},
+    //   "lat": GLOBAL_LAT,
+    //   "lon": GLOBAL_LON,
+    //   "time": GLOBAL_TIME
+    // };
+    // firePost = writeNewPost(postData).then(function(){
+    //   location.href = '/generate/two/'+GLOBAL_TO_ID;
+    // });
   });
 });
 </script>

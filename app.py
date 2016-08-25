@@ -1,3 +1,7 @@
+# 11:52:50 PM web.1 |  "I_8xdZu766_FSaexEaDXTIfEWc0/uT0uIUR0DRqJMiiH8oEq3KagAoo"
+# 11:52:50 PM web.1 |  this is etag from tsr
+# 11:52:50 PM web.1 |  "I_8xdZu766_FSaexEaDXTIfEWc0/lb4Dh2wuHYWNS40eRacpKzFWv-E"
+
 import json
 import httplib2
 import gevent
@@ -19,7 +23,7 @@ from flask_sse import sse
 from flask import Flask, render_template, request, redirect, jsonify, session, url_for,send_file
 from oauth2client.client import OAuth2Credentials
 from oauth2client.contrib import multistore_file as oams
-from werkzeug.contrib.profiler import ProfilerMiddleware
+# from werkzeug.contrib.profiler import ProfilerMiddleware
 
 
 #
@@ -39,8 +43,8 @@ app.config['OAUTH_CREDENTIALS'] = {
         'secret':'e2oBEpfgl3HVwU94UjFolXL8'
     }
 }
-app.config['PROFILE'] = True
-app.wsgi_app = ProfilerMiddleware(app.wsgi_app, restrictions=[30])
+# app.config['PROFILE'] = True
+# app.wsgi_app = ProfilerMiddleware(app.wsgi_app, restrictions=[30])
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 604800
 config = {
   "apiKey": "AIzaSyBKX1xmfY8JuhIbgOxhO2APg6f4VcCZWXI",
@@ -81,14 +85,62 @@ def index():
             credentials.refresh(httplib2.Http())
         if credentials.invalid == True:
             return redirect('/login')
-        # if user is new then history run
-        # if user hasn't signed in a day then thread history run
+
+        youtube = tsr.get_authenticated_service(user['email'])
+        hid = tsr.get_history_id(youtube)
+
+        if 'etag' in session['credentials']['id_token']:
+            etag = session['credentials']['id_token']['etag']
+        else:
+            etag = None
+        print('this is etag from index')
+        print(etag)
+        go_no = tsr.is_history_new(youtube,user['email'],etag=etag,hid=hid)
+        session['credentials']['id_token']['etag'] = go_no['etag']
+        print('this is go no {0}'.format(go_no))
+        # this all works but things break down when i try to commit new song and history
+        if go_no['refresh'] == True:
+            song = tsr.get_latest_song(user['email'],hid,youtube)
+            print('this is the song {0}'.format(song))
+            if song is not None:
+                match = tsm.db.session.query(tsm.db.exists().where(
+                    tsm.db.and_(
+                        tsm.Zong.yt_uri == song['yt_uri'],
+                    )
+                )).scalar()
+                print('this is the match {0}'.format(match))
+                if match == False:
+                    commit_song = tsm.Zong(sp_uri=song['sp_uri'],yt_uri=song['yt_uri'],track=song['track'],artist=song['artist'])
+                    print('This is a {0} for {1}. This is a {2} for {3}.'.format(type(song['sp_uri']),song['sp_uri'],type(song['yt_uri']),song['yt_uri']      ))
+                    tsm.db.session.add(commit_song)
+                commit_history = tsm.Zistory(uid=user['id'],zurl=song['yt_uri'],created_at=moment.utcnow().datetime.isoformat())
+                tsm.db.session.add(commit_history)
+                tsm.db.session.commit()
+            else:
+                print('No music found for {0}'.format(user['email']))
+        else:
+            print('no new music')
         # history_run(uid=user.id,uemail=user.email)
         # thr = Thread(target=history_run,args=[user.id,user.email])
         # thr.start()
         t1 = time.time() - t0
         return render_template('home.html',user_name=user['name'],user_email=user['email'],user_id=user['id'], execution_time=t1)
 
+def history_run(uid=None,uemail=None):
+    history = tsr.get_watch_history(user=uemail)
+    if history != None:
+        song = tsm.Song.query.filter_by(sp_uri=history[3]).first()
+    else:
+        song = None
+    if song == None:
+        song = tsm.Song(sp_uri=history[3],track=history[1],artist=history[0],yt_uri=history[2])
+        tsm.db.session.add(song)
+        tsm.db.session.flush()
+    t = moment.utcnow().datetime.isoformat()
+    h = tsm.History(uid=uid,sid=song.s_id,created_at=t)
+    tsm.db.session.add(h)
+    tsm.db.session.commit()
+    tsm.db.session.close()
 
 # *************************
 # sign in
@@ -166,7 +218,7 @@ def avatar_update(user_id):
 # *************************
 # make a playlist
 # *************************
-@app.route('/generate/one', methods=['GET'])
+@app.route('/generate/one/old', methods=['GET'])
 def generate_select():
     return render_template('generate_one.html')
 
@@ -175,72 +227,71 @@ def generate_match(user_id):
     match = tsm.get_user(uid=user_id)
     return render_template('generate_two.html',match=match)
 
+@app.route('/generate/one/<int:user_id>', methods=['GET'])
+def generate_one(user_id):
+    return render_template('generate_one_1.html',user_avatar=session['credentials']['id_token']['avatar'],user_email=session['credentials']['id_token']['email'],user_name=session['credentials']['id_token']['name'],user_id=user_id)
 
-@app.route('/generate/three', methods=['POST'])
-def generate_recommendation():
-    # prepare data for run_generation
-    print('generating recommendation',file=sys.stderr)
-    time = moment.utcnow().datetime.isoformat()
-    location = request.json['location']
-    uone = request.json['uone']
-    utwo = request.json['utwo']
-    hone = tsm.get_history(uone['id'])
-    htwo = tsm.get_history(utwo['id'])
+@app.route('/generate/two/<int:user_id>/<int:first>/<int:second>')
+def generate_two(user_id,first,second):
+    return render_template('generate_two_1.html',first=first,second=second,user_id=user_id)
 
-    # run_generation wraps all of the steps necessary to generate recommendation
-    data = tsr.run_generation(uone,utwo,hone.song.sp_uri,htwo.song.sp_uri,location,time,60)
+@app.route('/generate/three/<int:user_id>/<status>/<int:other_id>')
+def generate_three(user_id,status,other_id):
+    user = session['credentials']['id_token']
+    other = tsm.get_user(uid=other_id)
+    return render_template('generate_three_1.html',user_id=user_id,user_email=user['email'],user_avatar=user['avatar'],status=status,other_email=other['email'],other_id=other['id'],other_name=other['name'])
 
-    # create playlist model and store it in the database
-    playlist = tsm.Playlist(uone['id'],utwo['id'],time,location,data['playlist_url'])
-    tsm.db.session.add(playlist)
-    tsm.db.session.flush()
-    plid = playlist.p_id
+
+@app.route('/fcm', methods=['GET'])
+def fcm():
+    return render_template('fcm.html')
+
+
+@app.route('/ts/api/generate/bump', methods=['POST'])
+def generate_bump():
+    fr = request.json['fr']
+    to = request.json['to']
+    # created_at = request.json['created_at']
+    created_at = moment.utcnow().datetime
+    delta = datetime.timedelta(minutes=1)
+    limit = created_at - delta
+    match = tsm.db.session.query(tsm.db.exists().where(
+        tsm.db.and_(
+            tsm.Bump.created_at >= limit,
+            tsm.Bump.fr == to,
+            tsm.Bump.too == fr
+        )
+    )).scalar()
+    if match == True:
+        fdbdata = {
+            'recipient':fr,
+            'message': 'match found',
+            'winner': True,
+            'created_at': created_at.isoformat(),
+            'step': 1
+        }
+        fdb.child("notification").push(fdbdata)
+        fdbdata = {
+            'recipient': to,
+            'message': 'match found',
+            'winner': False,
+            'created_at': created_at.isoformat(),
+            'step': 1
+        }
+        fdb.child("notification").push(fdbdata)
+    bump = tsm.Bump(fr=fr,too=to,created_at=created_at.isoformat())
+    tsm.db.session.add(bump)
     tsm.db.session.commit()
-    songs = data['songs']
-    thr = Thread(target=song_run, args=[songs,plid])
-    thr.start()
+    return jsonify({'status':'ok','data':{'first':request.json['first'],'second':request.json['second'],'me':request.json['fr']}})
 
-    fdbdata = {
-        'time':time,
-        'from':uone['id'],
-        'to':utwo['id'],
-        'plid':plid
-    }
-    fdb.child("notification").push(fdbdata)
-    tsm.db.session.close()
-    return jsonify({'status':'ok','payload':plid})
 
-def song_run(songs,pl):
-    for s in songs:
-        song = tsm.Song.query.filter_by(sp_uri=s[2]).first()
-        if song == None:
-            song = tsm.Song(s[2],s[0],s[1],s[3])
-            tsm.db.session.add(song)
-            tsm.db.session.flush()
-        pl_relation = tsm.PlaylistSong(pl,song.s_id)
-        tsm.db.session.add(pl_relation)
-    tsm.db.session.commit()
 
 
 # $$$$$$$$$$$$$$$$$$$$$$$$ #
 #       RESTFUL API        #
 # $$$$$$$$$$$$$$$$$$$$$$$$ #
 
-def history_run(uid=None,uemail=None):
-    history = tsr.get_watch_history(user=uemail)
-    if history != None:
-        song = tsm.Song.query.filter_by(sp_uri=history[3]).first()
-    else:
-        song = None
-    if song == None:
-        song = tsm.Song(sp_uri=history[3],track=history[1],artist=history[0],yt_uri=history[2])
-        tsm.db.session.add(song)
-        tsm.db.session.flush()
-    t = moment.utcnow().datetime.isoformat()
-    h = tsm.History(uid=uid,sid=song.s_id,created_at=t)
-    tsm.db.session.add(h)
-    tsm.db.session.commit()
-    tsm.db.session.close()
+
 
 
 # Get user's information
@@ -287,38 +338,113 @@ def view_playlist(p_id):
     return jsonify({'status':'ok','data':songs,'execution_time':delta})
 
 # Create a new playlist
-@app.route('/ts/api/generate/recommention', methods=['POST'])
+@app.route('/ts/api/generate/recommendation', methods=['POST'])
 def create_recommendation():
-
-    time = moment.utcnow().datetime.isoformat()
+    message = 'Route: Recommendation'
+    t = moment.utcnow().datetime.isoformat()
     location = request.json['location']
+    location = 'JAMAICA'
     uone = request.json['uone']
     utwo = request.json['utwo']
-    hone = tsm.get_history(uone['id'])
-    htwo = tsm.get_history(utwo['id'])
 
-    # run_generation wraps all of the steps necessary to generate recommendation
-    data = tsr.run_generation(uone,utwo,hone.song.sp_uri,htwo.song.sp_uri,location,time,60)
+    t0 = time.time()
+    # hone = tsm.get_history(uone['id'])
+    # htwo = tsm.get_history(utwo['id'])
+    # histories = tsm.get_faster_history(uone['id'],utwo['id'])
+    histories = tsm.zzzistory(uone['id'],utwo['id'])
+    s1 = time.time() - t0
+    step = 1
+    # fb_notification(recipient=uone['id'],message=message,created_at=s1,step=step)
+    # fb_notification(recipient=utwo['id'],message=message,created_at=s1,step=step)
+    # ~ 3 seconds
 
-    # create playlist model and store it in the database
-    playlist = tsm.Playlist(uone['id'],utwo['id'],time,location,data['playlist_url'])
+    t1 = time.time()
+
+    tunesmash = tsr.generate_recommendations(histories[uone['id']]['sp_uri'],histories[utwo['id']]['sp_uri'],100)
+    tunesmash = tsr.add_audio_features(tunesmash)
+    tunesmash = tsr.bell_sort(tunesmash)
+    tunesmash = tsr.remove_ids(tunesmash)
+    s2 = time.time() - t1
+    step = 2
+    # fb_notification(recipient=uone['id'],message=message,created_at=s2,step=step)
+    # fb_notification(recipient=utwo['id'],message=message,created_at=s2,step=step)
+    # ~ 3 seconds
+
+
+    t2 = time.time()
+    try:
+        youtube = tsr.get_authenticated_service(uone['email'])
+        ytpid = tsr.generate_yt_playlist(yt=youtube,uone=uone['email'],utwo=utwo['email'],t=t2)
+    except tsr.HttpError as err:
+        e = err
+        print(e.content,file=sys.stderr)
+        return jsonify({'status':'fail','error':'error'})
+    s3 = time.time() - t2
+    step = 3
+    # fb_notification(recipient=uone['id'],message=message,created_at=s3,step=step)
+    # fb_notification(recipient=utwo['id'],message=message,created_at=s3,step=step)
+    # ~ 3 seconds
+
+    t3 = time.time()
+    videos = tsr.test_populate(youtube,tunesmash,ytpid)
+    s4 = time.time() - t3
+    step = 4
+    # fb_notification(recipient=uone['id'],message=message,created_at=s4,step=step)
+    # fb_notification(recipient=utwo['id'],message=message,created_at=s4,step=step)
+    # ~ 4 seconds
+    [tunesmash[i].append(videos[i])  for i in range(len(videos))]
+    pprint.pprint(tunesmash)
+    t4 = time.time()
+    playlist = tsm.Playlist(uone['id'],utwo['id'],t,location,ytpid)
     tsm.db.session.add(playlist)
-    tsm.db.session.flush()
-    plid = playlist.p_id
     tsm.db.session.commit()
-    songs = data['songs']
-    thr = Thread(target=song_run, args=[songs,plid])
-    thr.start()
+    s5 = time.time() - t4
 
+    t5 = time.time()
+    song_run(tunesmash,ytpid)
+    s6 = time.time() - t5
+    # pprint.pprint(tunesmash)
+    # fdbdata = {
+    #     'time':time,
+    #     'from':uone['id'],
+    #     'to':utwo['id'],
+    #     'plid':plid
+    # }
+    # fdb.child("notification").push(fdbdata)
+    # tsm.db.session.close()
+    return jsonify({'status':'ok','data':{'playlist_url':ytpid,'playlist_id':ytpid},'execution_times':{1:s1,2:s2,3:s3,4:s4,5:s5,6:s6}})
+
+def fb_notification(recipient=None,message=None,created_at=None,step=0):
     fdbdata = {
-        'time':time,
-        'from':uone['id'],
-        'to':utwo['id'],
-        'plid':plid
+        'recipient':recipient,
+        'message': message,
+        'created_at': created_at,
+        'step': step
     }
     fdb.child("notification").push(fdbdata)
-    tsm.db.session.close()
-    return jsonify({'status':'ok','payload':plid})
+
+def song_run(songs,pl):
+    new = []
+    plob = []
+    for s in songs:
+        try:
+            match = tsm.db.session.query(tsm.db.exists().where(
+                tsm.db.and_(
+                    tsm.Zong.yt_uri == s[3]
+                )
+            )).scalar()
+            if match == True:
+                print('This song is already in the db {0}'.format(s[3]))
+            else:
+                new.append(tsm.Zong(track=s[0],artist=s[1],sp_uri=s[2],yt_uri=s[3]))
+            plob.append(tsm.Pongz(pl,s[3]))
+        except tsm.exc.IntegrityError as e:
+            print('$$$ MAJOR FUCKING ERROR $$$')
+            print(e)
+            tsm.db.session.rollback()
+    tsm.db.session.add_all(new)
+    tsm.db.session.add_all(plob)
+    tsm.db.session.commit()
 
 if __name__ == "__main__":
     app.run(debug = True)

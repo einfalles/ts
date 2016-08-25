@@ -20,7 +20,7 @@ Copyright (c) Rad Kitchen Inc. All rights reserved.
 import datetime
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-
+from sqlalchemy import exc
 PRODUCTION = 'postgres://ksualenqkvlhjj:h84hpFPOi4boL6QYl6EOwRyP6T@ec2-54-243-204-195.compute-1.amazonaws.com:5432/de1brda8ltt7bd'
 DEVELOPMENT = 'postgresql://localhost:5432/rachelgoree'
 
@@ -70,30 +70,30 @@ class History(db.Model):
     __tablename__ = 'history'
     h_id = db.Column(db.Integer, primary_key=True)
     uid = db.Column(db.Integer, db.ForeignKey('users.id'),index=True)
-    sid = db.Column(db.Integer, db.ForeignKey('songs.s_id'))
+    surl = db.Column(db.Integer, db.ForeignKey('songs.yt_uri'))
     user = db.relationship('User', foreign_keys=[uid])
-    song = db.relationship('Song', foreign_keys=[sid])
+    song = db.relationship('Song', foreign_keys=[surl])
     created_at = db.Column(db.DateTime(timezone=True), nullable=False)
 
-    def __init__ (self,uid,sid,created_at):
+    def __init__ (self,uid,surl,created_at):
         self.uid = uid
-        self.sid = sid
+        self.surl = surl
         self.created_at = created_at
 
     def __repr__(self):
-        return "history"
+        return repr((self.uid, self.created_at, self.song.track,self.song.artist,self.song.sp_uri))
 
 
 class Playlist(db.Model):
     __tablename__ = 'playlists'
-    p_id = db.Column(db.Integer, primary_key=True)
+    p_id = db.Column(db.Sequence('playlists_p_id_seq'),autoincrement=True)
     uo_id = db.Column(db.Integer, db.ForeignKey('users.id'),index=True)
     ut_id = db.Column(db.Integer, db.ForeignKey('users.id'),index=True)
     uone = db.relationship('User',foreign_keys=[uo_id])
     utwo = db.relationship('User',foreign_keys=[ut_id])
     created_at = db.Column(db.DateTime(timezone=True), nullable=False)
     location = db.Column(db.String(200))
-    url = db.Column(db.String(200))
+    url = db.Column(db.String(200),primary_key=True)
 
     def __init__ (self,uo_id,ut_id,created_at,location,url):
         self.uo_id = uo_id
@@ -109,14 +109,14 @@ class Playlist(db.Model):
 class PlaylistSong(db.Model):
     __tablename__ = 'playlist_songs'
     id = db.Column(db.Integer, primary_key=True)
-    pl_id = db.Column(db.Integer, db.ForeignKey('playlists.p_id'), index=True)
-    s_id = db.Column(db.Integer, db.ForeignKey('songs.s_id'))
-    playlist = db.relationship('Playlist', foreign_keys=[pl_id])
-    song = db.relationship('Song', foreign_keys=[s_id])
+    purl = db.Column(db.Integer, db.ForeignKey('playlists.url'), index=True)
+    surl = db.Column(db.Integer, db.ForeignKey('songs.yt_uri'))
+    playlist = db.relationship('Playlist', foreign_keys=[purl])
+    song = db.relationship('Song', foreign_keys=[surl])
 
-    def __init__ (self,p_id, s_id):
-        self.pl_id = p_id
-        self.s_id = s_id
+    def __init__ (self,purl, surl):
+        self.purl = purl
+        self.surl = surl
 
     def __repr__(self):
         return "playlist songs"
@@ -124,10 +124,10 @@ class PlaylistSong(db.Model):
 
 class Song(db.Model):
     __tablename__ = 'songs'
-    s_id = db.Column(db.Integer, primary_key=True)
+    s_id = db.Column(db.Integer)
     track = db.Column(db.String(200))
     artist = db.Column(db.String(200))
-    yt_uri = db.Column(db.String(200))
+    yt_uri = db.Column(db.String(200),primary_key=True)
     sp_uri = db.Column(db.String(200),index=True)
 
     def __init__ (self,sp_uri,track,artist,yt_uri):
@@ -139,6 +139,77 @@ class Song(db.Model):
     def __repr__(self):
         return "Song"
 
+class Bump(db.Model):
+    __tablename__ = 'bumps'
+    id = db.Column(db.Integer, primary_key=True)
+    # first = db.Column(db.Integer, db.ForeignKey('users.id'), index=True)
+    # second = db.Column(db.Integer, db.ForeignKey('users.id'), index=True)
+    fr = db.Column(db.Integer, db.ForeignKey('users.id'), index=True)
+    too = db.Column(db.Integer, db.ForeignKey('users.id'), index=True)
+    created_at = db.Column(db.DateTime(timezone=True), nullable=False)
+
+    def __init__ (self,fr,too,created_at):
+        self.fr = fr
+        self.too = too
+        self.created_at = created_at
+
+    def __repr__(self):
+        return "Bump bump bump"
+
+# ~~~~~~~~~~~~~~~~~
+class Zistory(db.Model):
+    __tablename__ = 'zistory'
+    h_id = db.Column(db.Integer, primary_key=True)
+    uid = db.Column(db.Integer, db.ForeignKey('users.id'),index=True)
+    zurl = db.Column(db.Integer, db.ForeignKey('zongz.yt_uri'))
+    user = db.relationship('User', foreign_keys=[uid])
+    song = db.relationship('Zong', foreign_keys=[zurl])
+    created_at = db.Column(db.DateTime(timezone=True), nullable=False)
+
+    def __init__ (self,uid,zurl,created_at):
+        self.uid = uid
+        self.zurl = zurl
+        self.created_at = created_at
+
+    def __repr__(self):
+        return repr((self.uid, self.created_at, self.song.track,self.song.artist,self.song.sp_uri))
+
+
+
+class Pongz(db.Model):
+    __tablename__ = 'pongz'
+    id = db.Column(db.Integer, primary_key=True)
+    purl = db.Column(db.Integer, db.ForeignKey('playlists.url'), index=True)
+    zurl = db.Column(db.Integer, db.ForeignKey('zongz.yt_uri'))
+    playlist = db.relationship('Playlist', foreign_keys=[purl])
+    zong = db.relationship('Zong', foreign_keys=[zurl])
+
+    def __init__ (self,purl, zurl):
+        self.purl = purl
+        self.zurl = zurl
+
+    def __repr__(self):
+        return "playlist songs"
+
+
+class Zong(db.Model):
+    __tablename__ = 'zongz'
+    s_id = db.Column(db.Sequence('zongz_s_id_seq'),autoincrement=True)
+    sp_uri = db.Column(db.String(200),index=True)
+    track = db.Column(db.String(200))
+    artist = db.Column(db.String(200))
+    yt_uri = db.Column(db.String(200),primary_key=True)
+
+    def __init__ (self,sp_uri,track,artist,yt_uri):
+        self.sp_uri = sp_uri
+        self.track = track
+        self.artist = artist
+        self.yt_uri = yt_uri
+
+    def __repr__(self):
+        return "Song"
+# ~~~~~~~~~~~~~~~~~
+
 #
 # HELPER FUNCTIONS
 #
@@ -148,14 +219,16 @@ def get_user(email=None,uid=None):
         user = User.query.filter(User.email==email).first()
     if uid:
         user = User.query.get(uid)
-
-    results = {
-        'id': user.id,
-        'avatar': user.avatar,
-        'email': user.email,
-        'name': user.name
-    }
-    return results
+    if user != None:
+        results = {
+            'id': user.id,
+            'avatar': user.avatar,
+            'email': user.email,
+            'name': user.name
+        }
+        return results
+    else:
+        return None
 
 def get_all_playlists(uid=None,user_email=None):
     playlists = []
@@ -245,7 +318,65 @@ def get_playlist_url(pl_id=None):
 
 def get_history(uid=None,uemail=None):
     if uid:
-        results = History.query.filter_by(uid=uid).first()
-        return results
+        results = History.query.order_by('created_at desc').filter(History.uid==uid).first()
+        history = {
+            'sp_uri': results.song.sp_uri,
+            'created_at': results.created_at.isoformat(),
+            's_id': results.song.s_id,
+            'yt_uri': results.song.yt_uri,
+            'artist': results.song.artist,
+            'track': results.song.track
+        }
+        return history
     else:
         return None
+
+def zzzistory(one=None,two=None):
+    histories = Zistory.query.order_by('created_at desc').filter(db.or_(Zistory.uid==one,Zistory.uid==two)).all()
+    passback = {}
+    for results in histories:
+        if results.uid in passback:
+            pass
+        else:
+            passback[results.uid] = {
+                'sp_uri': results.song.sp_uri,
+                'created_at': results.created_at.isoformat(),
+                's_id': results.song.s_id,
+                'yt_uri': results.song.yt_uri,
+                'artist': results.song.artist,
+                'track': results.song.track
+            }
+    # history = {
+    #     'sp_uri': results.song.sp_uri,
+    #     'created_at': results.created_at.isoformat(),
+    #     's_id': results.song.s_id,
+    #     'yt_uri': results.song.yt_uri,
+    #     'artist': results.song.artist,
+    #     'track': results.song.track
+    # }
+    return passback
+
+def get_faster_history(one=None,two=None):
+    histories = History.query.order_by('created_at desc').filter(db.or_(History.uid==one,History.uid==two)).all()
+    passback = {}
+    for results in histories:
+        if results.uid in passback:
+            pass
+        else:
+            passback[results.uid] = {
+                'sp_uri': results.song.sp_uri,
+                'created_at': results.created_at.isoformat(),
+                's_id': results.song.s_id,
+                'yt_uri': results.song.yt_uri,
+                'artist': results.song.artist,
+                'track': results.song.track
+            }
+    # history = {
+    #     'sp_uri': results.song.sp_uri,
+    #     'created_at': results.created_at.isoformat(),
+    #     's_id': results.song.s_id,
+    #     'yt_uri': results.song.yt_uri,
+    #     'artist': results.song.artist,
+    #     'track': results.song.track
+    # }
+    return passback

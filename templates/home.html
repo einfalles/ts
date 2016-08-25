@@ -6,14 +6,6 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="TuneSmash">
-  <style>
-    style {
-      display: none;
-    }
-    script {
-      display: none;
-    }
-  </style>
 </head>
 <body>
 <div class="container">
@@ -23,7 +15,7 @@
           <h2 class="page-header">TuneSmash</h2>
         </header>
         <main class="m-t-auto w-100">
-          <a class="m-b-5" href="/generate/one" data-uid="{{user_id}}" data-email="{{user_email}}" data-name="{{user_name}}" id="submit">
+          <a class="m-b-5" href="/generate/one/{{user_id}}" data-uid="{{user_id}}" data-email="{{user_email}}" data-name="{{user_name}}" id="submit">
             <button class="primary-button pink">Make A Playlist</button>
           </a>
           <a class="m-b-5" href="/users/{{user_id}}/playlists"  href="/">
