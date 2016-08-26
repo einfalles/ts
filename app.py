@@ -249,7 +249,7 @@ def generate_bump():
     except:
         print('MAJOR ERROR AT BUMP: {0}'.format(sys.exc_info()[0]))
         raygun.send_exception(exc_info=sys.exc_info())
-        return jsonify({'status':'fail':'error':'error'})
+        return jsonify({'status':'fail','error':'error'})
 
 
 
@@ -288,7 +288,7 @@ def update_history():
     except:
         print('MAJOR ERROR AT BUMP: {0}'.format(sys.exc_info()[0]))
         raygun.send_exception(exc_info=sys.exc_info())
-        return jsonify({'status':'fail':'error':'error'})
+        return jsonify({'status':'fail','error':'error'})
 
 
 # Get user's information
