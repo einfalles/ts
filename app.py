@@ -122,9 +122,10 @@ def auth():
         user = tsm.User(user_name,user_email,'/images/female/0.png')
         tsm.db.session.add(user)
         tsm.db.session.flush()
-        session['credentials']['id_token']['ts_uid'] = user.id
+        session['credentials']['id_token']['ts_uid'] = user['id']
         tsm.db.session.commit()
         # return redirect('/setup')
+    session['credentials']['id_token']['ts_uid'] = user['id']
     session.permanent = True
     return redirect("/")
 
