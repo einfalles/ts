@@ -1,7 +1,8 @@
 # 11:52:50 PM web.1 |  "I_8xdZu766_FSaexEaDXTIfEWc0/uT0uIUR0DRqJMiiH8oEq3KagAoo"
 # 11:52:50 PM web.1 |  this is etag from tsr
 # 11:52:50 PM web.1 |  "I_8xdZu766_FSaexEaDXTIfEWc0/lb4Dh2wuHYWNS40eRacpKzFWv-E"
-
+# get app level errors then when exception occurs see where the error occurs in the module no point in debugging all modules when you're not sure something should go wrong
+# now add raygun logging
 import json
 import httplib2
 import gevent
@@ -71,76 +72,37 @@ def index():
         return render_template('index.html',execution_time=t1)
 
     if 'credentials' in session:
-        user = tsm.get_user(email=session['credentials']['id_token']['email'])
-
-        tsm.db.session.close()
-        session['credentials']['id_token']['ts_uid'] = user['id']
-        session['credentials']['id_token']['avatar'] = user['avatar']
-        session.permanent = True
-
+        user = tsm.get_user(uid=session['credentials']['id_token']['ts_uid'])
+        t1 = time.time() - t0
+        t2 = time.time()
         store = oams.get_credential_storage(filename='multi.json',client_id=user['email'],user_agent='app',scope=['https://www.googleapis.com/auth/userinfo.profile','https://www.googleapis.com/auth/youtube'])
         credentials = store.get()
-
+        t3 = time.time() - t2
         if (credentials.token_expiry - datetime.datetime.utcnow()) < datetime.timedelta(minutes=app.config['REFRESH_LIMIT']):
             credentials.refresh(httplib2.Http())
         if credentials.invalid == True:
             return redirect('/login')
 
-        youtube = tsr.get_authenticated_service(user['email'])
-        hid = tsr.get_history_id(youtube)
-
         if 'etag' in session['credentials']['id_token']:
             etag = session['credentials']['id_token']['etag']
         else:
             etag = None
-        print('this is etag from index')
-        print(etag)
-        go_no = tsr.is_history_new(youtube,user['email'],etag=etag,hid=hid)
-        session['credentials']['id_token']['etag'] = go_no['etag']
-        print('this is go no {0}'.format(go_no))
-        # this all works but things break down when i try to commit new song and history
-        if go_no['refresh'] == True:
-            song = tsr.get_latest_song(user['email'],hid,youtube)
-            print('this is the song {0}'.format(song))
-            if song is not None:
-                match = tsm.db.session.query(tsm.db.exists().where(
-                    tsm.db.and_(
-                        tsm.Zong.yt_uri == song['yt_uri'],
-                    )
-                )).scalar()
-                print('this is the match {0}'.format(match))
-                if match == False:
-                    commit_song = tsm.Zong(sp_uri=song['sp_uri'],yt_uri=song['yt_uri'],track=song['track'],artist=song['artist'])
-                    print('This is a {0} for {1}. This is a {2} for {3}.'.format(type(song['sp_uri']),song['sp_uri'],type(song['yt_uri']),song['yt_uri']      ))
-                    tsm.db.session.add(commit_song)
-                commit_history = tsm.Zistory(uid=user['id'],zurl=song['yt_uri'],created_at=moment.utcnow().datetime.isoformat())
-                tsm.db.session.add(commit_history)
-                tsm.db.session.commit()
-            else:
-                print('No music found for {0}'.format(user['email']))
-        else:
-            print('no new music')
-        # history_run(uid=user.id,uemail=user.email)
-        # thr = Thread(target=history_run,args=[user.id,user.email])
-        # thr.start()
-        t1 = time.time() - t0
-        return render_template('home.html',user_name=user['name'],user_email=user['email'],user_id=user['id'], execution_time=t1)
-
-def history_run(uid=None,uemail=None):
-    history = tsr.get_watch_history(user=uemail)
-    if history != None:
-        song = tsm.Song.query.filter_by(sp_uri=history[3]).first()
-    else:
-        song = None
-    if song == None:
-        song = tsm.Song(sp_uri=history[3],track=history[1],artist=history[0],yt_uri=history[2])
-        tsm.db.session.add(song)
-        tsm.db.session.flush()
-    t = moment.utcnow().datetime.isoformat()
-    h = tsm.History(uid=uid,sid=song.s_id,created_at=t)
-    tsm.db.session.add(h)
-    tsm.db.session.commit()
-    tsm.db.session.close()
+        try:
+            t4 = time.time()
+            youtube = tsr.get_authenticated_service(user['email'])
+            hid = tsr.get_history_id(youtube)
+            t5 = time.time() - t4
+            t6 = time.time()
+            go_no = tsr.is_history_new(youtube,user['email'],etag=etag,hid=hid)
+            session['credentials']['id_token']['etag'] = go_no['etag']
+        except:
+            print('MAJOR ERROR')
+            raygun.send_exception(exc_info=sys.exc_info())
+        session['credentials']['id_token']['ts_uid'] = user['id']
+        session['credentials']['id_token']['avatar'] = user['avatar']
+        session.permanent = True
+        t7 = time.time() - t6
+        return render_template('home.html',refresh=go_no['refresh'],user_name=user['name'],user_email=user['email'],user_id=user['id'], execution_time={1:t1,2:t3,3:t5,4:t7})
 
 # *************************
 # sign in
@@ -279,11 +241,15 @@ def generate_bump():
             'step': 1
         }
         fdb.child("notification").push(fdbdata)
-    bump = tsm.Bump(fr=fr,too=to,created_at=created_at.isoformat())
-    tsm.db.session.add(bump)
-    tsm.db.session.commit()
-    return jsonify({'status':'ok','data':{'first':request.json['first'],'second':request.json['second'],'me':request.json['fr']}})
-
+    try:
+        bump = tsm.Bump(fr=fr,too=to,created_at=created_at.isoformat())
+        tsm.db.session.add(bump)
+        tsm.db.session.commit()
+        return jsonify({'status':'ok','data':{'first':request.json['first'],'second':request.json['second'],'me':request.json['fr']}})
+    except:
+        print('MAJOR ERROR AT BUMP: {0}'.format(sys.exc_info()[0]))
+        raygun.send_exception(exc_info=sys.exc_info())
+        return jsonify({'status':'fail':'error':'error'})
 
 
 
@@ -291,7 +257,38 @@ def generate_bump():
 #       RESTFUL API        #
 # $$$$$$$$$$$$$$$$$$$$$$$$ #
 
-
+@app.route('/ts/api/users/update/history', methods=['POST'])
+def update_history():
+    user = {
+        'email': request.json['email'],
+        'id': request.json['id']
+    }
+    youtube = tsr.get_authenticated_service(user['email'])
+    try:
+        song = tsr.get_latest_song(user['email'],hid,youtube)
+        print('this is the song {0}'.format(song))
+        if song is not None:
+            match = tsm.db.session.query(tsm.db.exists().where(
+                tsm.db.and_(
+                    tsm.Zong.yt_uri == song['yt_uri'],
+                )
+            )).scalar()
+            print('this is the match {0}'.format(match))
+            if match == False:
+                commit_song = tsm.Zong(sp_uri=song['sp_uri'],yt_uri=song['yt_uri'],track=song['track'],artist=song['artist'])
+                print('This is a {0} for {1}. This is a {2} for {3}.'.format(type(song['sp_uri']),song['sp_uri'],type(song['yt_uri']),song['yt_uri']      ))
+                tsm.db.session.add(commit_song)
+            commit_history = tsm.Zistory(uid=user['id'],zurl=song['yt_uri'],created_at=moment.utcnow().datetime.isoformat())
+            tsm.db.session.add(commit_history)
+            tsm.db.session.commit()
+            return jsonify({'status':'ok':'data':{'message':'available','latest_song_sp_id':song['sp_uri']}})
+        else:
+            print('No music found for {0}'.format(user['email']))
+            return jsonify({'status':'ok':'data':{'message':'unavailable'}})
+    except:
+        print('MAJOR ERROR AT BUMP: {0}'.format(sys.exc_info()[0]))
+        raygun.send_exception(exc_info=sys.exc_info())
+        return jsonify({'status':'fail':'error':'error'})
 
 
 # Get user's information
@@ -311,11 +308,6 @@ def get_user_history(user_id):
     b = time.clock()
     delta = b-a
     return jsonify({'status':'ok','data':user,'execution_time':delta})
-
-# Create a user's history
-# @app.route('/ts/api/generate/history', methods=['POST'])
-# def create_history():
-#     return jsonify({'status':'ok','data':user,'execution_time':delta})
 
 # Get a user's playlists
 @app.route('/ts/api/users/<int:user_id>/playlists', methods=['GET'])
@@ -359,11 +351,15 @@ def create_recommendation():
     # ~ 3 seconds
 
     t1 = time.time()
-
-    tunesmash = tsr.generate_recommendations(histories[uone['id']]['sp_uri'],histories[utwo['id']]['sp_uri'],100)
-    tunesmash = tsr.add_audio_features(tunesmash)
-    tunesmash = tsr.bell_sort(tunesmash)
-    tunesmash = tsr.remove_ids(tunesmash)
+    try:
+        tunesmash = tsr.generate_recommendations(histories[uone['id']]['sp_uri'],histories[utwo['id']]['sp_uri'],100)
+        tunesmash = tsr.add_audio_features(tunesmash)
+        tunesmash = tsr.bell_sort(tunesmash)
+        tunesmash = tsr.remove_ids(tunesmash)
+    except:
+        print('MAJOR ERROR AT BUMP: {0}'.format(sys.exc_info()[0]))
+        raygun.send_exception(exc_info=sys.exc_info())
+        return jsonify({'status':'fail','execution_times':{1:s1})
     s2 = time.time() - t1
     step = 2
     # fb_notification(recipient=uone['id'],message=message,created_at=s2,step=step)
@@ -378,7 +374,9 @@ def create_recommendation():
     except tsr.HttpError as err:
         e = err
         print(e.content,file=sys.stderr)
-        return jsonify({'status':'fail','error':'error'})
+        print('MAJOR ERROR AT BUMP: {0}'.format(sys.exc_info()[0]))
+        raygun.send_exception(exc_info=sys.exc_info())
+        return jsonify({'status':'fail','execution_times':{1:s1,2:s2})
     s3 = time.time() - t2
     step = 3
     # fb_notification(recipient=uone['id'],message=message,created_at=s3,step=step)
@@ -386,24 +384,39 @@ def create_recommendation():
     # ~ 3 seconds
 
     t3 = time.time()
-    videos = tsr.test_populate(youtube,tunesmash,ytpid)
+    try:
+        videos = tsr.test_populate(youtube,tunesmash,ytpid)
+        [tunesmash[i].append(videos[i])  for i in range(len(videos))]
+    except:
+        print('MAJOR ERROR AT BUMP: {0}'.format(sys.exc_info()[0]))
+        raygun.send_exception(exc_info=sys.exc_info())
+        return jsonify({'status':'fail','execution_times':{1:s1,2:s2,3:s3})
     s4 = time.time() - t3
     step = 4
     # fb_notification(recipient=uone['id'],message=message,created_at=s4,step=step)
     # fb_notification(recipient=utwo['id'],message=message,created_at=s4,step=step)
     # ~ 4 seconds
-    [tunesmash[i].append(videos[i])  for i in range(len(videos))]
-    pprint.pprint(tunesmash)
+
     t4 = time.time()
-    playlist = tsm.Playlist(uone['id'],utwo['id'],t,location,ytpid)
-    tsm.db.session.add(playlist)
-    tsm.db.session.commit()
+    try:
+        playlist = tsm.Playlist(uone['id'],utwo['id'],t,location,ytpid)
+        tsm.db.session.add(playlist)
+        tsm.db.session.commit()
+    except:
+        print('MAJOR ERROR AT BUMP: {0}'.format(sys.exc_info()[0]))
+        raygun.send_exception(exc_info=sys.exc_info())
+        return jsonify({'status':'fail','execution_times':{1:s1,2:s2,3:s3,4:s4})
     s5 = time.time() - t4
 
     t5 = time.time()
-    song_run(tunesmash,ytpid)
+    try:
+        song_run(tunesmash,ytpid)
+    except:
+        print('MAJOR ERROR AT BUMP: {0}'.format(sys.exc_info()[0]))
+        raygun.send_exception(exc_info=sys.exc_info())
+        return jsonify({'status':'fail','execution_times':{1:s1,2:s2,3:s3,4:s4,5:s5})
     s6 = time.time() - t5
-    # pprint.pprint(tunesmash)
+
     # fdbdata = {
     #     'time':time,
     #     'from':uone['id'],
@@ -438,13 +451,24 @@ def song_run(songs,pl):
             else:
                 new.append(tsm.Zong(track=s[0],artist=s[1],sp_uri=s[2],yt_uri=s[3]))
             plob.append(tsm.Pongz(pl,s[3]))
-        except tsm.exc.IntegrityError as e:
+        except:
             print('$$$ MAJOR FUCKING ERROR $$$')
-            print(e)
+            raygun.send_exception(exc_info=sys.exc_info())
             tsm.db.session.rollback()
     tsm.db.session.add_all(new)
     tsm.db.session.add_all(plob)
     tsm.db.session.commit()
 
+@app.errorhandler(Exception)
+def unhandled_exception(e):
+    print('Unhandled Exception: {0}'.format(e))
+    raygun.send_exception(exc_info=sys.exc_info())
+    return render_template('error.html',err = str(e))
+# might to need make one for every exception type like typerror,integrityerror, etc
+# write a class http://flask.pocoo.org/docs/0.11/patterns/apierrors/
+
+# @app.errorhandler(404)
+# def page_not_found(e):
+#     return render_template('404.html'), 404
 if __name__ == "__main__":
     app.run(debug = True)
