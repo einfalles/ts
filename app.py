@@ -1,8 +1,6 @@
-# 11:52:50 PM web.1 |  "I_8xdZu766_FSaexEaDXTIfEWc0/uT0uIUR0DRqJMiiH8oEq3KagAoo"
-# 11:52:50 PM web.1 |  this is etag from tsr
-# 11:52:50 PM web.1 |  "I_8xdZu766_FSaexEaDXTIfEWc0/lb4Dh2wuHYWNS40eRacpKzFWv-E"
-# get app level errors then when exception occurs see where the error occurs in the module no point in debugging all modules when you're not sure something should go wrong
-# now add raygun logging
+# keep google oauth
+# change where songs are getting stored zongz -> songs etc
+#
 import json
 import httplib2
 import gevent
@@ -102,7 +100,7 @@ def index():
         session['credentials']['id_token']['avatar'] = user['avatar']
         session.permanent = True
         t7 = time.time() - t6
-        return render_template('home.html',refresh=go_no['refresh'],user_name=user['name'],user_email=user['email'],user_id=user['id'], execution_time={1:t1,2:t3,3:t5,4:t7})
+        return render_template('home.html',refresh=go_no['refresh'],hid=hid,user_name=user['name'],user_email=user['email'],user_id=user['id'], execution_time={1:t1,2:t3,3:t5,4:t7})
 
 # *************************
 # sign in
@@ -213,7 +211,6 @@ def fcm():
 def generate_bump():
     fr = request.json['fr']
     to = request.json['to']
-    # created_at = request.json['created_at']
     created_at = moment.utcnow().datetime
     delta = datetime.timedelta(minutes=1)
     limit = created_at - delta
@@ -261,11 +258,12 @@ def generate_bump():
 def update_history():
     user = {
         'email': request.json['email'],
-        'id': request.json['id']
+        'id': request.json['id'],
+        'hid': request.json['hid']
     }
     youtube = tsr.get_authenticated_service(user['email'])
     try:
-        song = tsr.get_latest_song(user['email'],hid,youtube)
+        song = tsr.get_latest_song(user['email'],user['hid'],youtube)
         print('this is the song {0}'.format(song))
         if song is not None:
             match = tsm.db.session.query(tsm.db.exists().where(
@@ -464,6 +462,7 @@ def unhandled_exception(e):
     print('Unhandled Exception: {0}'.format(e))
     raygun.send_exception(exc_info=sys.exc_info())
     return render_template('error.html',err = str(e))
+
 # might to need make one for every exception type like typerror,integrityerror, etc
 # write a class http://flask.pocoo.org/docs/0.11/patterns/apierrors/
 

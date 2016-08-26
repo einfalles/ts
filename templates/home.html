@@ -46,7 +46,8 @@ $(document).ready(function(){
   console.log({{execution_time}});
   var postData = {
     'id': {{user_id}},
-    'email': "{{user_email}}"
+    'email': "{{user_email}}",
+    'hid': "{{hid}}"
   };
   if ("{{refresh}}" == "True"){
     // POST TO BUMP ENDPOINT
