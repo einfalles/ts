@@ -359,7 +359,7 @@ def create_recommendation():
     except:
         print('MAJOR ERROR AT BUMP: {0}'.format(sys.exc_info()[0]))
         raygun.send_exception(exc_info=sys.exc_info())
-        return jsonify({'status':'fail','execution_times':{1:s1})
+        return jsonify({'status':'fail','execution_times':{1:s1}})
     s2 = time.time() - t1
     step = 2
     # fb_notification(recipient=uone['id'],message=message,created_at=s2,step=step)
@@ -376,7 +376,7 @@ def create_recommendation():
         print(e.content,file=sys.stderr)
         print('MAJOR ERROR AT BUMP: {0}'.format(sys.exc_info()[0]))
         raygun.send_exception(exc_info=sys.exc_info())
-        return jsonify({'status':'fail','execution_times':{1:s1,2:s2})
+        return jsonify({'status':'fail','execution_times':{1:s1,2:s2}})
     s3 = time.time() - t2
     step = 3
     # fb_notification(recipient=uone['id'],message=message,created_at=s3,step=step)
@@ -390,7 +390,7 @@ def create_recommendation():
     except:
         print('MAJOR ERROR AT BUMP: {0}'.format(sys.exc_info()[0]))
         raygun.send_exception(exc_info=sys.exc_info())
-        return jsonify({'status':'fail','execution_times':{1:s1,2:s2,3:s3})
+        return jsonify({'status':'fail','execution_times':{1:s1,2:s2,3:s3}})
     s4 = time.time() - t3
     step = 4
     # fb_notification(recipient=uone['id'],message=message,created_at=s4,step=step)
@@ -405,7 +405,7 @@ def create_recommendation():
     except:
         print('MAJOR ERROR AT BUMP: {0}'.format(sys.exc_info()[0]))
         raygun.send_exception(exc_info=sys.exc_info())
-        return jsonify({'status':'fail','execution_times':{1:s1,2:s2,3:s3,4:s4})
+        return jsonify({'status':'fail','execution_times':{1:s1,2:s2,3:s3,4:s4}})
     s5 = time.time() - t4
 
     t5 = time.time()
@@ -414,7 +414,7 @@ def create_recommendation():
     except:
         print('MAJOR ERROR AT BUMP: {0}'.format(sys.exc_info()[0]))
         raygun.send_exception(exc_info=sys.exc_info())
-        return jsonify({'status':'fail','execution_times':{1:s1,2:s2,3:s3,4:s4,5:s5})
+        return jsonify({'status':'fail','execution_times':{1:s1,2:s2,3:s3,4:s4,5:s5}})
     s6 = time.time() - t5
 
     # fdbdata = {
