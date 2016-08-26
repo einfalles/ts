@@ -281,10 +281,10 @@ def update_history():
             commit_history = tsm.Zistory(uid=user['id'],zurl=song['yt_uri'],created_at=moment.utcnow().datetime.isoformat())
             tsm.db.session.add(commit_history)
             tsm.db.session.commit()
-            return jsonify({'status':'ok':'data':{'message':'available','latest_song_sp_id':song['sp_uri']}})
+            return jsonify({'status':'ok','data':{'message':'available','latest_song_sp_id':song['sp_uri']}})
         else:
             print('No music found for {0}'.format(user['email']))
-            return jsonify({'status':'ok':'data':{'message':'unavailable'}})
+            return jsonify({'status':'ok','data':{'message':'unavailable'}})
     except:
         print('MAJOR ERROR AT BUMP: {0}'.format(sys.exc_info()[0]))
         raygun.send_exception(exc_info=sys.exc_info())
