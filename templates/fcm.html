@@ -29,37 +29,57 @@
   <script>
   $(document).ready(function(){
     var status = "{{status}}";
-    var postData = {
-      'location':'South of France',
-      'uone': {
-        'id':1,
-        'email':'dlamnguyen@gmail.com',
-        'name': 'Caite'
-      },
-      'utwo': {
-        'id':2,
-        'email':'dlamnguyen@gmail.com',
-        'name': 'Duylam'
-      }
-    }
+    // var postData = {
+    //   'location':'South of France',
+    //   'uone': {
+    //     'id':1,
+    //     'email':'dlamnguyen@gmail.com',
+    //     'name': 'Duylam'
+    //   },
+    //   'utwo': {
+    //     'id':2,
+    //     'email':'eat@rad.kitchen',
+    //     'name': 'Rachel'
+    //   }
+    // }
     $('button').on('click',function(){
-      alert('Victory is yours');
+      var postData = {
+        'id': {{user_id}},
+        'email': "{{user_email}}",
+        'hid': "{{hid}}"
+      };
+
       $.ajax({
         async: true,
         contentType:"application/json",
-        url: '/ts/api/generate/recommendation',
+        url: '/ts/api/users/update/history',
         dataType: 'json',
         data: JSON.stringify(postData),
-        error: function(){
-          alert("Recommendation: Something went wrong. Please close the app and restart.");
+        error: function(error){
+          console.log(error);
         },
         method: 'POST',
         success: function(response){
-          alert('Ready to Listen?');
+          alert('yo');
           console.log(response);
-          // window.open('https://www.youtube.com/playlist?list=' + response['data']['playlist'].toString());
         }
       });
+      // $.ajax({
+      //   async: true,
+      //   contentType:"application/json",
+      //   url: '/ts/api/generate/recommendation',
+      //   dataType: 'json',
+      //   data: JSON.stringify(postData),
+      //   error: function(){
+      //     alert("Recommendation: Something went wrong. Please close the app and restart.");
+      //   },
+      //   method: 'POST',
+      //   success: function(response){
+      //     alert('Ready to Listen?');
+      //     console.log(response);
+      //     window.open('https://www.youtube.com/playlist?list=' + response['data']['playlist'].toString());
+      //   }
+      // });
     });
   });
   </script>

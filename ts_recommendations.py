@@ -66,6 +66,7 @@ def get_latest_song(user_email=None,hid=None,youtube=None):
     videos_response = videos_request.execute()
     untested_songs = [i['snippet']['title'] for i in videos_response['items'] if i['snippet']['categoryId']=='10']
     s = []
+    print(untested_songs)
     for i in range(len(untested_songs)):
          a = re.sub('\s?\(.+\)\s?','',untested_songs[i])
          b = re.sub('\s?\[.+\]\s?','',a)
@@ -75,7 +76,11 @@ def get_latest_song(user_email=None,hid=None,youtube=None):
     for i in range(len(s)):
         print('Jigga is at: {0}'.format(i))
         try:
-            results = SP.search(q='artist:'+s[i][0] + ' AND ' + 'track:'+s[i][1], type='track')
+
+            if len(s[i]) >= 2:
+                results = SP.search(q='artist:'+s[i][0] + ' AND ' + 'track:'+s[i][1], type='track')
+            else:
+                results = SP.search(q=s[i][0], type='track')
             if len(results['tracks']['items'])>0:
                 data = {
                     'sp_uri':results['tracks']['items'][0]['id'],
