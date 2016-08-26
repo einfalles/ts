@@ -119,8 +119,10 @@ def auth():
     user = tsm.get_user(email=user_email)
     if user == None:
         session['credentials']['id_token']['new'] = True
-        user = tsm.User(user_name,user_email,'http://thecatapi.com/api/images/get?format=src&amp;type=gif')
+        user = tsm.User(user_name,user_email,'/images/female/0.png')
         tsm.db.session.add(user)
+        tsm.db.session.flush()
+        session['credentials']['id_token']['ts_uid'] = user.id
         tsm.db.session.commit()
         # return redirect('/setup')
     session.permanent = True

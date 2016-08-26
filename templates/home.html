@@ -50,6 +50,7 @@ $(document).ready(function(){
     'hid': "{{hid}}"
   };
   if ("{{refresh}}" == "True"){
+    console.log("Getting new history");
     // POST TO BUMP ENDPOINT
     $.ajax({
       async: true,
