@@ -208,11 +208,13 @@ class Zong(db.Model):
 
     def __repr__(self):
         return "Song"
-# ~~~~~~~~~~~~~~~~~
 
+
+# ~~~~~~~~~~~~~~~~~
 #
 # HELPER FUNCTIONS
 #
+# ~~~~~~~~~~~~~~~~~
 def get_user(email=None,uid=None):
 
     if email:
@@ -309,12 +311,6 @@ def get_playlist_songs(pl_id=None):
     else:
         return None
 
-def get_playlist_url(pl_id=None):
-    if pl_id:
-        url = Playlist.query.filter(Playlist.p_id==pl_id).first()
-        return url
-    else:
-        return None
 
 def get_history(uid=None,uemail=None):
     if uid:
@@ -346,14 +342,6 @@ def zzzistory(one=None,two=None):
                 'artist': results.song.artist,
                 'track': results.song.track
             }
-    # history = {
-    #     'sp_uri': results.song.sp_uri,
-    #     'created_at': results.created_at.isoformat(),
-    #     's_id': results.song.s_id,
-    #     'yt_uri': results.song.yt_uri,
-    #     'artist': results.song.artist,
-    #     'track': results.song.track
-    # }
     return passback
 
 def get_faster_history(one=None,two=None):
@@ -371,12 +359,43 @@ def get_faster_history(one=None,two=None):
                 'artist': results.song.artist,
                 'track': results.song.track
             }
-    # history = {
-    #     'sp_uri': results.song.sp_uri,
-    #     'created_at': results.created_at.isoformat(),
-    #     's_id': results.song.s_id,
-    #     'yt_uri': results.song.yt_uri,
-    #     'artist': results.song.artist,
-    #     'track': results.song.track
-    # }
     return passback
+
+
+def song_run(songs,pl):
+    new = []
+    plob = []
+    print("*** SONG RUN ***")
+    for s in songs:
+        try:
+            sp_match = db.session.query(db.exists().where(
+                    Zong.sp_uri == s[2]
+            )).scalar()
+            yt_match =  db.session.query(db.exists().where(
+                    Zong.yt_uri == s[3]
+            )).scalar()
+            print('Song: {0} // SP URI: {1} // YT URI: {2} // Sp Exists: {3} // Yt Exists: {4}'.format(s[0],s[2],s[3],sp_match, yt_match))
+            if sp_match == True and yt_match == True:
+                # print('*** This song is already in the db {0}'.format(s))
+                plob.append(Pongz(pl,s[3]))
+            if sp_match == False and yt_match == False:
+                # print('New song {0}'.format(s))
+                new.append(Zong(track=s[0],artist=s[1],sp_uri=s[2],yt_uri=s[3]))
+                plob.append(Pongz(pl,s[3]))
+            if sp_match == True and yt_match == False:
+                # print('Spotify URI is there, but not yt uri {0}'.format(s))
+                a = Zong.query.filter(Zong.sp_uri == s[2]).first()
+                plob.append(Pongz(pl,a.yt_uri))
+            if sp_match == False and yt_match == True:
+                # print('YR URI is there but not sp...should send a log {0}'.format(s))
+                plob.append(Pongz(pl,s[3]))
+
+        except exc.IntegrityError as err:
+            print("*** Integrity Error as song run: {0}".format(sys.exc_info()))
+            pass
+        except:
+            db.session.rollback()
+            pass
+    db.session.add_all(new)
+    db.session.add_all(plob)
+    db.session.commit()

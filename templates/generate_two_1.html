@@ -14,18 +14,6 @@
       <div class="twelve columns display-center h-100-vp" data-step="1">
         <h4>searching {{user_id}}</h4>
       </div>
-      <div class="twelve columns display-center h-100-vp" data-step="2">
-        <h4>matched with {{first}}</h4>
-      </div>
-      <div class="twelve columns display-center h-100-vp" data-step="3">
-        <h4>melding your listening preferences</h4>
-      </div>
-      <div class="twelve columns display-center h-100-vp" data-step="4">
-        <h4>generating tunes</h4>
-      </div>
-      <div class="twelve columns display-center h-100-vp" data-step="5">
-        <h4>putting the mixtape on youtube</h4>
-      </div>
     </div>
   </div>
   <style>
@@ -72,28 +60,28 @@
       dataType: 'json',
       data: JSON.stringify(postData),
       error: function(error){
-        alert("{{user_id}} Something went wrong. Please close the app and restart.");
         console.log(error);
       },
       method: 'POST',
       success: function(response){
         console.log(response);
       }
+    }).done(function(){
+      // LISTEN FOR NOTIFICATIONS
+      alert('Bump done');
+      notification.orderByChild("recipient").equalTo({{user_id}}).on('child_added',function(snapshot){
+        var data = snapshot.val();
+        var href='';
+        if (data['custom']['winner'] == true ) {
+          href = '/generate/three/{{user_id}}/win/'+to.toString();
+        } else {
+          href = '/generate/three/{{user_id}}/lose/'+to.toString();
+        }
+        notification.child(snapshot.key).remove();
+        location.href = href;
+      });
     });
-
-    // LISTEN FOR NOTIFICATIONS
-    notification.orderByChild("recipient").equalTo({{user_id}}).on('child_added',function(snapshot){
-      var data = snapshot.val();
-      var href='';
-      if (data['winner'] == true ) {
-        href = '/generate/three/{{user_id}}/win/'+to.toString();
-      } else {
-        href = '/generate/three/{{user_id}}/lose/'+to.toString();
-      }
-      notification.child(snapshot.key).remove();
-      location.href = href;
     });
-  });
   </script>
 </body>
 </html>

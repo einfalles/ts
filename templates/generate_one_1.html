@@ -65,9 +65,6 @@
         first = two;
         second = one;
       }
-      console.log("***");
-      console.log(data);
-      console.log("^^^^^^")
       var href = '/generate/two/'+ one.toString() +'/'+first+'/'+second;
       $('ul').append('<li id="'+ snapshot.key+'">'+'<a class="clickbait"'+"href='" +href+"'"+' data-email="'+ data['email']+'" data-id="'+data['uid'] +'"'+'>'+data['name']+'</a></li>');
       if (data['uid'] == {{user_id}}){

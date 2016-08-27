@@ -11,20 +11,20 @@
 <body>
   <div class="container">
     <div class="mobile row h-100-vp">
-      <div class="twelve columns display-center h-100-vp" data-step="1">
+      <div class="twelve columns display-center h-100-vp hide" data-step="1">
         <h6>Welcome {{user_id}}</h6>
         <h6>You {{status}}</h6>
       </div>
-      <div class="twelve columns display-center h-100-vp" data-step="2">
-        <h4>matched with {{match}}</h4>
+      <div class="twelve columns display-center h-100-vp hide" data-step="2">
+        <h4>matched with {{other_name}}</h4>
       </div>
-      <div class="twelve columns display-center h-100-vp" data-step="3">
+      <div class="twelve columns display-center h-100-vp hide" data-step="3">
         <h4>melding your listening preferences</h4>
       </div>
-      <div class="twelve columns display-center h-100-vp" data-step="4">
+      <div class="twelve columns display-center h-100-vp hide" data-step="4">
         <h4>generating tunes</h4>
       </div>
-      <div class="twelve columns display-center h-100-vp" data-step="5">
+      <div class="twelve columns display-center h-100-vp hide" data-step="5">
         <h4>putting the mixtape on youtube</h4>
       </div>
     </div>
@@ -44,6 +44,7 @@
   $(document).ready(function(){
     var status = "{{status}}";
     var postData = {
+      'fr': {{user_id}},
       'location':'South of France',
       'uone': {
         'id':{{user_id}},
@@ -72,12 +73,12 @@
         success: function(response){
           alert('Ready to Listen?');
           console.log(response);
-          window.open('https://www.youtube.com/playlist?list=' + response['data']['playlist'].toString());
+          // window.open('https://www.youtube.com/playlist?list=' + response['data']['playlist'].toString());
         }
       });
-
-    } else {
-      console.log('Wait up');
+    }
+    if (status== "lose") {
+      alert('Loser {{user_id}}');
     }
 
     var config = {
@@ -91,8 +92,9 @@
     var notification = firebase.database().ref('notification');
     notification.orderByChild("recipient").equalTo({{user_id}}).on('child_added',function(snapshot){
       var data = snapshot.val();
+      // console.log(data);
       $('div.mobile').children().filter(function(){
-        if($(this).data('step') != data['step']) {
+        if($(this).data('step') != data['custom']['step']) {
           $(this).addClass('hide');
         } else {
           $(this).removeClass('hide');

@@ -1,26 +1,20 @@
-# keep google oauth
-# change where songs are getting stored zongz -> songs etc
-
 import json
+import jsonify
 import httplib2
 import gevent
+import moment
+import sys
 import time
 import pprint
-import jsonify
 import datetime
-import pyrebase
+
 import ts_auth as tsa
 import ts_recommendations as tsr
 import ts_models as tsm
-import moment
-import sys
+import ts_messaging as message
 
 from raygun4py import raygunprovider
-from threading import Thread
-from oauth2client import client
-from flask_sse import sse
 from flask import Flask, render_template, request, redirect, jsonify, session, url_for,send_file
-from oauth2client.client import OAuth2Credentials
 from oauth2client.contrib import multistore_file as oams
 # from werkzeug.contrib.profiler import ProfilerMiddleware
 
@@ -28,11 +22,8 @@ from oauth2client.contrib import multistore_file as oams
 #
 # CONSTANTS
 #
-
 app = Flask(__name__, static_url_path='')
 app.debug = True
-raygun = raygunprovider.RaygunSender("aR9aPioLxr1y42IN3HqSnw==")
-
 app.config['REFRESH_LIMIT'] = 15
 
 app.secret_key = 'duylamduylam'
@@ -45,14 +36,7 @@ app.config['OAUTH_CREDENTIALS'] = {
 # app.config['PROFILE'] = True
 # app.wsgi_app = ProfilerMiddleware(app.wsgi_app, restrictions=[30])
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 604800
-config = {
-  "apiKey": "AIzaSyBKX1xmfY8JuhIbgOxhO2APg6f4VcCZWXI",
-  "authDomain": "luminous-inferno-9831.firebaseapp.com",
-  "databaseURL": "https://luminous-inferno-9831.firebaseio.com",
-  "storageBucket": "luminous-inferno-9831.appspot.com",
-};
-firebase = pyrebase.initialize_app(config)
-fdb = firebase.database()
+raygun = raygunprovider.RaygunSender("aR9aPioLxr1y42IN3HqSnw==")
 
 
 #
@@ -65,42 +49,46 @@ def loaderio():
 @app.route('/')
 def index():
     t0 = time.time()
+
     if 'credentials' not in session:
         t1 = time.time() - t0
         return render_template('index.html',execution_time=t1)
 
-    if 'credentials' in session:
-        user = tsm.get_user(uid=session['credentials']['id_token']['ts_uid'])
-        t1 = time.time() - t0
-        t2 = time.time()
-        store = oams.get_credential_storage(filename='multi.json',client_id=user['email'],user_agent='app',scope=['https://www.googleapis.com/auth/userinfo.profile','https://www.googleapis.com/auth/youtube'])
-        credentials = store.get()
-        t3 = time.time() - t2
-        if (credentials.token_expiry - datetime.datetime.utcnow()) < datetime.timedelta(minutes=app.config['REFRESH_LIMIT']):
-            credentials.refresh(httplib2.Http())
-        if credentials.invalid == True:
-            return redirect('/login')
+    user = tsm.get_user(uid=session['credentials']['id_token']['ts_uid'])
+    t1 = time.time() - t0
 
-        if 'etag' in session['credentials']['id_token']:
-            etag = session['credentials']['id_token']['etag']
-        else:
-            etag = None
-        try:
-            t4 = time.time()
-            youtube = tsr.get_authenticated_service(user['email'])
-            hid = tsr.get_history_id(youtube)
-            t5 = time.time() - t4
-            t6 = time.time()
-            go_no = tsr.is_history_new(youtube,user['email'],etag=etag,hid=hid)
-            session['credentials']['id_token']['etag'] = go_no['etag']
-        except:
-            print('MAJOR ERROR')
-            raygun.send_exception(exc_info=sys.exc_info())
-        session['credentials']['id_token']['ts_uid'] = user['id']
-        session['credentials']['id_token']['avatar'] = user['avatar']
-        session.permanent = True
-        t7 = time.time() - t6
-        return render_template('home.html',refresh=go_no['refresh'],hid=hid,user_name=user['name'],user_email=user['email'],user_id=user['id'], execution_time={1:t1,2:t3,3:t5,4:t7})
+    t2 = time.time()
+    credentials = tsr.youtube_credentials(user['email'])
+    if (credentials.token_expiry - datetime.datetime.utcnow()) < datetime.timedelta(minutes=app.config['REFRESH_LIMIT']):
+        credentials.refresh(httplib2.Http())
+    if credentials.invalid == True:
+        return redirect('/login')
+    t3 = time.time() - t2
+
+    # try:
+    if 'etag' in session['credentials']['id_token']:
+        etag = session['credentials']['id_token']['etag']
+    else:
+        etag = None
+
+    t4 = time.time()
+    youtube = tsr.youtube_client(credentials)
+    hid = tsr.playlist_history_id(youtube)
+    t5 = time.time() - t4
+
+    t6 = time.time()
+    go_no = tsr.is_history_updated(credentials=credentials,youtube=youtube,user_email=user['email'],etag=etag,hid=hid)
+    session['credentials']['id_token']['etag'] = go_no['etag']
+    t7 = time.time() - t6
+
+    session['credentials']['id_token']['ts_uid'] = user['id']
+    session['credentials']['id_token']['avatar'] = user['avatar']
+    session.permanent = True
+    return render_template('home.html',refresh=go_no['refresh'],hid=hid,user_name=user['name'],user_email=user['email'],user_id=user['id'], execution_time={1:t1,2:t3,3:t5,4:t7})
+    # except:
+    #     print('MAJOR ERROR')
+    #     raygun.send_exception(exc_info=sys.exc_info())
+    #     return jsonify({'status':'fail'})
 
 # *************************
 # sign in
@@ -109,14 +97,17 @@ def index():
 def auth():
     oauth = tsa.OAuthSignIn.get_provider("google")
     credentials = oauth.callback()
+
     session['credentials'] = json.loads(credentials.to_json())
     user_email = session['credentials']['id_token']['email']
     user_name = session['credentials']['id_token']['name']
     session['credentials']['id_token']['new'] = False
+
     store = oams.get_credential_storage(filename='multi.json',client_id=user_email,user_agent='app',scope=['https://www.googleapis.com/auth/userinfo.profile','https://www.googleapis.com/auth/youtube'])
     store.put(credentials)
 
     user = tsm.get_user(email=user_email)
+
     if user == None:
         session['credentials']['id_token']['new'] = True
         user = tsm.User(user_name,user_email,'/images/female/0.png')
@@ -124,7 +115,7 @@ def auth():
         tsm.db.session.flush()
         session['credentials']['id_token']['ts_uid'] = user['id']
         tsm.db.session.commit()
-        # return redirect('/setup')
+
     session['credentials']['id_token']['ts_uid'] = user['id']
     session.permanent = True
     return redirect("/")
@@ -139,13 +130,11 @@ def login():
 # *************************
 @app.route('/users/<int:user_id>/playlists', methods=['GET'])
 def view_playlists(user_id):
-    t0 = time.time()
-    return render_template('playlists_one.html',execution_time=time.time()-t0,user_id=user_id)
+    return render_template('playlists_one.html',user_id=user_id)
 
 @app.route('/users/<int:user_id>/playlists/<int:playlist_id>/<url>/<name>', methods=['GET'])
 def view_playlist_songs(user_id,playlist_id,url,name):
-    t0 = time.time()
-    return render_template('playlists_two.html',execution_time=time.time()-t0,pid=playlist_id,name=name,url=url)
+    return render_template('playlists_two.html',pid=playlist_id,name=name,url=url)
 
 # *************************
 # manage account
@@ -166,17 +155,6 @@ def view_profile_avatar(user_id):
 def view_profile_avatar_gender(user_id,gender):
     f  = list(range(0,20))
     return render_template('profile_avatar_gender.html',user_id=user_id,gender=gender,f=f)
-
-@app.route('/ts/api/users/<int:user_id>/update', methods=['POST'])
-def avatar_update(user_id):
-    print(request.form)
-    field = request.json['update']
-    data = request.json['data']
-    tsm.User.query.filter(tsm.User.id==user_id).update({field:data})
-    tsm.db.session.commit()
-    session['credentials']['id_token'][field] = data
-    tsm.db.session.close()
-    return jsonify({'status':'ok'})
 
 # *************************
 # make a playlist
@@ -208,10 +186,31 @@ def generate_three(user_id,status,other_id):
 @app.route('/fcm', methods=['GET'])
 def fcm():
     user = session['credentials']['id_token']
-    youtube = tsr.get_authenticated_service(user['email'])
-    hid = tsr.get_history_id(youtube)
+    credentials = tsr.youtube_credentials(user['email'])
+    youtube = tsr.youtube_client(credentials)
+    hid = tsr.playlist_history_id(youtube)
     return render_template('fcm.html',hid=hid,user_email=user['email'],user_id=user['ts_uid'])
 
+
+
+# $$$$$$$$$$$$$$$$$$$$$$$$ #
+#       RESTFUL API        #
+# $$$$$$$$$$$$$$$$$$$$$$$$ #
+
+@app.route('/ts/api/users/<int:user_id>/update', methods=['POST'])
+def avatar_update(user_id):
+    # time: start
+    t0 = time.time()
+    field = request.json['update']
+    data = request.json['data']
+    tsm.User.query.filter(tsm.User.id==user_id).update({field:data})
+    tsm.db.session.commit()
+    session['credentials']['id_token'][field] = data
+    tsm.db.session.close()
+
+    # time: end
+    t1 = time.time() - t0
+    return jsonify({'status':'ok','execution_time':t1})
 
 @app.route('/ts/api/generate/bump', methods=['POST'])
 def generate_bump():
@@ -227,24 +226,10 @@ def generate_bump():
             tsm.Bump.too == fr
         )
     )).scalar()
-    if match == True:
-        fdbdata = {
-            'recipient':fr,
-            'message': 'match found',
-            'winner': True,
-            'created_at': created_at.isoformat(),
-            'step': 1
-        }
-        fdb.child("notification").push(fdbdata)
-        fdbdata = {
-            'recipient': to,
-            'message': 'match found',
-            'winner': False,
-            'created_at': created_at.isoformat(),
-            'step': 1
-        }
-        fdb.child("notification").push(fdbdata)
     try:
+        if match == True:
+            message.fb_notification(fr,'matched',created_at.isoformat(),{'step': 1,'winner': True})
+            message.fb_notification(to,'matched',created_at.isoformat(),{'step': 1,'winner': False})
         bump = tsm.Bump(fr=fr,too=to,created_at=created_at.isoformat())
         tsm.db.session.add(bump)
         tsm.db.session.commit()
@@ -255,21 +240,19 @@ def generate_bump():
         return jsonify({'status':'fail','error':'error'})
 
 
-
-# $$$$$$$$$$$$$$$$$$$$$$$$ #
-#       RESTFUL API        #
-# $$$$$$$$$$$$$$$$$$$$$$$$ #
-
 @app.route('/ts/api/users/update/history', methods=['POST'])
 def update_history():
+    t0 = time.time()
     user = {
         'email': request.json['email'],
         'id': request.json['id'],
         'hid': request.json['hid']
     }
-    youtube = tsr.get_authenticated_service(user['email'])
+    credentials = tsr.youtube_credentials(user['email'])
+    youtube = tsr.youtube_client(credentials)
+    spotify = tsr.spotify_client()
     try:
-        song = tsr.get_latest_song(user['email'],user['hid'],youtube)
+        song = tsr.latest_song(user['email'],user['hid'],youtube,spotify)
         if song is not None:
             match = tsm.db.session.query(tsm.db.exists().where(
                 tsm.db.and_(
@@ -282,28 +265,22 @@ def update_history():
             commit_history = tsm.Zistory(uid=user['id'],zurl=song['yt_uri'],created_at=moment.utcnow().datetime.isoformat())
             tsm.db.session.add(commit_history)
             tsm.db.session.commit()
-            return jsonify({'status':'ok','data':{'message':'available','latest_song_sp_id':song['sp_uri']}})
+            t1 = time.time() - t0
+            return jsonify({'status':'ok','data':{'message':'available','latest_song_sp_id':song['sp_uri']},'execution_time':t1})
         else:
             print('No music found for {0}'.format(user['email']))
-            return jsonify({'status':'ok','data':{'message':'unavailable'}})
+            t1 = time.time() - t0
+            return jsonify({'status':'ok','data':{'message':'unavailable'},'execution_time':t1})
     except:
         print('MAJOR ERROR AT HISTORY: {0}'.format(sys.exc_info()))
         raygun.send_exception(exc_info=sys.exc_info())
-        return jsonify({'status':'fail','error':'error'})
+        t1 = time.time() - t0
+        return jsonify({'status':'fail','error':'error','execution_time':t1})
 
 
 # Get user's information
 @app.route('/ts/api/users/<int:user_id>', methods=['GET'])
 def get_user(user_id):
-    a = time.clock()
-    user = tsm.get_user(uid=user_id)
-    b = time.clock()
-    delta = b-a
-    return jsonify({'status':'ok','data':user,'execution_time':delta})
-
-# Get a user's history
-@app.route('/ts/api/users/<int:user_id>/history', methods=['GET'])
-def get_user_history(user_id):
     a = time.clock()
     user = tsm.get_user(uid=user_id)
     b = time.clock()
@@ -333,7 +310,8 @@ def view_playlist(p_id):
 # Create a new playlist
 @app.route('/ts/api/generate/recommendation', methods=['POST'])
 def create_recommendation():
-    message = 'Route: Recommendation'
+    pprint.pprint('{0} has made a request to generate a playlist'.format(request.json['fr']))
+    note = 'Route: Recommendation'
     t = moment.utcnow().datetime.isoformat()
     location = request.json['location']
     location = 'JAMAICA'
@@ -341,52 +319,48 @@ def create_recommendation():
     utwo = request.json['utwo']
 
     t0 = time.time()
-    # hone = tsm.get_history(uone['id'])
-    # htwo = tsm.get_history(utwo['id'])
-    # histories = tsm.get_faster_history(uone['id'],utwo['id'])
     histories = tsm.zzzistory(uone['id'],utwo['id'])
     s1 = time.time() - t0
     step = 1
-    # fb_notification(recipient=uone['id'],message=message,created_at=s1,step=step)
-    # fb_notification(recipient=utwo['id'],message=message,created_at=s1,step=step)
-    # ~ 3 seconds
+    message.fb_notification(recipient=uone['id'],message=note,created_at=s1,custom={'step':step})
+    message.fb_notification(recipient=utwo['id'],message=note,created_at=s1,custom={'step':step})
 
     t1 = time.time()
     try:
-        tunesmash = tsr.generate_recommendations(histories[uone['id']]['sp_uri'],histories[utwo['id']]['sp_uri'],100)
-        tunesmash = tsr.add_audio_features(tunesmash)
-        tunesmash = tsr.bell_sort(tunesmash)
-        tunesmash = tsr.remove_ids(tunesmash)
+        spotify = tsr.spotify_client()
+        tunesmash = tsr.recommendations(histories[uone['id']]['sp_uri'],histories[utwo['id']]['sp_uri'],100,spotify)
+        tunesmash = tsr._audio_features(tunesmash,spotify)
+        tunesmash = tsr._sort_bell(tunesmash)
+        tunesmash = tsr._remove_metric_tempo(tunesmash)
     except:
-        print('MAJOR ERROR AT BUMP: {0}'.format(sys.exc_info()[0]))
+        print('MAJOR ERROR: {0}'.format(sys.exc_info()[0]))
         raygun.send_exception(exc_info=sys.exc_info())
         return jsonify({'status':'fail','execution_times':{1:s1}})
     s2 = time.time() - t1
     step = 2
-    # fb_notification(recipient=uone['id'],message=message,created_at=s2,step=step)
-    # fb_notification(recipient=utwo['id'],message=message,created_at=s2,step=step)
-    # ~ 3 seconds
+    message.fb_notification(recipient=uone['id'],message=note,created_at=s2,custom={'step':step,'tunes':tunesmash})
+    message.fb_notification(recipient=utwo['id'],message=note,created_at=s2,custom={'step':step,'tunes':tunesmash})
 
 
     t2 = time.time()
     try:
-        youtube = tsr.get_authenticated_service(uone['email'])
-        ytpid = tsr.generate_yt_playlist(yt=youtube,uone=uone['email'],utwo=utwo['email'],t=t2)
-    except tsr.HttpError as err:
-        e = err
-        print(e.content,file=sys.stderr)
-        print('MAJOR ERROR AT BUMP: {0}'.format(sys.exc_info()[0]))
+        created_at = moment.utcnow().datetime.isoformat()
+        credentials = tsr.youtube_credentials(uone['email'])
+        youtube = tsr.youtube_client(credentials)
+        ytpid = tsr.insert_playlist(youtube=youtube,uone=uone['email'],utwo=utwo['email'],t=created_at)
+    except:
+        print('MAJOR ERROR: {0}'.format(sys.exc_info()[0]))
         raygun.send_exception(exc_info=sys.exc_info())
         return jsonify({'status':'fail','execution_times':{1:s1,2:s2}})
     s3 = time.time() - t2
     step = 3
-    # fb_notification(recipient=uone['id'],message=message,created_at=s3,step=step)
-    # fb_notification(recipient=utwo['id'],message=message,created_at=s3,step=step)
-    # ~ 3 seconds
+    message.fb_notification(recipient=uone['id'],message=note,created_at=s3,custom={'step':step})
+    message.fb_notification(recipient=utwo['id'],message=note,created_at=s3,custom={'step':step})
+
 
     t3 = time.time()
     try:
-        videos = tsr.test_populate(youtube,tunesmash,ytpid)
+        videos = tsr.insert_playlist_videos(youtube,tunesmash,ytpid)
         [tunesmash[i].append(videos[i])  for i in range(len(videos))]
     except:
         print('MAJOR ERROR AT BUMP: {0}'.format(sys.exc_info()[0]))
@@ -394,9 +368,9 @@ def create_recommendation():
         return jsonify({'status':'fail','execution_times':{1:s1,2:s2,3:s3}})
     s4 = time.time() - t3
     step = 4
-    # fb_notification(recipient=uone['id'],message=message,created_at=s4,step=step)
-    # fb_notification(recipient=utwo['id'],message=message,created_at=s4,step=step)
-    # ~ 4 seconds
+    message.fb_notification(recipient=uone['id'],message=note,created_at=s4,custom={'step':step})
+    message.fb_notification(recipient=utwo['id'],message=note,created_at=s4,custom={'step':step})
+    # return jsonify({'status':'ok','data':{'tunes': tunesmash,'playlist_id':ytpid},'execution_times':{1:s1,2:s2,3:s3,4:s4}})
 
     t4 = time.time()
     try:
@@ -411,66 +385,63 @@ def create_recommendation():
 
     t5 = time.time()
     try:
-        song_run(tunesmash,ytpid)
+        tsm.song_run(tunesmash,ytpid)
     except:
         print('MAJOR ERROR AT BUMP: {0}'.format(sys.exc_info()[0]))
         raygun.send_exception(exc_info=sys.exc_info())
         return jsonify({'status':'fail','execution_times':{1:s1,2:s2,3:s3,4:s4,5:s5}})
     s6 = time.time() - t5
 
-    # fdbdata = {
-    #     'time':time,
-    #     'from':uone['id'],
-    #     'to':utwo['id'],
-    #     'plid':plid
-    # }
-    # fdb.child("notification").push(fdbdata)
-    # tsm.db.session.close()
-    return jsonify({'status':'ok','data':{'playlist_url':ytpid,'playlist_id':ytpid},'execution_times':{1:s1,2:s2,3:s3,4:s4,5:s5,6:s6}})
+    tsm.db.session.close()
 
-def fb_notification(recipient=None,message=None,created_at=None,step=0):
-    fdbdata = {
-        'recipient':recipient,
-        'message': message,
-        'created_at': created_at,
-        'step': step
-    }
-    fdb.child("notification").push(fdbdata)
+    return jsonify({'status':'ok','data':{'tunes':tunesmash,'playlist_url':ytpid,'playlist_id':ytpid},'execution_times':{1:s1,2:s2,3:s3,4:s4,5:s5,6:s6}})
 
-def song_run(songs,pl):
-    new = []
-    plob = []
-    for s in songs:
-        try:
-            match = tsm.db.session.query(tsm.db.exists().where(
-                tsm.db.and_(
-                    tsm.Zong.yt_uri == s[3]
-                )
-            )).scalar()
-            if match == True:
-                print('This song is already in the db {0}'.format(s[3]))
-            else:
-                new.append(tsm.Zong(track=s[0],artist=s[1],sp_uri=s[2],yt_uri=s[3]))
-            plob.append(tsm.Pongz(pl,s[3]))
-        except:
-            print('$$$ MAJOR FUCKING ERROR $$$')
-            raygun.send_exception(exc_info=sys.exc_info())
-            tsm.db.session.rollback()
-    tsm.db.session.add_all(new)
-    tsm.db.session.add_all(plob)
-    tsm.db.session.commit()
-
-@app.errorhandler(Exception)
-def unhandled_exception(e):
-    print('Unhandled Exception: {0}'.format(e))
-    raygun.send_exception(exc_info=sys.exc_info())
-    return render_template('error.html',err = str(e))
+# @app.errorhandler(Exception)
+# def unhandled_exception(e):
+#     print('Unhandled Exception: {0}'.format(e))
+#     raygun.send_exception(exc_info=sys.exc_info())
+#     return render_template('error.html',err = str(e))
 
 # might to need make one for every exception type like typerror,integrityerror, etc
 # write a class http://flask.pocoo.org/docs/0.11/patterns/apierrors/
 
-# @app.errorhandler(404)
-# def page_not_found(e):
-#     return render_template('404.html'), 404
+@app.route('/duplicate_error',methods=['POST'])
+def duplicate_error():
+    t0 = time.time()
+    pprint.pprint('{0} has made a request to generate a playlist'.format(request.json['fr']))
+    note = 'Route: Recommendation'
+    t = moment.utcnow().datetime.isoformat()
+    location = request.json['location']
+    location = 'JAMAICA'
+    uone = request.json['uone']
+    utwo = request.json['utwo']
+# sometimes spotify uri will be there but yt uri will
+    tunesmash = [['Sink or Swim', 'Beatspoke', '4sv9KsJz6LaEzMlErYfd1T'],
+        ['Black Ghost', 'Darkstar', '6aLf1utZzrT1DMh2VQJp47'],
+        ['Warm Thoughts', 'Flume', '0IjVJk7EZK5V71LUwk6OjC'],
+        ['To the Moon and Beyond', 'Galimatias', '7HOcP8cH5XgKgBYiEYKBT3'],
+        ['All In The Value', 'HONNE', '6UoHvjfWYlzM43houhnD3k'],
+        ['Sich', 'Sohn', '4kPNZYXFVCqBV92Y9DueCr'],
+        ['Where You Belong - From The "Fifty Shades of Grey" Soundtrack', 'The Weeknd', '23zykvOc3kJKObhUMC64EV'],
+        ['Sleep Sound', 'Jamie xx', '515ka3A61zIelXCIRdfFIe'],
+        ['Call Of The Wild', 'George Maple', '3fs5VrK6WItIIOpXYH1BBc'],
+        ['Rose', 'Free n Losh', '0L7H4ioYJeCPsiEPLHkH0Z'],
+        ['Kode', 'FTSE', '5vai0ZWkAh0qOUiwBU0NTo'],
+        ["You Don't Treat Me No Good", 'Chet Faker', '7gjylALVcqouNMhH7tqEBZ']]
+
+    created_at = moment.utcnow().datetime.isoformat()
+    credentials = tsr.youtube_credentials(uone['email'])
+    youtube = tsr.youtube_client(credentials)
+    created_at = 'DUPLICATING DB INSERT'
+    ytpid = tsr.insert_playlist(youtube=youtube,uone=uone['email'],utwo=utwo['email'],t=created_at)
+    videos = tsr.insert_playlist_videos(youtube,tunesmash,ytpid)
+    [tunesmash[i].append(videos[i])  for i in range(len(videos))]
+    playlist = tsm.Playlist(uone['id'],utwo['id'],t,location,ytpid)
+    tsm.db.session.add(playlist)
+    tsm.db.session.commit()
+    tsm.song_run(tunesmash,ytpid)
+    tsm.db.session.close()
+    s1 = time.time() - t0
+    return jsonify({'status':'ok','data':{'tunes':tunesmash,'playlist_url':ytpid},'execution_times':{1:s1}})
 if __name__ == "__main__":
     app.run(debug = True)

@@ -28,58 +28,56 @@
   <script src="https://www.gstatic.com/firebasejs/3.1.0/firebase.js"></script>
   <script>
   $(document).ready(function(){
-    var status = "{{status}}";
-    // var postData = {
-    //   'location':'South of France',
-    //   'uone': {
-    //     'id':1,
-    //     'email':'dlamnguyen@gmail.com',
-    //     'name': 'Duylam'
-    //   },
-    //   'utwo': {
-    //     'id':2,
-    //     'email':'eat@rad.kitchen',
-    //     'name': 'Rachel'
-    //   }
-    // }
+    var config = {
+      apiKey: "AIzaSyBKX1xmfY8JuhIbgOxhO2APg6f4VcCZWXI",
+      authDomain: "luminous-inferno-9831.firebaseapp.com",
+      databaseURL: "https://luminous-inferno-9831.firebaseio.com",
+      storageBucket: "luminous-inferno-9831.appspot.com",
+    };
+
+    firebase.initializeApp(config);
+    var notification = firebase.database().ref('notification');
     $('button').on('click',function(){
+      console.log('clicked');
       var postData = {
-        'id': {{user_id}},
-        'email': "{{user_email}}",
-        'hid': "{{hid}}"
-      };
+        'fr': 1,
+        'location':'South of France',
+        'uone': {
+          'id':1,
+          'email':'dlamnguyen@gmail.com',
+          'name': "user"
+        },
+        'utwo': {
+          'id':2,
+          'email':'dlamnguyen@gmail.com',
+          'name': "other"
+        }
+      }
 
       $.ajax({
         async: true,
         contentType:"application/json",
-        url: '/ts/api/users/update/history',
+        url: '/ts/api/generate/recommendation',
         dataType: 'json',
         data: JSON.stringify(postData),
         error: function(error){
+          alert("{{user_email}} Recommendation: Something went wrong. Please close the app and restart.");
           console.log(error);
         },
         method: 'POST',
         success: function(response){
-          alert('yo');
           console.log(response);
         }
       });
-      // $.ajax({
-      //   async: true,
-      //   contentType:"application/json",
-      //   url: '/ts/api/generate/recommendation',
-      //   dataType: 'json',
-      //   data: JSON.stringify(postData),
-      //   error: function(){
-      //     alert("Recommendation: Something went wrong. Please close the app and restart.");
-      //   },
-      //   method: 'POST',
-      //   success: function(response){
-      //     alert('Ready to Listen?');
-      //     console.log(response);
-      //     window.open('https://www.youtube.com/playlist?list=' + response['data']['playlist'].toString());
-      //   }
-      // });
+
+      notification.orderByChild("recipient").equalTo(1).on('child_added',function(snapshot){
+        var data = snapshot.val();
+        // console.log(data);
+        $('div.mobile').children().filter(function(){
+          // console.log('Step ' + data['custom']['step']);
+        });
+        notification.child(snapshot.key).remove();
+      });
     });
   });
   </script>
