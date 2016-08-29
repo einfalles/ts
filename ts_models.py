@@ -16,7 +16,7 @@ date of last edit:
 Copyright (c) Rad Kitchen Inc. All rights reserved.
 
 """
-
+import psycopg2
 import datetime
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
@@ -399,3 +399,34 @@ def song_run(songs,pl):
     db.session.add_all(new)
     db.session.add_all(plob)
     db.session.commit()
+
+def psyco_get_user(user_id=None):
+    host = 'ec2-54-243-204-195.compute-1.amazonaws.com'
+    database = 'de1brda8ltt7bd'
+    user = 'ksualenqkvlhjj'
+    port = 5432
+    password = 'h84hpFPOi4boL6QYl6EOwRyP6T'
+    connection_string = "host={0} dbname={1} user={2} port={3} password={4}".format(host,database,user,port,password)
+    query = 'SELECT * FROM users WHERE id={0};'.format(user_id)
+    conn = psycopg2.connect(connection_string)
+    cursor = conn.cursor()
+    cursor.execute(query)
+    a = cursor.fetchone()
+    results = {
+        'id': a[0],
+        'name': a[1],
+        'email': a[2],
+        'avatar': a[3]
+    }
+    return results
+def sqlalchemy_raw_get_user(user_id=None):
+    query = 'SELECT * FROM users WHERE id={0};'.format(user_id)
+    r = db.engine.execute(query)
+    a = r.first()
+    results = {
+        'id': a[0],
+        'name': a[1],
+        'email': a[2],
+        'avatar': a[3]
+    }
+    return results    

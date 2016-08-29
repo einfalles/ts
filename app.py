@@ -16,7 +16,7 @@ import ts_messaging as message
 from raygun4py import raygunprovider
 from flask import Flask, render_template, request, redirect, jsonify, session, url_for,send_file
 from oauth2client.contrib import multistore_file as oams
-# from werkzeug.contrib.profiler import ProfilerMiddleware
+from werkzeug.contrib.profiler import ProfilerMiddleware
 
 
 #
@@ -33,8 +33,8 @@ app.config['OAUTH_CREDENTIALS'] = {
         'secret':'e2oBEpfgl3HVwU94UjFolXL8'
     }
 }
-# app.config['PROFILE'] = True
-# app.wsgi_app = ProfilerMiddleware(app.wsgi_app, restrictions=[30])
+app.config['PROFILE'] = True
+app.wsgi_app = ProfilerMiddleware(app.wsgi_app, restrictions=[30])
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 604800
 raygun = raygunprovider.RaygunSender("aR9aPioLxr1y42IN3HqSnw==")
 
@@ -53,42 +53,49 @@ def index():
     if 'credentials' not in session:
         t1 = time.time() - t0
         return render_template('index.html',execution_time=t1)
-
-    user = tsm.get_user(uid=session['credentials']['id_token']['ts_uid'])
+    user = {
+        'id': session['credentials']['id_token']['ts_uid'],
+        'name': session['credentials']['id_token']['name'],
+        'avatar': session['credentials']['id_token']['avatar'],
+        'email': session['credentials']['id_token']['email']
+    }
+    pprint.pprint(user)
+    # user = tsm.get_user(uid=session['credentials']['id_token']['ts_uid'])
+    # user = tsm.psyco_get_user(user_id=session['credentials']['id_token']['ts_uid'])
+    # user = tsm.sqlalchemy_raw_get_user(user_id=session['credentials']['id_token']['ts_uid'])
     t1 = time.time() - t0
 
     t2 = time.time()
     credentials = tsr.youtube_credentials(user['email'])
+    session.permanent = True
     if (credentials.token_expiry - datetime.datetime.utcnow()) < datetime.timedelta(minutes=app.config['REFRESH_LIMIT']):
         credentials.refresh(httplib2.Http())
     if credentials.invalid == True:
         return redirect('/login')
     t3 = time.time() - t2
 
-    # try:
-    if 'etag' in session['credentials']['id_token']:
-        etag = session['credentials']['id_token']['etag']
-    else:
-        etag = None
+    try:
+        if 'etag' in session['credentials']['id_token']:
+            etag = session['credentials']['id_token']['etag']
+        else:
+            etag = None
 
-    t4 = time.time()
-    youtube = tsr.youtube_client(credentials)
-    hid = tsr.playlist_history_id(youtube)
-    t5 = time.time() - t4
+        t4 = time.time()
+        youtube = tsr.youtube_client(credentials)
+        hid = tsr.playlist_history_id(youtube)
+        t5 = time.time() - t4
 
-    t6 = time.time()
-    go_no = tsr.is_history_updated(credentials=credentials,youtube=youtube,user_email=user['email'],etag=etag,hid=hid)
-    session['credentials']['id_token']['etag'] = go_no['etag']
-    t7 = time.time() - t6
+        t6 = time.time()
+        go_no = tsr.is_history_updated(credentials=credentials,youtube=youtube,user_email=user['email'],etag=etag,hid=hid)
+        session['credentials']['id_token']['etag'] = go_no['etag']
+        t7 = time.time() - t6
 
-    session['credentials']['id_token']['ts_uid'] = user['id']
-    session['credentials']['id_token']['avatar'] = user['avatar']
-    session.permanent = True
-    return render_template('home.html',refresh=go_no['refresh'],hid=hid,user_name=user['name'],user_email=user['email'],user_id=user['id'], execution_time={1:t1,2:t3,3:t5,4:t7})
-    # except:
-    #     print('MAJOR ERROR')
-    #     raygun.send_exception(exc_info=sys.exc_info())
-    #     return jsonify({'status':'fail'})
+        tsm.db.session.close()
+        return render_template('home.html',refresh=go_no['refresh'],hid=hid,user_name=user['name'],user_email=user['email'],user_id=user['id'], execution_time={1:t1,2:t3,3:t5,4:t7})
+    except:
+        print('MAJOR ERROR')
+        raygun.send_exception(exc_info=sys.exc_info())
+        return jsonify({'status':'fail'})
 
 # *************************
 # sign in
@@ -100,7 +107,7 @@ def auth():
 
     session['credentials'] = json.loads(credentials.to_json())
     user_email = session['credentials']['id_token']['email']
-    user_name = session['credentials']['id_token']['name']
+
     session['credentials']['id_token']['new'] = False
 
     store = oams.get_credential_storage(filename='multi.json',client_id=user_email,user_agent='app',scope=['https://www.googleapis.com/auth/userinfo.profile','https://www.googleapis.com/auth/youtube'])
@@ -113,9 +120,11 @@ def auth():
         user = tsm.User(user_name,user_email,'/images/female/0.png')
         tsm.db.session.add(user)
         tsm.db.session.flush()
-        session['credentials']['id_token']['ts_uid'] = user['id']
+        session['credentials']['id_token']['ts_uid'] = user.id
         tsm.db.session.commit()
 
+    session['credentials']['id_token']['name'] = user['name']
+    session['credentials']['id_token']['avatar'] = user['avatar']
     session['credentials']['id_token']['ts_uid'] = user['id']
     session.permanent = True
     return redirect("/")
@@ -199,6 +208,7 @@ def fcm():
 
 @app.route('/ts/api/users/<int:user_id>/update', methods=['POST'])
 def avatar_update(user_id):
+
     # time: start
     t0 = time.time()
     field = request.json['update']
@@ -212,6 +222,7 @@ def avatar_update(user_id):
     t1 = time.time() - t0
     return jsonify({'status':'ok','execution_time':t1})
 
+# about 5 seconds
 @app.route('/ts/api/generate/bump', methods=['POST'])
 def generate_bump():
     fr = request.json['fr']
@@ -239,7 +250,7 @@ def generate_bump():
         raygun.send_exception(exc_info=sys.exc_info())
         return jsonify({'status':'fail','error':'error'})
 
-
+# about 5 seconds
 @app.route('/ts/api/users/update/history', methods=['POST'])
 def update_history():
     t0 = time.time()
@@ -307,6 +318,7 @@ def view_playlist(p_id):
     tsm.db.session.close()
     return jsonify({'status':'ok','data':songs,'execution_time':delta})
 
+# 15 seconds
 # Create a new playlist
 @app.route('/ts/api/generate/recommendation', methods=['POST'])
 def create_recommendation():
@@ -357,7 +369,7 @@ def create_recommendation():
     message.fb_notification(recipient=uone['id'],message=note,created_at=s3,custom={'step':step})
     message.fb_notification(recipient=utwo['id'],message=note,created_at=s3,custom={'step':step})
 
-
+    # HOW CAN WE MAKE THIS STEP FASTER????
     t3 = time.time()
     try:
         videos = tsr.insert_playlist_videos(youtube,tunesmash,ytpid)
@@ -382,25 +394,26 @@ def create_recommendation():
         raygun.send_exception(exc_info=sys.exc_info())
         return jsonify({'status':'fail','execution_times':{1:s1,2:s2,3:s3,4:s4}})
     s5 = time.time() - t4
-
+    step = 5
+    message.fb_notification(recipient=uone['id'],message=note,created_at=s5,custom={'step':step,'playlist_id':ytpid})
+    message.fb_notification(recipient=utwo['id'],message=note,created_at=s5,custom={'step':step,'playlist_id':ytpid})
+    # HOW CAN WE MAKE THIS STEP FASTER????
+    return jsonify({'status':'ok','data':{'tunes':tunesmash,'playlist_id':ytpid},'execution_times':{1:s1,2:s2,3:s3,4:s4,5:s5}})
+# 10 seconds
+@app.route('/ts/api/generate/recommendation/song_run', methods=['POST'])
+def store_songs():
     t5 = time.time()
+    tunesmash = request.json['tunes']
+    ytpid = request.json['playlist_id']
     try:
         tsm.song_run(tunesmash,ytpid)
+        s6 = time.time() - t5
+        tsm.db.session.close()
+        return jsonify({'status':'ok'})
     except:
         print('MAJOR ERROR AT BUMP: {0}'.format(sys.exc_info()[0]))
         raygun.send_exception(exc_info=sys.exc_info())
         return jsonify({'status':'fail','execution_times':{1:s1,2:s2,3:s3,4:s4,5:s5}})
-    s6 = time.time() - t5
-
-    tsm.db.session.close()
-
-    return jsonify({'status':'ok','data':{'tunes':tunesmash,'playlist_url':ytpid,'playlist_id':ytpid},'execution_times':{1:s1,2:s2,3:s3,4:s4,5:s5,6:s6}})
-
-# @app.errorhandler(Exception)
-# def unhandled_exception(e):
-#     print('Unhandled Exception: {0}'.format(e))
-#     raygun.send_exception(exc_info=sys.exc_info())
-#     return render_template('error.html',err = str(e))
 
 # might to need make one for every exception type like typerror,integrityerror, etc
 # write a class http://flask.pocoo.org/docs/0.11/patterns/apierrors/

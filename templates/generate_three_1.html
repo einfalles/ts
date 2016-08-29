@@ -73,7 +73,25 @@
         success: function(response){
           alert('Ready to Listen?');
           console.log(response);
-          // window.open('https://www.youtube.com/playlist?list=' + response['data']['playlist'].toString());
+          var postData = {
+            'tunes': response['data']['tunes'],
+            'playlist_id': response['data']['playlist_id']
+          }
+          $.ajax({
+            async: true,
+            contentType:"application/json",
+            url: '/ts/api/generate/recommendation/song_run',
+            dataType: 'json',
+            data: JSON.stringify(postData),
+            error: function(error){
+              console.log(error);
+            },
+            method: 'POST',
+            success: function(response){
+              console.log(response);
+
+            }
+          });
         }
       });
     }
@@ -92,12 +110,17 @@
     var notification = firebase.database().ref('notification');
     notification.orderByChild("recipient").equalTo({{user_id}}).on('child_added',function(snapshot){
       var data = snapshot.val();
-      // console.log(data);
+      console.log(data);
       $('div.mobile').children().filter(function(){
         if($(this).data('step') != data['custom']['step']) {
           $(this).addClass('hide');
         } else {
           $(this).removeClass('hide');
+          if ($(this).data('step')==5) {
+            alert('Ready to Listen?');
+            window.open('https://www.youtube.com/playlist?list=' + data['custom']['playlist_id']);
+            location.href = '/';
+          }
         }
       });
       notification.child(snapshot.key).remove();

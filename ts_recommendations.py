@@ -7,6 +7,7 @@ import requests
 from apiclient.discovery import build
 from oauth2client.contrib import multistore_file as oams
 from datetime import datetime, timedelta
+from apiclient.http import BatchHttpRequest
 
 CLIENT_SECRETS_FILE = "client_secrets.json"
 MISSING_CLIENT_SECRETS_MESSAGE ="NO NO NO NO"
@@ -137,7 +138,7 @@ def insert_playlist(youtube,uone,utwo,t):
                 description="Tunesmash"
             ),
             status=dict(
-                privacyStatus="private"
+                privacyStatus="public"
             )
         )
     ).execute()
@@ -146,6 +147,7 @@ def insert_playlist(youtube,uone,utwo,t):
 def insert_playlist_videos(youtube, recommendations, playlist_id):
     videos = []
     count = 0
+    # could use rest api...couldcut this down....
     for song in recommendations:
         query = song[0] + " " + song[1]
         ytsr = youtube.search().list(part='snippet',q=query,type='video')
@@ -163,7 +165,6 @@ def insert_playlist_videos(youtube, recommendations, playlist_id):
                                   'kind': 'youtube#video',
                               'videoId': results['items'][0]['id']['videoId']
                             }
-                        #'position': 0
                         }
                 }
             ).execute()

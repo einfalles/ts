@@ -9,26 +9,23 @@
 </head>
 <body>
 <div class="container">
-  <div class="mobile row h-100-vp">
-      <div class="twelve columns display-start h-100-vp">
-        <header class="header w-100 display-center">
-          <h2 class="page-header">TuneSmash</h2>
-        </header>
-        <main class="m-t-auto w-100">
-          <a class="m-b-5" href="/generate/one/{{user_id}}" data-uid="{{user_id}}" data-email="{{user_email}}" data-name="{{user_name}}" id="submit">
-            <button class="primary-button pink">Make A Playlist</button>
-          </a>
-          <a class="m-b-5" href="/users/{{user_id}}/playlists"  href="/">
-            <button class="primary-button purple">Manage Playlist</button>
-          </a>
-          <a class="m-b-5" href="/users/{{user_id}}/profile">
-            <button class="primary-button orange">Edit Avatar</button>
-          </a>
-        </main>
-        <footer class="h-0">
-
-        </footer>
-      </div>
+  <div class="mobile-view w-100">
+    <header class="w-100 mb-0">
+      <h3>TuneSmash</h3>
+    </header>
+    <main class="w-100">
+      <a class="primary button mb-6 salmon-pink" href="/generate/one/{{user_id}}" data-uid="{{user_id}}" data-email="{{user_email}}" data-name="{{user_name}}" id="submit">
+        <button>Make A Playlist</button>
+      </a>
+      <a class="primary button mb-6 periwinkle-purple" href="/users/{{user_id}}/playlists"  href="/">
+        <button>Manage Playlist</button>
+      </a>
+      <a class="primary button clementine-orange" href="/users/{{user_id}}/profile">
+        <button>Edit Avatar</button>
+      </a>
+    </main>
+    <footer class="w-100">
+    </footer>
   </div>
 </div>
 <style>

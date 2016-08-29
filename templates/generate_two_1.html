@@ -68,7 +68,6 @@
       }
     }).done(function(){
       // LISTEN FOR NOTIFICATIONS
-      alert('Bump done');
       notification.orderByChild("recipient").equalTo({{user_id}}).on('child_added',function(snapshot){
         var data = snapshot.val();
         var href='';
