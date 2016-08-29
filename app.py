@@ -16,7 +16,7 @@ import ts_messaging as message
 from raygun4py import raygunprovider
 from flask import Flask, render_template, request, redirect, jsonify, session, url_for,send_file
 from oauth2client.contrib import multistore_file as oams
-from werkzeug.contrib.profiler import ProfilerMiddleware
+# from werkzeug.contrib.profiler import ProfilerMiddleware
 
 
 #
@@ -33,8 +33,8 @@ app.config['OAUTH_CREDENTIALS'] = {
         'secret':'e2oBEpfgl3HVwU94UjFolXL8'
     }
 }
-app.config['PROFILE'] = True
-app.wsgi_app = ProfilerMiddleware(app.wsgi_app, restrictions=[30])
+# app.config['PROFILE'] = True
+# app.wsgi_app = ProfilerMiddleware(app.wsgi_app, restrictions=[30])
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 604800
 raygun = raygunprovider.RaygunSender("aR9aPioLxr1y42IN3HqSnw==")
 
@@ -127,6 +127,7 @@ def auth():
     session['credentials']['id_token']['avatar'] = user['avatar']
     session['credentials']['id_token']['ts_uid'] = user['id']
     session.permanent = True
+    tsm.db.session.close()
     return redirect("/")
 
 @app.route('/login')
@@ -244,6 +245,7 @@ def generate_bump():
         bump = tsm.Bump(fr=fr,too=to,created_at=created_at.isoformat())
         tsm.db.session.add(bump)
         tsm.db.session.commit()
+        tsm.db.session.close()
         return jsonify({'status':'ok','data':{'first':request.json['first'],'second':request.json['second'],'me':request.json['fr']}})
     except:
         print('MAJOR ERROR AT BUMP: {0}'.format(sys.exc_info()[0]))
@@ -277,15 +279,18 @@ def update_history():
             tsm.db.session.add(commit_history)
             tsm.db.session.commit()
             t1 = time.time() - t0
+            tsm.db.session.close()
             return jsonify({'status':'ok','data':{'message':'available','latest_song_sp_id':song['sp_uri']},'execution_time':t1})
         else:
             print('No music found for {0}'.format(user['email']))
             t1 = time.time() - t0
+            tsm.db.session.close()
             return jsonify({'status':'ok','data':{'message':'unavailable'},'execution_time':t1})
     except:
         print('MAJOR ERROR AT HISTORY: {0}'.format(sys.exc_info()))
         raygun.send_exception(exc_info=sys.exc_info())
         t1 = time.time() - t0
+        tsm.db.session.close()
         return jsonify({'status':'fail','error':'error','execution_time':t1})
 
 
@@ -296,6 +301,7 @@ def get_user(user_id):
     user = tsm.get_user(uid=user_id)
     b = time.clock()
     delta = b-a
+    tsm.db.session.close()
     return jsonify({'status':'ok','data':user,'execution_time':delta})
 
 # Get a user's playlists
@@ -309,10 +315,11 @@ def manage_playlist(user_id):
     return jsonify({'status':'ok','data':playlists,'execution_time':delta})
 
 # Get a playlist's songs
-@app.route('/ts/api/playlist/<int:p_id>', methods=['GET'])
+@app.route('/ts/api/playlist/<p_id>', methods=['GET'])
 def view_playlist(p_id):
     a = time.clock()
-    songs = tsm.get_playlist_songs(pl_id=p_id)
+    # songs = tsm.get_playlist_songs(pl_id=p_id)
+    songs = tsm.get_pongz(purl=p_id)
     b = time.clock()
     delta = b-a
     tsm.db.session.close()
@@ -395,11 +402,13 @@ def create_recommendation():
         return jsonify({'status':'fail','execution_times':{1:s1,2:s2,3:s3,4:s4}})
     s5 = time.time() - t4
     step = 5
-    message.fb_notification(recipient=uone['id'],message=note,created_at=s5,custom={'step':step,'playlist_id':ytpid})
-    message.fb_notification(recipient=utwo['id'],message=note,created_at=s5,custom={'step':step,'playlist_id':ytpid})
+    message.fb_notification(recipient=uone['id'],message=note,created_at=s5,custom={'step':step,'playlist_id':ytpid,'starting_video':videos[0]})
+    message.fb_notification(recipient=utwo['id'],message=note,created_at=s5,custom={'step':step,'playlist_id':ytpid,'starting_video':videos[0]})
     # HOW CAN WE MAKE THIS STEP FASTER????
-    return jsonify({'status':'ok','data':{'tunes':tunesmash,'playlist_id':ytpid},'execution_times':{1:s1,2:s2,3:s3,4:s4,5:s5}})
+    tsm.db.session.close()
+    return jsonify({'status':'ok','data':{'tunes':tunesmash,'playlist_id':ytpid,'starting_video':videos[0]},'execution_times':{1:s1,2:s2,3:s3,4:s4,5:s5}})
 # 10 seconds
+
 @app.route('/ts/api/generate/recommendation/song_run', methods=['POST'])
 def store_songs():
     t5 = time.time()

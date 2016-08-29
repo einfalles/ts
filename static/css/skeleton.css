@@ -66,6 +66,7 @@ ul li {
 }
 ul li a {
   margin-left: 1.5rem;
+  text-decoration: none;
 }
 ul li span {
   margin-left: auto;
@@ -154,13 +155,41 @@ button {
 .mb-9 { margin-bottom: 0.5rem; }
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
+/* ~~~~~~~~~~~~ Spacing ~~~~~~~~~~~~ */
+.mb-1 { margin-bottom: 3.0rem; }
+.mb-2 { margin-bottom: 2.75rem; }
+.mb-3 { margin-bottom: 2.0rem; }
+.mb-4 { margin-bottom: 1.5rem; }
+.mb-5 { margin-bottom: 1.25rem; }
+.mb-6 { margin-bottom: 1.0rem; }
+.mb-7 { margin-bottom: 0.875rem; }
+.mb-8 { margin-bottom: 0.75rem; }
+.mb-9 { margin-bottom: 0.5rem; }
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+/* ~~~~~~~~~~ Typography ~~~~~~~~~~~ */
+.fs-1 { font-size: 3.0rem; }
+.fs-2 { font-size: 2.75rem; }
+.fs-3 { font-size: 2.0rem; }
+.fs-4 { font-size: 1.5rem; }
+.fs-5 { font-size: 1.25rem; }
+.fs-6 { font-size: 1.0rem; }
+.fs-7 { font-size: 0.875rem; }
+.fs-8 { font-size: 0.75rem; }
+.fs-9 { font-size: 0.5rem; }
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
 /* ~~~~~~~~~~~~ Colors ~~~~~~~~~~~~~ */
 .salmon-pink { background-color: rgba(251,106,143,1);}
 .periwinkle-purple { background-color: rgba(106,119,249,1);}
 .clementine-orange { background-color: rgba(255,152,45,1);}
+.text { background-color: none;}
+.text.steel-grey { color: grey; }
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-
+/* ~~~~~~~~~~~~ States ~~~~~~~~~~~~~ */
+.hide { display: none;}
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 .row {
   width: 100%;
 }
@@ -209,21 +238,21 @@ button {
   flex: 0 0 75%;
   display: flex;
   flex-direction: column;
-  padding-left: 1.25rem;
+  height: 100%;
 }
 header h3 {
   font-size: 2rem;
 }
 
-li a,
-.content-wrapper a{
-  font-size: 1rem;
+.content-wrapper a,
+.content-wrapper p{
   text-decoration: none;
+  margin-left: 1.5rem;
+  margin-top: 0;
+  margin-bottom: 0;
+  margin-right: 0;
 }
-.content-wrapper p {
-  margin: 0;
-  font-size: 1rem;
-}
+
 .h-100-vp {
   height: 100vh;
 }

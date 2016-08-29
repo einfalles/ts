@@ -232,6 +232,7 @@ def get_user(email=None,uid=None):
     else:
         return None
 
+
 def get_all_playlists(uid=None,user_email=None):
     playlists = []
     uid = int(uid)
@@ -283,6 +284,32 @@ def get_all_playlists(uid=None,user_email=None):
         return result
     return None
 
+def get_pongz(purl=None):
+    songs = []
+    if purl:
+        result = Pongz.query.filter(Pongz.purl==purl).all()
+        for i in result:
+            songs.append({
+                # 'art': i.song.art,
+                'uone': {
+                    'id':i.playlist.uone.id,
+                    'name':i.playlist.uone.name,
+                    'avatar':i.playlist.uone.avatar,
+                    'email':i.playlist.uone.email
+                },
+                'utwo':{
+                    'id':i.playlist.utwo.id,
+                    'name':i.playlist.utwo.name,
+                    'avatar':i.playlist.utwo.avatar,
+                    'email':i.playlist.utwo.email
+                },
+                'track': i.zong.track,
+                'artist': i.zong.artist,
+                'yt_url': i.zong.yt_uri
+            })
+        return songs
+    else:
+        return None
 
 def get_playlist_songs(pl_id=None):
     songs = []
@@ -429,4 +456,4 @@ def sqlalchemy_raw_get_user(user_id=None):
         'email': a[2],
         'avatar': a[3]
     }
-    return results    
+    return results

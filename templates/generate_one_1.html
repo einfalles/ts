@@ -14,12 +14,12 @@
   <div class="container">
     <div class="mobile-view w-100">
       <header class="w-100">
-        <h3>Nearby Friends</h3>
+        <h5>Nearby Friends</h5>
       </header>
       <main class="w-100">
         <ul></ul>
       </main>
-      <footer class="w-100">
+      <footer class="w-100 hide">
       </footer>
     </div>
   </div>
@@ -65,7 +65,7 @@
         second = one;
       }
       var href = '/generate/two/'+ one.toString() +'/'+first+'/'+second;
-      $('ul').append('<li id="'+ snapshot.key+'">'+'<img src="'+ data['avatar'] +'"/>'+'<a class="clickbait"'+"href='" +href+"'"+' data-email="'+ data['email']+'" data-id="'+data['uid'] +'"'+'>'+data['name']+'</a><span> > </span></li>');
+      $('ul').append('<li id="'+ snapshot.key+'">'+'<img src="'+ data['avatar'] +'"/>'+'<a class="clickbait fs-7"'+"href='" +href+"'"+' data-email="'+ data['email']+'" data-id="'+data['uid'] +'"'+'>'+data['name']+'</a><span> > </span></li>');
       if (data['uid'] == {{user_id}}){
         $('ul li').filter('#'+snapshot.key).remove();
       }

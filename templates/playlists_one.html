@@ -20,7 +20,7 @@
     <div class="mobile row h-100-vp">
       <div class="twelve columns display-start h-100-vp">
         <header class="header w-100 display-center">
-          <h3 class="page-header">Your Playlists</h3>
+          <h5 class="page-header">Your Playlists</h5>
         </header>
         <main class="m-t-auto w-100">
           <ul class="w-100 no-of" id="playlist">
@@ -70,7 +70,15 @@
       var list = $('#playlist');
       for (var i = 0; i < data.length; i++){
         list.append(
-          "<li><div class='avatar-wrapper'><img src='" + data[i]['other']['avatar'] +"'></div><div class='content-wrapper'><a href='/users/{{user_id}}/playlists/"+data[i]['pid']+"/"+ data[i]['url']+"/"+data[i]['other']['name']+"'>"+data[i]['other']['name']+"</a><p>Created on "+data[i]['time']+"</p></div></li>"
+          "<li>\
+            <div class='avatar-wrapper'>\
+            <img src='" + data[i]['other']['avatar'] +
+            "'></div>\
+            <div class='content-wrapper'>\
+              <a class='fs-7' href='/users/{{user_id}}/playlists/"+data[i]['pid']+"/"+ data[i]['url']+"/"+data[i]['other']['name']+"'>"
+              + data[i]['other']['name']+"</a><p class='text steel-grey fs-8'>Created on "+data[i]['time']+"</p>\
+              </div>\
+            </li>"
         );
       }
     });
