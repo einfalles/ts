@@ -6,7 +6,13 @@
   <meta name="description" content="">
   <meta name="author" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
+  <script type="text/javascript">
+    !function(a,b,c,d,e,f,g,h){a.RaygunObject=e,a[e]=a[e]||function(){
+    (a[e].o=a[e].o||[]).push(arguments)},f=b.createElement(c),g=b.getElementsByTagName(c)[0],
+    f.async=1,f.src=d,g.parentNode.insertBefore(f,g),h=a.onerror,a.onerror=function(b,c,d,f,g){
+    h&&h(b,c,d,f,g),g||(g=new Error(b)),a[e].q=a[e].q||[],a[e].q.push({
+    e:g})}}(window,document,"script","//cdn.raygun.io/raygun4js/raygun.min.js","rg4js");
+  </script>
 </head>
 <body>
   <div class="container">
@@ -42,6 +48,7 @@
   <script src="https://www.gstatic.com/firebasejs/3.1.0/firebase.js"></script>
   <script>
   $(document).ready(function(){
+    Raygun.init('aR9aPioLxr1y42IN3HqSnw==')
     var status = "{{status}}";
     var postData = {
       'fr': {{user_id}},
@@ -68,6 +75,7 @@
         error: function(error){
           alert("{{user_email}} Recommendation: Something went wrong. Please close the app and restart.");
           console.log(error);
+          Raygun.send(error);
         },
         method: 'POST',
         success: function(response){
@@ -85,6 +93,7 @@
             data: JSON.stringify(postData),
             error: function(error){
               console.log(error);
+              Raygun.send(error);
             },
             method: 'POST',
             success: function(response){
