@@ -209,7 +209,7 @@ def fcm():
 
 @app.route('/ts/api/users/<int:user_id>/update', methods=['POST'])
 def avatar_update(user_id):
-
+    pprint.pprint(request.json['data'])
     # time: start
     t0 = time.time()
     field = request.json['update']
@@ -221,6 +221,7 @@ def avatar_update(user_id):
 
     # time: end
     t1 = time.time() - t0
+    pprint.pprint('sending something back now!')
     return jsonify({'status':'ok','execution_time':t1})
 
 # about 5 seconds

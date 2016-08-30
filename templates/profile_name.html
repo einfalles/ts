@@ -49,9 +49,10 @@
 
       $.ajax({
         async: true,
+        timeout: 100000,
         contentType:"application/json",
         url: '/ts/api/users/{{user_id}}/update',
-        dataType: 'json',
+
         data: JSON.stringify(postData),
         error: function(error){
           console.log(error.status);
@@ -69,6 +70,7 @@
           location.href = '/';
         }
       });
+      return false;
     });
   });
   </script>

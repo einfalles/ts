@@ -222,6 +222,13 @@ a.secondary.button button {
 .mb-9 { margin-bottom: 0.5rem; }
 
 .w-100 { width: 100%;}
+
+.flex-center {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
 /* Larger than mobile */
 @media (min-width: 400px) {}
 
@@ -265,7 +272,11 @@ h5 { font-size: 1.0rem; line-height: 1.5;  letter-spacing: -.05rem; }
 h6 { font-size: 0.875rem; line-height: 1.6;  letter-spacing: 0; }
 
 /* Larger than mobile */
-@media (min-width: 400px) {}
+@media (max-width: 320px) {
+  html { font-size: 62%;}
+  button { padding: 0;}
+
+}
 
 /* Larger than phablet (also point when grid becomes active) */
 @media (min-width: 550px) {}

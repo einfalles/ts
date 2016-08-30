@@ -30,23 +30,34 @@
 </head>
 <body>
   <div class="container">
-    <div class="mobile row h-100-vp">
-      <div class="twelve columns display-center h-100-vp hide" data-step="1">
-        <h6>Welcome {{user_id}}</h6>
-        <h6>You {{status}}</h6>
-      </div>
-      <div class="twelve columns display-center h-100-vp hide" data-step="2">
-        <h4>matched with {{other_name}}</h4>
-      </div>
-      <div class="twelve columns display-center h-100-vp hide" data-step="3">
-        <h4>melding your listening preferences</h4>
-      </div>
-      <div class="twelve columns display-center h-100-vp hide" data-step="4">
-        <h4>generating tunes</h4>
-      </div>
-      <div class="twelve columns display-center h-100-vp hide" data-step="5">
-        <a href="" id="listen-to-playlist">Ready To Listen?</a>
-      </div>
+    <div class="mobile-view">
+      <header class="w-100" style="visibility:hidden;">
+        <a class="navigation-button" href="/">
+          <button class="navigation"><</button>
+        </a>
+        <h5>Match</h5>
+      </header>
+      <main class="w-100">
+        <div class="w-100 flex-center " data-step="1">
+          <h6>Welcome {{user_id}}</h6>
+          <h6>You {{status}}</h6>
+        </div>
+        <div class="w-100 flex-center hide" data-step="2">
+          <h4>matched with {{other_name}}</h4>
+        </div>
+        <div class="w-100 flex-center hide" data-step="3">
+          <h4>melding your listening preferences</h4>
+        </div>
+        <div class="w-100 flex-center hide" data-step="4">
+          <h4>generating tunes</h4>
+        </div>
+        <div class="w-100 flex-center hide" data-step="5">
+          <a href="" id="listen-to-playlist">Ready To Listen?</a>
+        </div>
+      </main>
+      <footer class="w-100 hide">
+        {{execution_time}}
+      </footer>
     </div>
   </div>
   <link href='https://fonts.googleapis.com/css?family=Press+Start+2P' rel='stylesheet' type='text/css'>
@@ -77,49 +88,6 @@
         'email':'dlamnguyen@gmail.com',
         'name': "{{other_name}}"
       }
-    }
-    if (status == "win") {
-      alert('Win {{user_id}}');
-      $.ajax({
-        async: true,
-        contentType:"application/json",
-        url: '/ts/api/generate/recommendation',
-        dataType: 'json',
-        data: JSON.stringify(postData),
-        error: function(error){
-          alert("{{user_email}} Recommendation: Something went wrong. Please close the app and restart.");
-          console.log(error);
-          Raygun.send(error);
-        },
-        method: 'POST',
-        success: function(response){
-          alert('Ready to Listen?');
-          console.log(response);
-          var postData = {
-            'tunes': response['data']['tunes'],
-            'playlist_id': response['data']['playlist_id']
-          }
-          $.ajax({
-            async: true,
-            contentType:"application/json",
-            url: '/ts/api/generate/recommendation/song_run',
-            dataType: 'json',
-            data: JSON.stringify(postData),
-            error: function(error){
-              console.log(error);
-              Raygun.send(error);
-            },
-            method: 'POST',
-            success: function(response){
-              console.log(response);
-
-            }
-          });
-        }
-      });
-    }
-    if (status== "lose") {
-      alert('Loser {{user_id}}');
     }
 
     var config = {
@@ -152,6 +120,44 @@
       });
       notification.child(snapshot.key).remove();
     });
+    if (status == "win") {
+      $.ajax({
+        async: true,
+        contentType:"application/json",
+        url: '/ts/api/generate/recommendation',
+        dataType: 'json',
+        data: JSON.stringify(postData),
+        error: function(error){
+          alert("{{user_email}} Recommendation: Something went wrong. Please close the app and restart.");
+          console.log(error);
+        },
+        method: 'POST',
+        success: function(response){
+          console.log(response);
+          var postData = {
+            'tunes': response['data']['tunes'],
+            'playlist_id': response['data']['playlist_id']
+          }
+          $.ajax({
+            async: true,
+            contentType:"application/json",
+            url: '/ts/api/generate/recommendation/song_run',
+            dataType: 'json',
+            data: JSON.stringify(postData),
+            error: function(error){
+              console.log(error);
+            },
+            method: 'POST',
+            success: function(response){
+              console.log(response);
+
+            }
+          });
+          return false;
+        }
+      });
+      return false;
+    }
   });
   </script>
 </body>
