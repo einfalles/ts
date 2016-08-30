@@ -268,16 +268,34 @@ def update_history():
     try:
         song = tsr.latest_song(user['email'],user['hid'],youtube,spotify)
         if song is not None:
-            match = tsm.db.session.query(tsm.db.exists().where(
+            yt_match = tsm.db.session.query(tsm.db.exists().where(
                 tsm.db.and_(
                     tsm.Zong.yt_uri == song['yt_uri'],
                 )
             )).scalar()
-            if match == False:
+            sp_match = db.session.query(db.exists().where(
+                    Zong.sp_uri == song['sp_uri']
+            )).scalar()
+
+            if sp_match == True and yt_match == True:
+                commit_history = tsm.Zistory(uid=user['id'],zurl=song['yt_uri'],created_at=moment.utcnow().datetime.isoformat())
+                tsm.db.session.add(commit_history)
+
+            if sp_match == False and yt_match == False:
                 commit_song = tsm.Zong(sp_uri=song['sp_uri'],yt_uri=song['yt_uri'],track=song['track'],artist=song['artist'])
                 tsm.db.session.add(commit_song)
-            commit_history = tsm.Zistory(uid=user['id'],zurl=song['yt_uri'],created_at=moment.utcnow().datetime.isoformat())
-            tsm.db.session.add(commit_history)
+                commit_history = tsm.Zistory(uid=user['id'],zurl=song['yt_uri'],created_at=moment.utcnow().datetime.isoformat())
+                tsm.db.session.add(commit_history)
+
+            if sp_match == True and yt_match == False:
+                a = Zong.query.filter(Zong.sp_uri == song['sp_uri']).first()
+                commit_history = tsm.Zistory(uid=user['id'],zurl=a.yt_uri,created_at=moment.utcnow().datetime.isoformat())
+                tsm.db.session.add(commit_history)
+
+            if sp_match == False and yt_match == True:
+                commit_history = tsm.Zistory(uid=user['id'],zurl=song['yt_uri'],created_at=moment.utcnow().datetime.isoformat())
+                tsm.db.session.add(commit_history)
+
             tsm.db.session.commit()
             t1 = time.time() - t0
             tsm.db.session.close()
@@ -348,7 +366,7 @@ def create_recommendation():
     t1 = time.time()
     try:
         spotify = tsr.spotify_client()
-        tunesmash = tsr.recommendations(histories[uone['id']]['sp_uri'],histories[utwo['id']]['sp_uri'],100,spotify)
+        tunesmash = tsr.recommendations(histories[uone['id']]['sp_uri'],histories[utwo['id']]['sp_uri'],50,spotify)
         tunesmash = tsr._audio_features(tunesmash,spotify)
         tunesmash = tsr._sort_bell(tunesmash)
         tunesmash = tsr._remove_metric_tempo(tunesmash)
