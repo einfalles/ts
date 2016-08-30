@@ -1,3 +1,4 @@
 2) make sure songs are not full albums...do a time check on each video
 4)  is not bound to a Session; attribute refresh operation cannot proceed
 6) bumping is weird....
+7) some videos blocked on mobile??????
