@@ -102,32 +102,37 @@ def index():
 # *************************
 @app.route('/auth')
 def auth():
-    oauth = tsa.OAuthSignIn.get_provider("google")
-    credentials = oauth.callback()
+    try:
+        oauth = tsa.OAuthSignIn.get_provider("google")
+        credentials = oauth.callback()
 
-    session['credentials'] = json.loads(credentials.to_json())
-    user_email = session['credentials']['id_token']['email']
+        session['credentials'] = json.loads(credentials.to_json())
+        user_email = session['credentials']['id_token']['email']
 
-    session['credentials']['id_token']['new'] = False
+        session['credentials']['id_token']['new'] = False
 
-    store = oams.get_credential_storage(filename='multi.json',client_id=user_email,user_agent='app',scope=['https://www.googleapis.com/auth/userinfo.profile','https://www.googleapis.com/auth/youtube'])
-    store.put(credentials)
+        store = oams.get_credential_storage(filename='multi.json',client_id=user_email,user_agent='app',scope=['https://www.googleapis.com/auth/userinfo.profile','https://www.googleapis.com/auth/youtube'])
+        store.put(credentials)
 
-    user = tsm.get_user(email=user_email)
+        user = tsm.get_user(email=user_email)
 
-    if user == None:
-        session['credentials']['id_token']['new'] = True
-        user = tsm.User(user_name,user_email,'/images/female/0.png')
-        tsm.db.session.add(user)
-        tsm.db.session.flush()
-        session['credentials']['id_token']['ts_uid'] = user.id
-        tsm.db.session.commit()
+        if user == None:
+            session['credentials']['id_token']['new'] = True
+            user = tsm.User(user_name,user_email,'/images/female/0.png')
+            tsm.db.session.add(user)
+            tsm.db.session.flush()
+            session['credentials']['id_token']['ts_uid'] = user.id
+            tsm.db.session.commit()
 
-    session['credentials']['id_token']['name'] = user['name']
-    session['credentials']['id_token']['avatar'] = user['avatar']
-    session['credentials']['id_token']['ts_uid'] = user['id']
-    session.permanent = True
-    tsm.db.session.close()
+        session['credentials']['id_token']['name'] = user['name']
+        session['credentials']['id_token']['avatar'] = user['avatar']
+        session['credentials']['id_token']['ts_uid'] = user['id']
+        session.permanent = True
+        tsm.db.session.close()
+    except:
+        print('MAJOR ERROR AT BUMP: {0}'.format(sys.exc_info()[0]))
+        raygun.send_exception(exc_info=sys.exc_info())
+        return "Something broke. Sorry :( Try again soon."
     return redirect("/")
 
 @app.route('/login')
