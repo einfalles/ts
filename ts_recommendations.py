@@ -5,6 +5,7 @@ import pprint
 import re
 import requests
 from apiclient.discovery import build
+from apiclient.errors import HttpError
 from oauth2client.contrib import multistore_file as oams
 from datetime import datetime, timedelta
 from apiclient.http import BatchHttpRequest

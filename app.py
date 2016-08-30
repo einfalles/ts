@@ -293,7 +293,7 @@ def update_history():
                 tsm.db.session.add(commit_history)
 
             if sp_match == True and yt_match == False:
-                a = Zong.query.filter(Zong.sp_uri == song['sp_uri']).first()
+                a = tsm.Zong.query.filter(Zong.sp_uri == song['sp_uri']).first()
                 commit_history = tsm.Zistory(uid=user['id'],zurl=a.yt_uri,created_at=moment.utcnow().datetime.isoformat())
                 tsm.db.session.add(commit_history)
 
@@ -405,6 +405,13 @@ def create_recommendation():
     try:
         videos = tsr.insert_playlist_videos(youtube,tunesmash,ytpid)
         [tunesmash[i].append(videos[i])  for i in range(len(videos))]
+    except tsr.HttpError as err:
+        e = err
+        str_error = e.content.decode('utf-8')
+        dict_error = json.loads(b)
+        if dict_error['error']['code'] == 401:
+            return not_found()
+        return jsonify({'status':'fail'})
     except:
         print('MAJOR ERROR AT BUMP: {0}'.format(sys.exc_info()[0]))
         raygun.send_exception(exc_info=sys.exc_info())
@@ -450,6 +457,15 @@ def store_songs():
 
 # might to need make one for every exception type like typerror,integrityerror, etc
 # write a class http://flask.pocoo.org/docs/0.11/patterns/apierrors/
+@app.errorhandler(401)
+def not_found(error=None):
+    message = {
+            'status': 401,
+            'message': 'You have not created a Youtube Channel. Step 1: Go to Youtube Step 2: Sign in with the email you are using for TuneSmash. Step 3: Click my channel on the left hand side. Step 4: fill in all your details Step 5: click create channel. Step 6: Go back to TuneSmash and refresh the app from the home page'
+    }
+    resp = jsonify(message)
+    resp.status_code = 401
+    return resp
 
 @app.route('/duplicate_error',methods=['POST'])
 def duplicate_error():
