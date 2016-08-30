@@ -273,8 +273,8 @@ def update_history():
                     tsm.Zong.yt_uri == song['yt_uri'],
                 )
             )).scalar()
-            sp_match = db.session.query(db.exists().where(
-                    Zong.sp_uri == song['sp_uri']
+            sp_match = tsm.db.session.query(tsm.db.exists().where(
+                    tsm.Zong.sp_uri == song['sp_uri']
             )).scalar()
 
             if sp_match == True and yt_match == True:
