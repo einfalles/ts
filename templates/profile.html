@@ -14,23 +14,28 @@
 </head>
 <body>
   <div class="container">
-    <div class="mobile row h-100-vp">
-      <div class="twelve columns display-start h-100-vp">
-        <header class="header w-100 display-center">
-          <h5>Settings</h5>
-        </header>
-        <main class="m-t-auto w-100">
-          <img src="{{user_avatar}}"/>
-          <a href="/users/{{user_id}}/profile/account">
-            <button>{{user_name}}</button>
-          </a>
-          <a href="/users/{{user_id}}/profile/avatar">
-            <button>New Avatar</button>
-          </a>
-        </main>
-        <footer>
-        </footer>
-      </div>
+    <div class="mobile-view">
+      <header class="w-100">
+        <a class="navigation-button" href="/">
+          <button class="navigation"><</button>
+        </a>
+        <h5>Settings</h5>
+      </header>
+      <main class="w-100" id="profile">
+        <div class="avatar-wrapper mb-7">
+          <img src="{{user_avatar}}" />
+        </div>
+
+        <a class="secondary button mb-2" href="/users/{{user_id}}/profile/account">
+          <button>{{user_name}} ></button>
+        </a>
+        <a class="primary button salmon-pink w-100" href="/users/{{user_id}}/profile/avatar">
+          <button>New Avatar</button>
+        </a>
+      </main>
+      <footer class="w-100 hide">
+        {{execution_time}}
+      </footer>
     </div>
   </div>
   <link href='https://fonts.googleapis.com/css?family=Press+Start+2P' rel='stylesheet' type='text/css'>

@@ -37,6 +37,17 @@ def spotify_client():
     sp_token = oauth.SpotifyClientCredentials(client_id='4f8c3338b0b443a8895358db33763c6f',client_secret='76cf6ff10bb041dbb0b11a3e7dd89fe1')
     return spotipy.Spotify(auth=sp_token.get_access_token())
 
+def youtube_client_cli(email):
+    CLIENT_SECRETS_FILE = "client_secrets.json"
+    flow = flow_from_clientsecrets(CLIENT_SECRETS_FILE, scope=YOUTUBE_READ_WRITE_SCOPE,message=MISSING_CLIENT_SECRETS_MESSAGE)
+    flow.params['access_type'] = 'offline'
+    store = oams.get_credential_storage(filename='multi.json',client_id=email,user_agent='app',scope=['https://www.googleapis.com/auth/youtube','https://www.googleapis.com/auth/userinfo.profile'])
+    credentials = store.get()
+    if credentials is None or credentials.invalid == True:
+        credentials = run_flow(flow, store)
+    store.put(credentials)
+    return credentials
+
 # ~~~~~~~~~~~~~~~~~
 #
 # Step 2

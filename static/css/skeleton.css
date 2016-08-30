@@ -1,4 +1,4 @@
-/*/* Table of contents
+/* Table of contents
 ––––––––––––––––––––––––––––––––––––––––––––––––––
 - Grid
 - Base Styles
@@ -15,6 +15,22 @@
 - Media Queries
 */
 
+/* ~~~~~~~~~~~~~~ Base ~~~~~~~~~~~~~ */
+* { display: block; }
+
+html {
+  height: 100%;
+  font-size: 100%; }
+body {
+  height: 100%;
+  font-size: 1.5em; /* currently ems cause chrome bug misinterpreting rems on body element */
+  line-height: 1.6;
+  font-weight: 400;
+  font-family: "Press Start 2P", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  background-color: rgb(252,255,86);
+  color: #222; }
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
 
 /* Grid
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
@@ -22,7 +38,7 @@ title { display: none !important; }
 style { display: none !important; }
 script { display: none !important; }
 .container {
-  background-color: white;
+  background-color: none;
   height: 100vh;
   width: 100%;
   max-width: 375px;
@@ -32,45 +48,64 @@ script { display: none !important; }
   display: flex;
   justify-content: center;
   align-items: flex-start;
-}
+  margin: 0 auto; }
+
 .mobile-view {
   height: 100%;
   flex-direction: column;
   display: flex;
-  justify-content: flex-start;;
-  overflow: hidden;
-}
+  justify-content: flex-start;
+  width:100%;
+  overflow: hidden; }
+
+
 header {
   background-color: none;
   text-align: center;
-  padding: 1.5rem 0;
-}
+  position: relative;
+  padding: 1.5rem 0; }
+
 main {
   background-color: none;
   overflow: auto;
-  flex: 1;
-}
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1; }
+
 footer {
   height: 2rem;
   background-color: blue;
   position: absolute;
   left: 0;
-  bottom: 0;
-}
+  bottom: 0; }
+
 ul { padding: 0;}
 ul li {
   display: flex;
   justify-content: flex-start;
   align-items: center;
   margin-bottom: 1.5rem;
-}
-ul li a {
-  margin-left: 1.5rem;
-  text-decoration: none;
-}
-ul li span {
-  margin-left: auto;
-}
+  position: relative; }
+
+ul li a { margin-left: 1.5rem; }
+
+ul li span { margin-left: auto; }
+a { text-decoration: none;}
+/* Larger than mobile */
+@media (min-width: 400px) {}
+
+/* Larger than phablet (also point when grid becomes active) */
+@media (min-width: 550px) {}
+
+/* Larger than tablet */
+@media (min-width: 750px) {}
+
+/* Larger than desktop */
+@media (min-width: 1000px) {}
+
+/* Larger than Desktop HD */
+@media (min-width: 1200px) {}
 /* ~~~~~~~~~~~~~~~~~Buttons~~~~~~~~~~~~~~~~~~ */
 
 button,
@@ -131,19 +166,51 @@ input[type="button"].button-primary:focus {
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 /* ~~~~~~~~~~~~ Buttons ~~~~~~~~~~~~ */
-a.button.primary {
-  height: 68px;
-}
 button {
   height: 100%;
   border-radius: 0;
   border: 0;
   color: white;
 }
+button.toggle {
+  height: 68px;
+  width: 100%;
+}
+button.toggle.selected {
+  box-shadow: inset 2px 2px 0px 1px #27496d,inset 0 1px 16px #193047;
+}
+a.navigation-button {
+  position: absolute;
+  height: auto;
+  padding: 0;
+  top: 1rem;
+  left: 1rem;
+}
+button.navigation {
+  position: absolute;
+  color: black;
+  height:100%;
+  padding: 0;
+}
+a.button.primary {
+  height: 68px;
+  border-left: 2px solid rgba(240,255,255,0.5);
+  border-top: 2px solid rgba(240,255,255,0.5);
+  border-bottom: 2px solid rgba(100,100,100,0.5);
+  border-right: 2px solid rgba(100,100,100,0.5);
+  box-shadow: 2px 3px 6px rgba(100,100,100,0.8);
+  width: 90%;
+}
+a.button.primary button {
+  width: 100%;
+}
+a.secondary.button button {
+  color: black; }
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
+
+/* ~~~~~~~~~~~~ Spacing ~~~~~~~~~~~~ */
 .mb-0 { margin-bottom: 6.0rem }
-/* ~~~~~~~~~~~~ Spacing ~~~~~~~~~~~~ */
 .mb-1 { margin-bottom: 3.0rem; }
 .mb-2 { margin-bottom: 2.75rem; }
 .mb-3 { margin-bottom: 2.0rem; }
@@ -153,19 +220,25 @@ button {
 .mb-7 { margin-bottom: 0.875rem; }
 .mb-8 { margin-bottom: 0.75rem; }
 .mb-9 { margin-bottom: 0.5rem; }
+
+.w-100 { width: 100%;}
+/* Larger than mobile */
+@media (min-width: 400px) {}
+
+/* Larger than phablet (also point when grid becomes active) */
+@media (min-width: 550px) {}
+
+/* Larger than tablet */
+@media (min-width: 750px) {}
+
+/* Larger than desktop */
+@media (min-width: 1000px) {}
+
+/* Larger than Desktop HD */
+@media (min-width: 1200px) {}
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-/* ~~~~~~~~~~~~ Spacing ~~~~~~~~~~~~ */
-.mb-1 { margin-bottom: 3.0rem; }
-.mb-2 { margin-bottom: 2.75rem; }
-.mb-3 { margin-bottom: 2.0rem; }
-.mb-4 { margin-bottom: 1.5rem; }
-.mb-5 { margin-bottom: 1.25rem; }
-.mb-6 { margin-bottom: 1.0rem; }
-.mb-7 { margin-bottom: 0.875rem; }
-.mb-8 { margin-bottom: 0.75rem; }
-.mb-9 { margin-bottom: 0.5rem; }
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
 
 /* ~~~~~~~~~~ Typography ~~~~~~~~~~~ */
 .fs-1 { font-size: 3.0rem; }
@@ -177,6 +250,34 @@ button {
 .fs-7 { font-size: 0.875rem; }
 .fs-8 { font-size: 0.75rem; }
 .fs-9 { font-size: 0.5rem; }
+
+p { margin: 0;}
+
+h1, h2, h3, h4, h5, h6 {
+  margin-top: 0;
+  margin-bottom: 0rem;
+  font-weight: 300; }
+h1 { font-size: 3.0rem; line-height: 1.2;  letter-spacing: -.1rem;}
+h2 { font-size: 2.6rem; line-height: 1.25; letter-spacing: -.1rem; }
+h3 { font-size: 2.0rem; line-height: 1.3;  letter-spacing: -.1rem; }
+h4 { font-size: 1.4rem; line-height: 1.35; letter-spacing: -.08rem; }
+h5 { font-size: 1.0rem; line-height: 1.5;  letter-spacing: -.05rem; }
+h6 { font-size: 0.875rem; line-height: 1.6;  letter-spacing: 0; }
+
+/* Larger than mobile */
+@media (min-width: 400px) {}
+
+/* Larger than phablet (also point when grid becomes active) */
+@media (min-width: 550px) {}
+
+/* Larger than tablet */
+@media (min-width: 750px) {}
+
+/* Larger than desktop */
+@media (min-width: 1000px) {}
+
+/* Larger than Desktop HD */
+@media (min-width: 1200px) {}
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 /* ~~~~~~~~~~~~ Colors ~~~~~~~~~~~~~ */
@@ -190,90 +291,85 @@ button {
 /* ~~~~~~~~~~~~ States ~~~~~~~~~~~~~ */
 .hide { display: none;}
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-.row {
-  width: 100%;
-}
-.w-100 {
-  width: 100%;
-}
-.no-of {
-  overflow: hidden;
-}
-#playlist li,
-#songs li,
-#easyPaginate li{
+
+/* ~~~~~~~~~~ Components ~~~~~~~~~~~ */
+#avatars li {
+  width: calc(100% / 4);
+  background-color: pink;
+  border: 2px solid yellow;
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
   display: flex;
-  flex-direction: row;
-  width: 100%;
-  flex-grow:1;
-}
-#easyPaginate{
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-content: flex-end;
-  flex-wrap: wrap;
-  flex-flow: column wrap;
-  justify-content: space-around;
-}
-.page.current {
-  color: rebeccapurple;
-}
-.easyPaginateNav{
-  display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: flex-end;
+  margin-bottom:2px;
 }
-.easyPaginateNav a {
-  margin: 0 0.3rem;
-  text-decoration: none;
+#avatars li.active { border:2px solid green;}
+#songs li:before,
+#playlist li:before {
+  content: '\a0';
+  /* display: flex; */
+  /* padding: 2px 0; */
+  /* line-height: 1px; */
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+  position: absolute;
+  top: 76px;
+  z-index: 999;
+  height: 0;
+  width: 100%;
 }
 .avatar-wrapper {
-  flex: 0 0 25%;
+  width: 64px;
+  height: 64px;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  background-color: pink;
+  position: relative;
 }
 .avatar-wrapper img {
-  width: 100%;
+  width: 40px;
+  height: 40px;
+}
+
+#songs .avatar-wrapper img {
+  height: 100%;
+  width: auto
 }
 .content-wrapper {
-  flex: 0 0 75%;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-header h3 {
-  font-size: 2rem;
-}
-
-.content-wrapper a,
-.content-wrapper p{
-  text-decoration: none;
-  margin-left: 1.5rem;
-  margin-top: 0;
-  margin-bottom: 0;
-  margin-right: 0;
-}
-
-.h-100-vp {
-  height: 100vh;
-}
-.mobile.row{
-  width:375px;
-}
-.display-center {
-  display: flex;
-  flex-direction: column;
+  height: 64px;
+  flex: 1;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
 }
-.g-button {
-  text-decoration: none;
+.content-wrapper a {
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
-.g-button button {
-  background-color: #dd4b39;
-  height: 40px;
-  color: white;
-  border: 0 !important;
+.content-wrapper p {
+  margin-left: 1.5rem;
 }
+#profile .avatar-wrapper {
+  width: 200px;
+  height: 200px;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  background-color: pink;
+  position: relative;
+}
+#profile .avatar-wrapper img {
+  width: 140px;
+  height: 140px;
+}
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
 .image-container {
   display: flex;
   flex-direction: row;
@@ -291,177 +387,10 @@ header h3 {
         filter: FlipH;
         -ms-filter: "FlipH";
 }
-.m-t-auto {
-  margin-top: auto;
-}
-.h-0 {
-  height: 0;
-}
-.w-100 {
-  width: 100%;
-}
-
-.header h2 {
-  margin: 0;
-}
-.display-start {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: flex-start;
-}
-.page-header {
-  text-align: center;
-}
-button {
-  width: 100% !important;
-}
-.m-b-5 {
-  margin-bottom: 1rem;
-}
-.primary-button{
-  width: 80%;
-  margin: 0 auto;
-  border: 0;
-  color: white;
-}
-.pink {
-  background-color: rgb(249,77,124);
-}
-.purple {
-  background-color: rgb(85,85,250);
-}
-.orange {
-  background-color: #fb9423;
-}
-.column,
-.columns {
-  width: 100%;
-  float: left;
-  box-sizing: border-box; }
-.imp-but {
-  width: 80%;
-}
-* {
-  display: block;
-}
-/* For devices larger than 400px */
-@media (min-width: 400px) {
-  .container {
-    width: 85%;
-    padding: 0; }
-}
-
-/* For devices larger than 550px */
-@media (min-width: 550px) {
-  .container {
-    width: 80%; }
-  .column,
-  .columns {
-    margin-left: 4%; }
-  .column:first-child,
-  .columns:first-child {
-    margin-left: 0; }
-
-  .one.column,
-  .one.columns                    { width: 4.66666666667%; }
-  .two.columns                    { width: 13.3333333333%; }
-  .three.columns                  { width: 22%;            }
-  .four.columns                   { width: 30.6666666667%; }
-  .five.columns                   { width: 39.3333333333%; }
-  .six.columns                    { width: 48%;            }
-  .seven.columns                  { width: 56.6666666667%; }
-  .eight.columns                  { width: 65.3333333333%; }
-  .nine.columns                   { width: 74.0%;          }
-  .ten.columns                    { width: 82.6666666667%; }
-  .eleven.columns                 { width: 91.3333333333%; }
-  .twelve.columns                 { width: 100%; margin-left: 0; }
-
-  .one-third.column               { width: 30.6666666667%; }
-  .two-thirds.column              { width: 65.3333333333%; }
-
-  .one-half.column                { width: 48%; }
-
-  /* Offsets */
-  .offset-by-one.column,
-  .offset-by-one.columns          { margin-left: 8.66666666667%; }
-  .offset-by-two.column,
-  .offset-by-two.columns          { margin-left: 17.3333333333%; }
-  .offset-by-three.column,
-  .offset-by-three.columns        { margin-left: 26%;            }
-  .offset-by-four.column,
-  .offset-by-four.columns         { margin-left: 34.6666666667%; }
-  .offset-by-five.column,
-  .offset-by-five.columns         { margin-left: 43.3333333333%; }
-  .offset-by-six.column,
-  .offset-by-six.columns          { margin-left: 52%;            }
-  .offset-by-seven.column,
-  .offset-by-seven.columns        { margin-left: 60.6666666667%; }
-  .offset-by-eight.column,
-  .offset-by-eight.columns        { margin-left: 69.3333333333%; }
-  .offset-by-nine.column,
-  .offset-by-nine.columns         { margin-left: 78.0%;          }
-  .offset-by-ten.column,
-  .offset-by-ten.columns          { margin-left: 86.6666666667%; }
-  .offset-by-eleven.column,
-  .offset-by-eleven.columns       { margin-left: 95.3333333333%; }
-
-  .offset-by-one-third.column,
-  .offset-by-one-third.columns    { margin-left: 34.6666666667%; }
-  .offset-by-two-thirds.column,
-  .offset-by-two-thirds.columns   { margin-left: 69.3333333333%; }
-
-  .offset-by-one-half.column,
-  .offset-by-one-half.columns     { margin-left: 52%; }
-
-}
-
-
-/* Base Styles
-–––––––––––––––––––––––––––––––––––––––––––––––––– */
-
-html {
-  height: 100%;
-  font-size: 100%;
-}
-body {
-  height: 100%;
-  font-size: 1.5em; /* currently ems cause chrome bug misinterpreting rems on body element */
-  line-height: 1.6;
-  font-weight: 400;
-  font-family: "Press Start 2P", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  background-color: rgb(252,255,86);
-  color: #222; }
-
-
-/* Typography
-–––––––––––––––––––––––––––––––––––––––––––––––––– */
-h1, h2, h3, h4, h5, h6 {
-  margin-top: 0;
-  margin-bottom: 0rem;
-  font-weight: 300; }
-h1 { font-size: 3.0rem; line-height: 1.2;  letter-spacing: -.1rem;}
-h2 { font-size: 2.6rem; line-height: 1.25; letter-spacing: -.1rem; }
-h3 { font-size: 2.0rem; line-height: 1.3;  letter-spacing: -.1rem; }
-h4 { font-size: 1.4rem; line-height: 1.35; letter-spacing: -.08rem; }
-h5 { font-size: 1.0rem; line-height: 1.5;  letter-spacing: -.05rem; }
-h6 { font-size: 0.875rem; line-height: 1.6;  letter-spacing: 0; }
-
-/* Larger than phablet */
-@media (min-width: 550px) {
-  h1 { font-size: 5.0rem; }
-  h2 { font-size: 4.2rem; }
-  h3 { font-size: 3.6rem; }
-  h4 { font-size: 3.0rem; }
-  h5 { font-size: 2.4rem; }
-  h6 { font-size: 1.5rem; }
-}
-
-
-
 
 /* Forms
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
+
 input[type="email"],
 input[type="number"],
 input[type="search"],
@@ -503,7 +432,7 @@ input[type="url"]:focus,
 input[type="password"]:focus,
 textarea:focus,
 select:focus {
-  border: 1px solid #33C3F0;
+  border: 2px solid #33C3F0;
   outline: 0; }
 label,
 legend {
@@ -521,29 +450,10 @@ label > .label-body {
   margin-left: .5rem;
   font-weight: normal; }
 
-
-
-/* Media Queries
-–––––––––––––––––––––––––––––––––––––––––––––––––– */
-/*
-Note: The best way to structure the use of media queries is to create the queries
-near the relevant code. For example, if you wanted to change the styles for buttons
-on small devices, paste the mobile query code up in the buttons section and style it
-there.
-*/
-
-
-/* Larger than mobile */
-@media (min-width: 400px) {}
-
-/* Larger than phablet (also point when grid becomes active) */
-@media (min-width: 550px) {}
-
-/* Larger than tablet */
-@media (min-width: 750px) {}
-
-/* Larger than desktop */
-@media (min-width: 1000px) {}
-
-/* Larger than Desktop HD */
-@media (min-width: 1200px) {}
+input[type="text"] {
+  border: 2px solid black;
+  border-radius: 0;
+  height: 60px;
+  font-size: 1.5rem;
+  box-shadow: 4px 3px 8px rgba(100,100,100,0.8);
+  text-align: center; }

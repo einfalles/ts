@@ -15,19 +15,24 @@
 </head>
 <body>
   <div class="container">
-    <div class="mobile row h-100-vp">
-      <div class="twelve columns display-start h-100-vp">
-        <header class="header w-100 display-center">
-          <h5>What's Your Name?</h5>
-        </header>
-        <main class="m-t-auto w-100">
-          <input type='text' value=""></input>
-          <button id="submit">Continue</button>
-        </main>
-        <footer>
-        </footer>
-      </div>
+    <div class="mobile-view">
+      <header class="w-100">
+        <a class="navigation-button" href="/users/{{user_id}}/profile">
+          <button class="navigation"><</button>
+        </a>
+        <h5>What's Your Name?</h5>
+      </header>
+      <main class="w-100" id="profile">
+        <input type='text' value="" class="w-100"></input>
+        <a class="secondary button" href="" id="submit">
+          <button>Continue ></button>
+        </a>
+      </main>
+      <footer class="w-100 hide">
+        {{execution_time}}
+      </footer>
     </div>
+
   </div>
   <link href='https://fonts.googleapis.com/css?family=Press+Start+2P' rel='stylesheet' type='text/css'>
   <link rel="stylesheet" href="/css/normalize.css">
@@ -61,7 +66,6 @@
           }
         },
         success: function(response){
-          alert('Woop');
           location.href = '/';
         }
       });

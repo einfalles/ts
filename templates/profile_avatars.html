@@ -14,30 +14,53 @@
 </head>
 <body>
   <div class="container">
-    <div class="mobile row h-100-vp">
-      <div class="twelve columns display-start h-100-vp">
-        <header class="header w-100 display-center">
-          <h3>Settings</h3>
-        </header>
-        <main class="m-t-auto w-100">
-          <img src="{{user_avatar}}"/>
-          <a href="/profile/management/name">
-            <button>{{user_name}}</button>
-          </a>
-          <a href="/users/{{user_id}}/profile/avatar/female">
-            <button>Female</button>
-          </a>
-          <a href="/users/{{user_id}}/profile/avatar/male">
-            <button>Male</button>
-          </a>
-        </main>
-        <footer>
-        </footer>
-      </div>
+    <div class="mobile-view">
+      <main class="w-100 ">
+      <header class="w-100">
+        <a class="navigation-button" href="/users/{{user_id}}/profile">
+          <button class="navigation"><</button>
+        </a>
+        <h5 style="color: rgba(0,0,0,0);">Pick Your Avatar</h5>
+      </header>
+        <div class="image-container mb-3" style="min-height: 220px;">
+          <img data-gender="female" class="hide" src="/images/female_intro.png"/>
+          <img data-gender="male" class="show" src="/images/male_intro.png"/>
+        </div>
+        <button class="toggle salmon-pink mb-6" data-gender="female" data-href="/users/{{user_id}}/profile/avatar/female">Female</button>
+        <button class="toggle periwinkle-purple selected mb-2" data-gender="male" data-href="/users/{{user_id}}/profile/avatar/male">Male</button>
+        <a class="secondary button" href="/users/{{user_id}}/profile/avatar/male" id="submit">
+          <button>Continue ></button>
+        </a>
+      </main>
+      <footer class="w-100 hide">
+        {{execution_time}}
+      </footer>
     </div>
   </div>
   <link href='https://fonts.googleapis.com/css?family=Press+Start+2P' rel='stylesheet' type='text/css'>
   <link rel="stylesheet" href="/css/normalize.css">
   <link rel="stylesheet" href="/css/skeleton.css">
+  <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+  <script>
+  $(document).ready(function(){
+    $('button.toggle').on('click',function(){
+      $('button.toggle').removeClass('selected');
+      $(this).addClass('selected');
+      var url = $('.selected').data('href');
+      var gender = $('.selected').data('gender');
+      var genderShow = 'img[data-gender="'+gender+'"';
+      $('#submit').attr('href',url);
+      $('img').each(function(i,data){
+        if ($(data).data('gender')==gender){
+          $(data).removeClass('hide');
+          $(data).addClass('show');
+        } else {
+          $(data).addClass('hide');
+          $(data).removeClass('show');
+        }
+      });
+    });
+  });
+  </script>
 </body>
 </html>

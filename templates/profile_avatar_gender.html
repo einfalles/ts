@@ -7,26 +7,28 @@
 </head>
 <body>
   <div class="container">
-    <div class="mobile row h-100-vp">
-      <div class="twelve columns display-start h-100-vp">
-        <header class="header w-100 display-center">
-          <h4 class="display-center">Pick An Avatar</h4>
-        </header>
-        <main class="m-t-auto w-100">
-          <ul>
+    <div class="mobile-view">
+      <header class="w-100">
+        <a class="navigation-button" href="/users/{{user_id}}/profile/avatar">
+          <button class="navigation"><</button>
+        </a>
+        <h5>Pick An Avatar</h5>
+      </header>
+      <main class="w-100">
+        <ul class="w-100" id="avatars">
           {% for avatar in f%}
             <li data-id="{{avatar}}">
               <img src="/images/{{gender}}/{{avatar}}.png"/>
             </li>
           {% endfor %}
-          </ul>
-          <button id="submit">
-            Done
-          </button>
-        </main>
-        <footer>
-        </footer>
-      </div>
+        </ul>
+        <a class="secondary button" href="" id="submit">
+          <button>Continue ></button>
+        </a>
+      </main>
+      <footer class="w-100 hide">
+        {{execution_time}}
+      </footer>
     </div>
   </div>
   <style>
@@ -36,6 +38,7 @@ overflow: hidden;
 width: 100%;
 flex-wrap: wrap;
   }
+
   li {
     margin-bottom: 1rem;
     width: 84px;
@@ -45,9 +48,7 @@ flex-wrap: wrap;
     justify-content: center;
     align-items: center;
   }
-  .active {
-    outline: 2px solid green;
-  }
+
   </style>
   <style>
     style { display:none;}

@@ -17,19 +17,20 @@
 </head>
 <body>
   <div class="container">
-    <div class="mobile row h-100-vp">
-      <div class="twelve columns display-start h-100-vp">
-        <header class="header w-100 display-center">
-          <h5 class="page-header">Your Playlists</h5>
-        </header>
-        <main class="m-t-auto w-100">
-          <ul class="w-100 no-of" id="playlist">
-          </ul>
-        </main>
-        <footer>
-          {{execution_time}}
-        </footer>
-      </div>
+    <div class="mobile-view">
+      <header class="w-100">
+        <a class="navigation-button" href="/">
+          <button class="navigation"><</button>
+        </a>
+        <h5>Your Playlists</h5>
+      </header>
+      <main class="w-100">
+        <ul class="w-100" id="playlist">
+        </ul>
+      </main>
+      <footer class="w-100 hide">
+        {{execution_time}}
+      </footer>
     </div>
   </div>
   <style>
@@ -76,7 +77,7 @@
             "'></div>\
             <div class='content-wrapper'>\
               <a class='fs-7' href='/users/{{user_id}}/playlists/"+data[i]['pid']+"/"+ data[i]['url']+"/"+data[i]['other']['name']+"'>"
-              + data[i]['other']['name']+"</a><p class='text steel-grey fs-8'>Created on "+data[i]['time']+"</p>\
+              + data[i]['other']['name']+"</a><p class='text steel-grey fs-9'>Created on "+data[i]['time']+"</p>\
               </div>\
             </li>"
         );

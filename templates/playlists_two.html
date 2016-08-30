@@ -14,19 +14,20 @@
 </head>
 <body>
   <div class="container">
-    <div class="mobile row h-100-vp">
-      <div class="twelve columns display-start h-100-vp">
-        <header class="header w-100 display-center">
-          <h5 class="page-header">Made with {{name}}</h5>
-        </header>
-        <main class="m-t-auto w-100">
-          <ul class="w-100 " id="songs">
-          </ul>
-        </main>
-        <footer class="display-center">
-          {{execution_time}}
-        </footer>
-      </div>
+    <div class="mobile-view">
+      <header class="w-100">
+        <a class="navigation-button" href="/users/{{user_id}}/playlists">
+          <button class="navigation"><</button>
+        </a>
+        <h5>Made with {{name}}</h5>
+      </header>
+      <main class="w-100">
+        <ul class="w-100" id="songs">
+        </ul>
+      </main>
+      <footer class="w-100 hide">
+        {{execution_time}}
+      </footer>
     </div>
   </div>
   <style>
@@ -77,11 +78,11 @@
               "/default.jpg'>" +
             "</div>" +
             "<div class='content-wrapper'>" +
-              "<a href='https://youtube.com/watch?v="+data[i]['yt_url'] +
+              "<a class='fs-7' href='https://youtube.com/watch?v="+data[i]['yt_url'] +
               "&amp;index=" + index.toString() + "&amp;list={{url}}'>" +
               data[i]['track'] +
               "</a>" +
-              "<p>" +
+              "<p class='fs-9 text steel-grey'>" +
               data[i]['artist'] +
               "</p>" +
             "</div>" +

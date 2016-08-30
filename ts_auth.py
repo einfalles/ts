@@ -66,14 +66,3 @@ class GoogleSignIn(OAuthSignIn):
         code = request.args.get('code')
         credentials = self.flow.step2_exchange(code)
         return credentials
-
-# def youtube_client(email):
-#     CLIENT_SECRETS_FILE = "client_secrets.json"
-#     flow = flow_from_clientsecrets(CLIENT_SECRETS_FILE, scope=YOUTUBE_READ_WRITE_SCOPE,message=MISSING_CLIENT_SECRETS_MESSAGE)
-#     flow.params['access_type'] = 'offline'
-#     store = oams.get_credential_storage(filename='multi.json',client_id=email,user_agent='app',scope=['https://www.googleapis.com/auth/youtube','https://www.googleapis.com/auth/userinfo.profile'])
-#     credentials = store.get()
-#     if credentials is None or credentials.invalid == True:
-#         credentials = run_flow(flow, store)
-#     store.put(credentials)
-#     return credentials
