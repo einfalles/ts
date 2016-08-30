@@ -144,7 +144,7 @@ def view_playlists(user_id):
 
 @app.route('/users/<int:user_id>/playlists/<int:playlist_id>/<url>/<name>', methods=['GET'])
 def view_playlist_songs(user_id,playlist_id,url,name):
-    return render_template('playlists_two.html',pid=playlist_id,name=name,url=url)
+    return render_template('playlists_two.html',pid=playlist_id,user_id=user_id,name=name,url=url)
 
 # *************************
 # manage account
