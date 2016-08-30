@@ -53,7 +53,8 @@
         url: '/ts/api/users/{{user_id}}/update',
         dataType: 'json',
         data: JSON.stringify(postData),
-        error: function(){
+        error: function(error){
+          console.log(error);
           alert("Something went wrong. Please close the app and restart.");
         },
         method: 'POST',

@@ -181,10 +181,10 @@ button.toggle.selected {
 }
 a.navigation-button {
   position: absolute;
-  height: auto;
+  height: 40px;
   padding: 0;
   top: 1rem;
-  left: 1rem;
+  left: 0rem;
 }
 button.navigation {
   position: absolute;
