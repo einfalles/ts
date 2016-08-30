@@ -38,7 +38,7 @@
         <h5>Match</h5>
       </header>
       <main class="w-100">
-        <div class="w-100 flex-center " data-step="1">
+        <div class="w-100 flex-center" data-step="1">
           <h6>Welcome {{user_id}}</h6>
           <h6>You {{status}}</h6>
         </div>
@@ -102,7 +102,7 @@
     notification.orderByChild("recipient").equalTo({{user_id}}).on('child_added',function(snapshot){
       var data = snapshot.val();
       console.log(data);
-      $('div.mobile').children().filter(function(){
+      $('main').children().filter(function(){
         if($(this).data('step') != data['custom']['step']) {
           $(this).addClass('hide');
         } else {
