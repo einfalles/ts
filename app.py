@@ -108,12 +108,11 @@ def auth():
 
         session['credentials'] = json.loads(credentials.to_json())
         user_email = session['credentials']['id_token']['email']
-
+        user_name = session['credentials']['id_token']['name']
         session['credentials']['id_token']['new'] = False
 
         store = oams.get_credential_storage(filename='multi.json',client_id=user_email,user_agent='app',scope=['https://www.googleapis.com/auth/userinfo.profile','https://www.googleapis.com/auth/youtube'])
         store.put(credentials)
-
         user = tsm.get_user(email=user_email)
 
         if user == None:
@@ -455,8 +454,7 @@ def store_songs():
         raygun.send_exception(exc_info=sys.exc_info())
         return jsonify({'status':'fail','execution_times':{1:s1,2:s2,3:s3,4:s4,5:s5}})
 
-# might to need make one for every exception type like typerror,integrityerror, etc
-# write a class http://flask.pocoo.org/docs/0.11/patterns/apierrors/
+
 @app.errorhandler(401)
 def not_found(error=None):
     message = {
@@ -467,43 +465,6 @@ def not_found(error=None):
     resp.status_code = 401
     return resp
 
-@app.route('/duplicate_error',methods=['POST'])
-def duplicate_error():
-    t0 = time.time()
-    pprint.pprint('{0} has made a request to generate a playlist'.format(request.json['fr']))
-    note = 'Route: Recommendation'
-    t = moment.utcnow().datetime.isoformat()
-    location = request.json['location']
-    location = 'JAMAICA'
-    uone = request.json['uone']
-    utwo = request.json['utwo']
-# sometimes spotify uri will be there but yt uri will
-    tunesmash = [['Sink or Swim', 'Beatspoke', '4sv9KsJz6LaEzMlErYfd1T'],
-        ['Black Ghost', 'Darkstar', '6aLf1utZzrT1DMh2VQJp47'],
-        ['Warm Thoughts', 'Flume', '0IjVJk7EZK5V71LUwk6OjC'],
-        ['To the Moon and Beyond', 'Galimatias', '7HOcP8cH5XgKgBYiEYKBT3'],
-        ['All In The Value', 'HONNE', '6UoHvjfWYlzM43houhnD3k'],
-        ['Sich', 'Sohn', '4kPNZYXFVCqBV92Y9DueCr'],
-        ['Where You Belong - From The "Fifty Shades of Grey" Soundtrack', 'The Weeknd', '23zykvOc3kJKObhUMC64EV'],
-        ['Sleep Sound', 'Jamie xx', '515ka3A61zIelXCIRdfFIe'],
-        ['Call Of The Wild', 'George Maple', '3fs5VrK6WItIIOpXYH1BBc'],
-        ['Rose', 'Free n Losh', '0L7H4ioYJeCPsiEPLHkH0Z'],
-        ['Kode', 'FTSE', '5vai0ZWkAh0qOUiwBU0NTo'],
-        ["You Don't Treat Me No Good", 'Chet Faker', '7gjylALVcqouNMhH7tqEBZ']]
 
-    created_at = moment.utcnow().datetime.isoformat()
-    credentials = tsr.youtube_credentials(uone['email'])
-    youtube = tsr.youtube_client(credentials)
-    created_at = 'DUPLICATING DB INSERT'
-    ytpid = tsr.insert_playlist(youtube=youtube,uone=uone['email'],utwo=utwo['email'],t=created_at)
-    videos = tsr.insert_playlist_videos(youtube,tunesmash,ytpid)
-    [tunesmash[i].append(videos[i])  for i in range(len(videos))]
-    playlist = tsm.Playlist(uone['id'],utwo['id'],t,location,ytpid)
-    tsm.db.session.add(playlist)
-    tsm.db.session.commit()
-    tsm.song_run(tunesmash,ytpid)
-    tsm.db.session.close()
-    s1 = time.time() - t0
-    return jsonify({'status':'ok','data':{'tunes':tunesmash,'playlist_url':ytpid},'execution_times':{1:s1}})
 if __name__ == "__main__":
     app.run(debug = True)
