@@ -121,10 +121,13 @@ def auth():
             tsm.db.session.add(user)
             tsm.db.session.flush()
             session['credentials']['id_token']['ts_uid'] = user.id
+            session['credentials']['id_token']['name'] = user.name
+            session['credentials']['id_token']['avatar'] = user.avatar
             tsm.db.session.commit()
-
-        session['credentials']['id_token']['name'] = user.name
-        session['credentials']['id_token']['avatar'] = user.avatar
+        else:
+            session['credentials']['id_token']['name'] = user['name']
+            session['credentials']['id_token']['avatar'] = user['avatar']
+            session['credentials']['id_token']['ts_uid'] = user['id']
         session.permanent = True
         tsm.db.session.close()
     except:
