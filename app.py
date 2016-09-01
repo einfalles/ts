@@ -294,7 +294,7 @@ def update_history():
                 tsm.db.session.add(commit_history)
 
             if sp_match == True and yt_match == False:
-                a = tsm.Zong.query.filter(Zong.sp_uri == song['sp_uri']).first()
+                a = tsm.Zong.query.filter(tsm.Zong.sp_uri == song['sp_uri']).first()
                 commit_history = tsm.Zistory(uid=user['id'],zurl=a.yt_uri,created_at=moment.utcnow().datetime.isoformat())
                 tsm.db.session.add(commit_history)
 
