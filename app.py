@@ -391,7 +391,7 @@ def create_recommendation():
         created_at = moment.utcnow().datetime.isoformat()
         credentials = tsr.youtube_credentials(uone['email'])
         youtube = tsr.youtube_client(credentials)
-        ytpid = tsr.insert_playlist(youtube=youtube,uone=uone['email'],utwo=utwo['email'],t=created_at)
+        ytpid = tsr.insert_playlist(youtube=youtube,uone=uone['name'],utwo=utwo['name'],t=created_at)
     except:
         print('MAJOR ERROR: {0}'.format(sys.exc_info()[0]))
         raygun.send_exception(exc_info=sys.exc_info())

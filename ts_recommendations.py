@@ -146,7 +146,7 @@ def insert_playlist(youtube,uone,utwo,t):
         part="snippet,status",
         body=dict(
             snippet=dict(
-                title=str(t)+" * " + uone  + " and " + utwo,
+                title="Created with {0} on {1}".format(utwo,t),
                 description="Tunesmash"
             ),
             status=dict(
