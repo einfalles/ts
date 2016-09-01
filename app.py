@@ -394,7 +394,8 @@ def create_recommendation():
         youtube = tsr.youtube_client(credentials)
         youtube_2 = tsr.youtube_client(credential_2)
         ytpid = tsr.insert_playlist(youtube=youtube,uone=uone['name'],utwo=utwo['name'],t=created_at)
-        ytpid_2 = tsr.insert_playlist(youtube=youtube,uone=utwo['name'],utwo=uone['name'],t=created_at)
+        ytpid_2 = tsr.insert_playlist(youtube=youtube_2,uone=utwo['name'],utwo=uone['name'],t=created_at)
+        print(ytpid_2)
     except:
         print('MAJOR ERROR: {0}'.format(sys.exc_info()[0]))
         raygun.send_exception(exc_info=sys.exc_info())
@@ -409,11 +410,15 @@ def create_recommendation():
     try:
         videos = tsr.insert_playlist_videos(youtube,tunesmash,ytpid)
         [tunesmash[i].append(videos[i])  for i in range(len(videos))]
+        print(videos)
         videos_2 = tsr.insert_playlist_videos_2(youtube_2,tunesmash,ytpid_2,videos)
     except tsr.HttpError as err:
         e = err
         str_error = e.content.decode('utf-8')
-        dict_error = json.loads(b)
+        dict_error = json.loads(str_error)
+        pprint.pprint(dict_error)
+        message.fb_notification(recipient=uone['id'],message='ERROR',created_at=s3,custom={'step':step})
+        message.fb_notification(recipient=utwo['id'],message='ERROR',created_at=s3,custom={'step':step})
         if dict_error['error']['code'] == 401:
             return not_found()
         return jsonify({'status':'fail'})
