@@ -196,7 +196,7 @@ def generate_two(user_id,first,second):
 def generate_three(user_id,status,other_id):
     user = session['credentials']['id_token']
     other = tsm.get_user(uid=other_id)
-    return render_template('generate_three_1.html',user_id=user_id,user_email=user['email'],user_avatar=user['avatar'],status=status,other_email=other['email'],other_id=other['id'],other_name=other['name'])
+    return render_template('generate_three_1.html',user_id=user_id,user_name=user['name'],user_email=user['email'],user_avatar=user['avatar'],status=status,other_email=other['email'],other_id=other['id'],other_name=other['name'])
 
 
 @app.route('/fcm', methods=['GET'])
