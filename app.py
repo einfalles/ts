@@ -388,13 +388,13 @@ def create_recommendation():
 
     t2 = time.time()
     try:
-        created_at = moment.utcnow().datetime.isoformat()
+        created_at = moment.now().date
         credentials = tsr.youtube_credentials(uone['email'])
         credential_2 = tsr.youtube_credentials(utwo['email'])
         youtube = tsr.youtube_client(credentials)
         youtube_2 = tsr.youtube_client(credential_2)
-        ytpid = tsr.insert_playlist(youtube=youtube,uone=uone['name'],utwo=utwo['name'],t=created_at)
-        ytpid_2 = tsr.insert_playlist(youtube=youtube_2,uone=utwo['name'],utwo=uone['name'],t=created_at)
+        ytpid = tsr.insert_playlist(youtube=youtube,uone=uone['name'],utwo=utwo['name'],year=created_at.year,month=created_at.month,day=created_at.day,hour=created_at.hour)
+        ytpid_2 = tsr.insert_playlist(youtube=youtube_2,uone=utwo['name'],utwo=uone['name'],year=created_at.year,month=created_at.month,day=created_at.day,hour=created_at.hour)
         print(ytpid_2)
     except:
         print('MAJOR ERROR: {0}'.format(sys.exc_info()[0]))
