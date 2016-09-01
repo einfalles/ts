@@ -141,12 +141,12 @@ def recommendations(seed_one, seed_two,limit,spotify):
 # Step 5
 #
 # ~~~~~~~~~~~~~~~~~
-def insert_playlist(youtube,uone,utwo,year,month,day):
+def insert_playlist(youtube,uone,utwo,year,month,day,hour):
     playlist = youtube.playlists().insert(
         part="snippet,status",
         body=dict(
             snippet=dict(
-                title="TuneSmash with {0} on {1}-{2}-{3}".format(utwo,year,month,day),
+                title="TuneSmash with {0} on {1}-{2}-{3}".format(utwo,year,month,day,hour),
                 description="Tunesmash"
             ),
             status=dict(
