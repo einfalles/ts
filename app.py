@@ -390,8 +390,11 @@ def create_recommendation():
     try:
         created_at = moment.utcnow().datetime.isoformat()
         credentials = tsr.youtube_credentials(uone['email'])
+        credential_2 = tsr.youtube_credentials(utwo['email'])
         youtube = tsr.youtube_client(credentials)
+        youtube_2 = tsr.youtube_client(credential_2)
         ytpid = tsr.insert_playlist(youtube=youtube,uone=uone['name'],utwo=utwo['name'],t=created_at)
+        ytpid_2 = tsr.insert_playlist(youtube=youtube,uone=utwo['name'],utwo=uone['name'],t=created_at)
     except:
         print('MAJOR ERROR: {0}'.format(sys.exc_info()[0]))
         raygun.send_exception(exc_info=sys.exc_info())
@@ -406,6 +409,7 @@ def create_recommendation():
     try:
         videos = tsr.insert_playlist_videos(youtube,tunesmash,ytpid)
         [tunesmash[i].append(videos[i])  for i in range(len(videos))]
+        videos_2 = tsr.insert_playlist_videos_2(youtube_2,tunesmash,ytpid_2,videos)
     except tsr.HttpError as err:
         e = err
         str_error = e.content.decode('utf-8')
@@ -435,7 +439,7 @@ def create_recommendation():
     s5 = time.time() - t4
     step = 5
     message.fb_notification(recipient=uone['id'],message=note,created_at=s5,custom={'step':step,'playlist_id':ytpid,'starting_video':videos[0]})
-    message.fb_notification(recipient=utwo['id'],message=note,created_at=s5,custom={'step':step,'playlist_id':ytpid,'starting_video':videos[0]})
+    message.fb_notification(recipient=utwo['id'],message=note,created_at=s5,custom={'step':step,'playlist_id':ytpid_2,'starting_video':videos[0]})
     # HOW CAN WE MAKE THIS STEP FASTER????
     tsm.db.session.close()
     return jsonify({'status':'ok','data':{'tunes':tunesmash,'playlist_id':ytpid,'starting_video':videos[0]},'execution_times':{1:s1,2:s2,3:s3,4:s4,5:s5}})

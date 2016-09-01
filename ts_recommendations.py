@@ -181,6 +181,20 @@ def insert_playlist_videos(youtube, recommendations, playlist_id):
                 }
             ).execute()
     return videos
+def insert_playlist_videos_2(youtube, recommendations, playlist_id,videos):
+    for song in videos:
+        add_video_request = youtube.playlistItems().insert(
+            part="snippet",
+            body={
+                    'snippet': {
+                      'playlistId': playlist_id,
+                      'resourceId': {
+                              'kind': 'youtube#video',
+                          'videoId': song
+                        }
+                    }
+            }
+        ).execute()
 
 # ~~~~~~~~~~~~~~~~~
 #
