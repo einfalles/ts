@@ -2,6 +2,7 @@ import spotipy
 import spotipy.oauth2 as oauth
 import httplib2
 import pprint
+import time
 import re
 import requests
 from apiclient.discovery import build
@@ -16,7 +17,10 @@ YOUTUBE_READ_WRITE_SCOPE = "https://www.googleapis.com/auth/youtube"
 YOUTUBE_API_SERVICE_NAME = "youtube"
 YOUTUBE_API_VERSION = "v3"
 YOUTUBE_API_KEY = "AIzaSyD8kls0eIplOLZ1B-Arf8_wlfQSnJkBFmg"
-
+SPOTIFY_INFO = {
+    'id':'4f8c3338b0b443a8895358db33763c6f',
+    'secret':'76cf6ff10bb041dbb0b11a3e7dd89fe1'
+}
 
 # ~~~~~~~~~~~~~~~~~
 #
@@ -37,6 +41,7 @@ def youtube_client(credentials):
 def spotify_client():
     sp_token = oauth.SpotifyClientCredentials(client_id='4f8c3338b0b443a8895358db33763c6f',client_secret='76cf6ff10bb041dbb0b11a3e7dd89fe1')
     return spotipy.Spotify(auth=sp_token.get_access_token())
+
 
 def youtube_client_cli(email):
     CLIENT_SECRETS_FILE = "client_secrets.json"

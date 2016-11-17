@@ -21,10 +21,12 @@
       <a class="primary button mb-6 periwinkle-purple" href="/users/{{user_id}}/playlists"  href="/">
         <button>Manage Playlist</button>
       </a>
-      <a class="primary button clementine-orange" href="/users/{{user_id}}/profile">
+      <a class="primary button mb-6 clementine-orange" href="/users/{{user_id}}/profile">
         <button>Edit Avatar</button>
       </a>
-
+      <a id="pl-create" class="primary button clementine-orange">
+        <button>SPOTIFY PLAYLIST</button>
+      </a>
     </main>
     <footer class="w-100 hide">
     </footer>
@@ -42,32 +44,28 @@
 <script src="https://www.gstatic.com/firebasejs/3.1.0/firebase.js"></script>
 <script>
 $(document).ready(function(){
-  console.log({{execution_time}});
   var postData = {
     'id': {{user_id}},
-    'email': "{{user_email}}",
-    'hid': "{{hid}}"
   };
-  if ("{{refresh}}" == "True"){
-    console.log("Getting new history");
     // POST TO BUMP ENDPOINT
-    $.ajax({
-      async: true,
-      contentType:"application/json",
-      url: '/ts/api/users/update/history',
-      dataType: 'json',
-      data: JSON.stringify(postData),
-      error: function(error){
-        console.log(error);
-      },
-      method: 'POST',
-      success: function(response){
-        console.log(response);
-      }
-    });
-  } else {
-    console.log("Nothing new");
-  }
+  $('#pl-create').on('click',function(){
+      $.ajax({
+        async: true,
+        contentType:"application/json",
+        url: '/ts/api/users/{{user_id}}/create_playlist',
+        dataType: 'json',
+        data: JSON.stringify(postData),
+        error: function(error){
+          alert('Failure');
+        },
+        method: 'POST',
+        success: function(response){
+          alert('Success');
+          console.log(response);
+        }
+      });
+  });
+
 });
 </script>
 </body>

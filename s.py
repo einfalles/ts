@@ -1,3 +1,6 @@
+"""
+TESTING SPOTIFY OAUTH
+"""
 import json
 import jsonify
 import httplib2
@@ -7,7 +10,6 @@ import sys
 import time
 import pprint
 import datetime
-import builtins
 
 import ts_auth as tsa
 import ts_recommendations as tsr
@@ -17,7 +19,7 @@ import ts_messaging as message
 from raygun4py import raygunprovider
 from flask import Flask, render_template, request, redirect, jsonify, session, url_for,send_file
 from oauth2client.contrib import multistore_file as oams
-# from werkzeug.contrib.profiler import ProfilerMiddleware
+
 
 
 #
@@ -25,9 +27,8 @@ from oauth2client.contrib import multistore_file as oams
 #
 app = Flask(__name__, static_url_path='')
 app.debug = True
-app.config['REFRESH_LIMIT'] = 15
-
 app.secret_key = 'duylamduylam'
+app.config['REFRESH_LIMIT'] = 15
 app.config['OAUTH_CREDENTIALS'] = {
     'google':{
         'id':'423012525826-42ued2niiiecpuvrehd445n83kt16ano.apps.googleusercontent.com',
@@ -47,6 +48,9 @@ raygun = raygunprovider.RaygunSender("aR9aPioLxr1y42IN3HqSnw==")
 #
 # ROUTING
 #
+@app.route('/sp_callback')
+def sp_callback():
+    return "hello"
 
 @app.route('/loaderio-c54d3912e32128c85bd19987caf3561e')
 def loaderio():
@@ -63,45 +67,47 @@ def index():
         'id': session['credentials']['id_token']['ts_uid'],
         'name': session['credentials']['id_token']['name'],
         'avatar': session['credentials']['id_token']['avatar'],
-        'email': session['credentials']['id_token']['email']
+        'email': session['credentials']['id_token']['email'],
+        'music_method': session['credentials']['id_token']['music_method']
     }
-    pprint.pprint(user)
+    pprint.pprint(session['credentials'])
     # user = tsm.get_user(uid=session['credentials']['id_token']['ts_uid'])
     # user = tsm.psyco_get_user(user_id=session['credentials']['id_token']['ts_uid'])
     # user = tsm.sqlalchemy_raw_get_user(user_id=session['credentials']['id_token']['ts_uid'])
     t1 = time.time() - t0
 
-    t2 = time.time()
-    credentials = tsr.youtube_credentials(user['email'])
-    session.permanent = True
-    if (credentials.token_expiry - datetime.datetime.utcnow()) < datetime.timedelta(minutes=app.config['REFRESH_LIMIT']):
-        credentials.refresh(httplib2.Http())
-    if credentials.invalid == True:
-        return redirect('/login')
-    t3 = time.time() - t2
+    if user['music_method'] == 'youtube':
+        try:
+            if 'etag' in session['credentials']['id_token']:
+                etag = session['credentials']['id_token']['etag']
+            else:
+                etag = None
+            t3 = time.time()
+            t4 = time.time()
+            credentials = tsr.youtube_credentials(user['email'])
+            youtube = tsr.youtube_client(credentials)
+            hid = tsr.playlist_history_id(youtube)
+            t5 = time.time() - t4
 
-    try:
-        if 'etag' in session['credentials']['id_token']:
-            etag = session['credentials']['id_token']['etag']
-        else:
-            etag = None
+            t6 = time.time()
+            go_no = tsr.is_history_updated(credentials=credentials,youtube=youtube,user_email=user['email'],etag=etag,hid=hid)
+            session['credentials']['id_token']['etag'] = go_no['etag']
+            t7 = time.time() - t6
 
-        t4 = time.time()
-        youtube = tsr.youtube_client(credentials)
-        hid = tsr.playlist_history_id(youtube)
-        t5 = time.time() - t4
+            tsm.db.session.close()
+            return render_template('home.html',refresh=go_no['refresh'],hid=hid,user_name=user['name'],user_email=user['email'],user_id=user['id'], execution_time={1:t1,2:t3,3:t5,4:t7})
+        except:
+            print('MAJOR ERROR')
+            raygun.send_exception(exc_info=sys.exc_info())
+            return jsonify({'status':'fail'})
 
-        t6 = time.time()
-        go_no = tsr.is_history_updated(credentials=credentials,youtube=youtube,user_email=user['email'],etag=etag,hid=hid)
-        session['credentials']['id_token']['etag'] = go_no['etag']
-        t7 = time.time() - t6
-
-        tsm.db.session.close()
-        return render_template('home.html',refresh=go_no['refresh'],hid=hid,user_name=user['name'],user_email=user['email'],user_id=user['id'], execution_time={1:t1,2:t3,3:t5,4:t7})
-    except:
-        print('MAJOR ERROR')
-        raygun.send_exception(exc_info=sys.exc_info())
-        return jsonify({'status':'fail'})
+    if user['music_method'] == 'spotify':
+        try:
+            return render_template('home.html',refresh=go_no['refresh'],hid=hid,user_name=user['name'],user_email=user['email'],user_id=user['id'], execution_time={1:t1,2:t3,3:t5,4:t7})
+        except:
+            print('MAJOR ERROR')
+            raygun.send_exception(exc_info=sys.exc_info())
+            return jsonify({'status':'fail'})
 
 # *************************
 # sign in
@@ -113,6 +119,7 @@ def auth():
         credentials = oauth.callback()
 
         session['credentials'] = json.loads(credentials.to_json())
+        session['credentials']['id_token']['music_method'] = 'youtube'
         user_email = session['credentials']['id_token']['email']
         user_name = session['credentials']['id_token']['name']
         session['credentials']['id_token']['new'] = False
@@ -134,7 +141,7 @@ def auth():
             session['credentials']['id_token']['name'] = user['name']
             session['credentials']['id_token']['avatar'] = user['avatar']
             session['credentials']['id_token']['ts_uid'] = user['id']
-        session.permanent = True
+        # session.permanent = True
         tsm.db.session.close()
     except:
         print('MAJOR ERROR AT BUMP: {0}'.format(sys.exc_info()[0]))
@@ -142,24 +149,19 @@ def auth():
         return "Something broke. Sorry :( Try again soon."
     return redirect("/")
 
-@app.route('/login')
-def login():
-    oauth = tsa.OAuthSignIn.get_provider("google")
-    return redirect(oauth.authorize())
 
 @app.route('/sp/auth')
 def spotify_auth():
     oauth = tsa.OAuthSignIn.get_provider("spotify")
-    oauth.callback()
-    pprint.pprint(oauth.results)
-    user_email = oauth.results['spotify_user_id']
-    user_refresh_token = oauth.results['refresh_token']
-    user_refresh_expiration = oauth.results['expires_at']
-    user_access_token = oauth.results['access_token']
-    user_name = oauth.results['name']
-    user_spid_but_actually_its_their_email = oauth.results['email']
+    results = oauth.callback()
+    session['credentials'] = {'id_token':{}}
+    session['credentials']['id_token'] = results
+    session['credentials']['id_token']['music_method'] = 'spotify'
+    user_email = session['credentials']['id_token']['spotify_user_id']
+    user_name = session['credentials']['id_token']['name']
+    session['credentials']['id_token']['new'] = False
     user = tsm.get_user(email=user_email)
-    session['credentials'] = {'id_token':{'email':'','ts_uid':'','name':'','avatar':'','new':False}}
+    # return jsonify({'user':user})
     if user == None:
         session['credentials']['id_token']['new'] = True
         user = tsm.User(user_name,user_email,'/images/female/0.png')
@@ -168,17 +170,19 @@ def spotify_auth():
         session['credentials']['id_token']['ts_uid'] = user.id
         session['credentials']['id_token']['name'] = user.name
         session['credentials']['id_token']['avatar'] = user.avatar
-        session['credentials']['id_token']['email'] = user.email
         tsm.db.session.commit()
     else:
         session['credentials']['id_token']['name'] = user['name']
         session['credentials']['id_token']['avatar'] = user['avatar']
         session['credentials']['id_token']['ts_uid'] = user['id']
-        session['credentials']['id_token']['email'] = user['email']
-    session.permanent = True
     tsm.db.session.close()
-
     return redirect("/")
+
+@app.route('/login')
+def login():
+    oauth = tsa.OAuthSignIn.get_provider("google")
+    return redirect(oauth.authorize())
+
 
 @app.route('/sp/login')
 def spotify_login():
