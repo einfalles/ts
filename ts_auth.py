@@ -15,10 +15,12 @@ date of last edit:
 
 Copyright (c) Rad Kitchen Inc. All rights reserved.
 """
+import json
 import pprint
 import httplib2
 import spotipy
 import spotipy.oauth2 as spoauth
+import requests
 from flask import Flask, render_template, request, redirect, jsonify, session, url_for,current_app
 from oauth2client.client import OAuth2WebServerFlow, flow_from_clientsecrets
 from oauth2client.tools import run_flow
@@ -27,6 +29,10 @@ PROD_AUTH = 'http://tunesmash.herokuapp.com/auth'
 APP_AUTH = 'http://app.tunesmash.org/auth'
 DEV_AUTH = 'http://localhost:5000/auth'
 SP_DEV_AUTH = 'http://localhost:5000/sp/auth'
+SPOTIFY_INFO = {
+    'id':'4f8c3338b0b443a8895358db33763c6f',
+    'secret':'76cf6ff10bb041dbb0b11a3e7dd89fe1'
+}
 
 class OAuthSignIn(object):
     providers = None
@@ -103,11 +109,11 @@ class SpotifySignIn(OAuthSignIn):
             'expires_at': expires_at,
             'refresh_token': refresh_token
         }
-        print(' ')
-        print("**** &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& ****")
-        pprint.pprint(results)
-        print(type(results))
-        print("**** &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& ****")
-        print(' ')
+
         self.results = results
         return "hello"
+
+    def refresh(self,refresh_token):
+        # r = requests.post('https://accounts.spotify.com/api/token',json.dumps({'grant_type':'refresh_token','refresh_token':refresh_token}),auth=(SPOTIFY_INFO['id'],SPOTIFY_INFO['secret']))
+        token_info = self.oauth._refresh_access_token(refresh_token=refresh_token)
+        return token_info

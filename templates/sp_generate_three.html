@@ -82,12 +82,14 @@
       'uone': {
         'id':{{user_id}},
         'email':"{{user_email}}",
-        'name': "{{user_name}}"
+        'name': "{{user_name}}",
+        'song': "{{user_song}}"
       },
       'utwo': {
         'id':{{other_id}},
         'email':"{{other_email}}",
-        'name': "{{other_name}}"
+        'name': "{{other_name}}",
+        'song':"{{other_song}}"
       }
     }
 
@@ -108,13 +110,16 @@
           $(this).addClass('hide');
         } else {
           $(this).removeClass('hide');
-          if ($(this).data('step')==5) {
-            var url = 'https://www.youtube.com/watch?v=';
-            var video = data['custom']['starting_video'];
-            var playlist = data['custom']['playlist_id'];
-            url = url + video + '&list=' + playlist;
-            console.log(url);
-            $('#listen-to-playlist').attr('href',url);
+          if ($(this).data('step')==2) {
+
+            window.open(data['custom']['playlist_url']);
+
+            // var url = 'https://www.youtube.com/watch?v=';
+            // var video = data['custom']['starting_video'];
+            // var playlist = data['custom']['playlist_id'];
+            // url = url + video + '&list=' + playlist;
+            // console.log(url);
+            // $('#listen-to-playlist').attr('href',url);
             // window.open('https://www.youtube.com/playlist?list=' + data['custom']['playlist_id']);
           }
         }
@@ -122,6 +127,7 @@
       notification.child(snapshot.key).remove();
     });
     if (status == "win") {
+      alert('win');
       $.ajax({
         async: true,
         contentType:"application/json",
@@ -134,26 +140,23 @@
         },
         method: 'POST',
         success: function(response){
-          console.log(response);
-          var postData = {
-            'tunes': response['data']['tunes'],
-            'playlist_id': response['data']['playlist_id']
-          };
-          $.ajax({
-            async: true,
-            contentType:"application/json",
-            url: '/ts/api/generate/recommendation/song_run',
-            dataType: 'json',
-            data: JSON.stringify(postData),
-            error: function(error){
-              console.log(error);
-            },
-            method: 'POST',
-            success: function(response){
-              console.log(response);
-
-            }
-          });
+          alert('successfully made recommendation. check it out');
+          location.href = '/';
+          // $.ajax({
+          //   async: true,
+          //   contentType:"application/json",
+          //   url: '/ts/api/generate/recommendation/song_run',
+          //   dataType: 'json',
+          //   data: JSON.stringify(postData),
+          //   error: function(error){
+          //     console.log(error);
+          //   },
+          //   method: 'POST',
+          //   success: function(response){
+          //     console.log(response);
+          //
+          //   }
+          // });
           return false;
         }
       });

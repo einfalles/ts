@@ -2,6 +2,7 @@ import json
 import jsonify
 import httplib2
 import gevent
+import moment
 import sys
 import time
 import pprint
@@ -44,17 +45,31 @@ raygun = raygunprovider.RaygunSender("aR9aPioLxr1y42IN3HqSnw==")
 def index():
     if 'credentials' not in session:
         return render_template('index.html')
+    print('YOYOYOYOYO ****************************')
 
     user = {
         'id': session['credentials']['id_token']['ts_uid'],
         'name': session['credentials']['id_token']['name'],
         'avatar': session['credentials']['id_token']['avatar'],
-        'email': session['credentials']['id_token']['email']
+        'email': session['credentials']['id_token']['email'],
+        'access_token': session['credentials']['id_token']['access_token'],
+        'refresh_token':session['credentials']['id_token']['refresh_token'],
+        'expires_at':session['credentials']['id_token']['expires_at'],
+        'songs': session['credentials']['id_token']['songs']
     }
 
-    return render_template('sphome.html',user=user,user_id=user['id'])
+    # if (user['expires_at'] - datetime.datetime.utcnow()) < datetime.timedelta(minutes=15):
+
+    # if (credentials.token_expiry - datetime.datetime.utcnow()) < datetime.timedelta(minutes=15):
+    #     credentials.refresh(httplib2.Http())
+
+    return render_template('sphome.html',user=user)
 
 
+@app.route('/sp/logout')
+def view_logout():
+    session.pop('credentials', None)
+    return redirect('/')
 
 # ******************************************************************* #
 #                              sign in                                #
@@ -70,16 +85,20 @@ def spotify_auth():
     session['credentials'] = {
         'id_token': {
             'access_token':'',
+            'expires_at':'',
             'refresh_token':'',
             'email':'',
             'ts_uid':'',
             'name':'',
             'avatar':'',
-            'new':False
+            'new':False,
+            'songs':[]
             }
     }
+
     oauth = tsa.OAuthSignIn.get_provider("spotify")
     oauth.callback()
+
     user_email = oauth.results['spotify_user_id']
     user_refresh_token = oauth.results['refresh_token']
     user_refresh_expiration = oauth.results['expires_at']
@@ -88,7 +107,6 @@ def spotify_auth():
     user_spid_but_actually_its_their_email = oauth.results['email']
 
     user = tsm.get_user(email=user_email)
-
     if user == None:
         user = tsm.User(user_name,user_email,'/images/female/0.png')
         tsm.db.session.add(user)
@@ -98,12 +116,15 @@ def spotify_auth():
     else:
         session['credentials']['id_token']['ts_uid'] = user['id']
 
-    session['credentials']['id_token']['email'] = user['email']
+    session['credentials']['id_token']['email'] = user_email
+    session['credentials']['id_token']['expires_at'] = user_refresh_expiration
     session['credentials']['id_token']['access_token'] = user_access_token
     session['credentials']['id_token']['refresh_token'] = user_refresh_token
-    session['credentials']['id_token']['name'] = user['name']
-    session['credentials']['id_token']['avatar'] = user['avatar']
-
+    session['credentials']['id_token']['name'] = user_name
+    session['credentials']['id_token']['avatar'] = '/images/female/0.png'
+    sp = tsr.sp_user_client(session['credentials']['id_token']['access_token'])
+    top_tracks_ids = tsr.sp_get_user_top_tracks(sp)
+    session['credentials']['id_token']['songs'] = top_tracks_ids
     tsm.db.session.close()
 
     return redirect('/')
@@ -146,25 +167,110 @@ def view_profile_avatar_gender(user_id,gender):
 # ******************************************************************* #
 #                          make a playlist                            #
 # ******************************************************************* #
-@app.route('/generate/one/<int:user_id>', methods=['GET'])
-def generate_one(user_id):
-    return render_template('sp_generate_one.html',user_avatar=session['credentials']['id_token']['avatar'],user_email=session['credentials']['id_token']['email'],user_name=session['credentials']['id_token']['name'],user_id=user_id)
+@app.route('/generate/one', methods=['GET'])
+def generate_one():
+    user = {
+        'id': session['credentials']['id_token']['ts_uid'],
+        'name': session['credentials']['id_token']['name'],
+        'avatar': session['credentials']['id_token']['avatar'],
+        'email': session['credentials']['id_token']['email'],
+        'accesss_token': session['credentials']['id_token']['access_token'],
+        'refresh_token':session['credentials']['id_token']['refresh_token'],
+        'expires_at':session['credentials']['id_token']['expires_at'],
+        'songs': session['credentials']['id_token']['songs']
+    }
+    return render_template('sp_generate_one.html',user=user)
 
-@app.route('/generate/two/<int:user_id>/<int:first>/<int:second>')
-def generate_two(user_id,first,second):
-    return render_template('sp_generate_two.html',first=first,second=second,user_id=user_id)
+@app.route('/generate/two/<int:user_id>/<user_song>/<int:other_id>/<other_song>')
+def generate_two(user_id,user_song,other_id,other_song):
+    print("user {0} // user song {1} // other id {2} // other song {3}".format(user_id,user_song,other_id,other_song))
+    return render_template('sp_generate_two.html',user_id=user_id,user_song=user_song,other_id=other_id,other_song=other_song)
 
-@app.route('/generate/three/<int:user_id>/<status>/<int:other_id>')
-def generate_three(user_id,status,other_id):
+@app.route('/generate/three/<int:user_id>/<status>/<user_song>/<other_song>/<int:other_id>')
+def generate_three(user_id,status,user_song,other_song,other_id):
     user = session['credentials']['id_token']
     other = tsm.get_user(uid=other_id)
-    return render_template('sp_generate_three_1.html',user_id=user_id,user_name=user['name'],user_email=user['email'],user_avatar=user['avatar'],status=status,other_email=other['email'],other_id=other['id'],other_name=other['name'])
+    return render_template('sp_generate_three.html',user_song=user_song,other_song=other_song,user_id=user_id,user_name=user['name'],user_email=user['email'],user_avatar=user['avatar'],status=status,other_email=other['email'],other_id=other['id'],other_name=other['name'])
 
 
 
 # $$$$$$$$$$$$$$$$$$$$$$$$ # # $$$$$$$$$$$$$$$$$$$$$$$$ # # $$$$$$$$$$$$$$$$$$ #
 #       RESTFUL API        # #       RESTFUL API        # #    RESTFUL API     #
-# $$$$$$$$$$$$$$$$$$$$$$$$ # # $$$$$$$$$$$$$$$$$$$$$$$$ # # $$$$$$$$$$$$$$$$$$ # 
+# $$$$$$$$$$$$$$$$$$$$$$$$ # # $$$$$$$$$$$$$$$$$$$$$$$$ # # $$$$$$$$$$$$$$$$$$ #
+
+# this end point logs a message from a user. then it checks if someone has sent
+# a message to the user
+@app.route('/ts/api/generate/bump', methods=['POST'])
+def generate_bump():
+    fr = request.json['fr']
+    to = request.json['to']
+    time.sleep(2)
+    created_at = moment.utcnow().datetime
+    delta = datetime.timedelta(minutes=1)
+    limit = created_at - delta
+    match = tsm.db.session.query(tsm.db.exists().where(
+        tsm.db.and_(
+            tsm.Bump.created_at >= limit,
+            tsm.Bump.fr == to,
+            tsm.Bump.too == fr
+        )
+    )).scalar()
+
+    try:
+        if match == True:
+            message.fb_notification(fr,'matched',created_at.isoformat(),{'step': 1,'winner': True})
+            message.fb_notification(to,'matched',created_at.isoformat(),{'step': 1,'winner': False})
+        bump = tsm.Bump(fr=fr,too=to,created_at=created_at.isoformat())
+        tsm.db.session.add(bump)
+        tsm.db.session.commit()
+        tsm.db.session.close()
+        return jsonify({'status':'ok'})
+
+    except:
+        print('MAJOR ERROR AT BUMP: {0}'.format(sys.exc_info()[0]))
+        raygun.send_exception(exc_info=sys.exc_info())
+        return jsonify({'status':'fail','error':'error'})
+
+# this endpoint receives a request by the user and creates the recommendations
+@app.route('/ts/api/generate/recommendation', methods=['POST'])
+def create_recommendation():
+    note = 'Route: Recommendation'
+    t = moment.utcnow().datetime.isoformat()
+    location = 'JAMAICA'
+    uone = request.json['uone']
+    utwo = request.json['utwo']
+    print("YOOOO RECCS")
+    print(uone)
+    songs = [uone['song'],utwo['song']]
+
+    oauth = tsa.OAuthSignIn.get_provider("spotify")
+    new_token = oauth.refresh(refresh_token=session['credentials']['id_token']['refresh_token'])
+
+    session['credentials']['id_token']['expires_at'] = new_token['expires_at']
+    session['credentials']['id_token']['access_token'] = new_token['access_token']
+
+    sp = tsr.sp_user_client(session['credentials']['id_token']['access_token'])
+    playlist_songs = tsr.sp_get_user_recommendations(sp,songs)
+    playlist = tsr.sp_create_user_playlist(sp,session['credentials']['id_token']['email'],playlist_songs,uone['name'],utwo['name'])
+
+    # message.fb_notification(recipient=uone['id'],message=note,created_at=1,custom={'step':1})
+    # message.fb_notification(recipient=utwo['id'],message=note,created_at=1,custom={'step':1})
+    # try:
+    #     histories = tsm.zzzistory(uone['id'],utwo['id'])
+    #     spotify = tsr.spotify_client()
+    #     tunesmash = tsr.recommendations(histories[uone['id']]['sp_uri'],histories[utwo['id']]['sp_uri'],50,spotify)
+    #     tunesmash = tsr._audio_features(tunesmash,spotify)
+    #     tunesmash = tsr._sort_bell(tunesmash)
+    #     tunesmash = tsr._remove_metric_tempo(tunesmash)
+    # except:
+    #     print('MAJOR ERROR: {0}'.format(sys.exc_info()[0]))
+    #     raygun.send_exception(exc_info=sys.exc_info())
+    #     return jsonify({'status':'fail','execution_times':{1:s1}})
+    #
+    message.fb_notification(recipient=uone['id'],message=note,created_at=2,custom={'step':2,'playlist_url':playlist['external_urls']['spotify']})
+    message.fb_notification(recipient=utwo['id'],message=note,created_at=2,custom={'step':2,'playlist_url':playlist['external_urls']['spotify']})
+    # tsm.db.session.close()
+    return jsonify({'status':'ok','data':playlist['external_urls']['spotify']})
 
 
 if __name__ == "__main__":

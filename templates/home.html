@@ -48,26 +48,6 @@ $(document).ready(function(){
     'email': "{{user_email}}",
     'hid': "{{hid}}"
   };
-  if ("{{refresh}}" == "True"){
-    console.log("Getting new history");
-    // POST TO BUMP ENDPOINT
-    $.ajax({
-      async: true,
-      contentType:"application/json",
-      url: '/ts/api/users/update/history',
-      dataType: 'json',
-      data: JSON.stringify(postData),
-      error: function(error){
-        console.log(error);
-      },
-      method: 'POST',
-      success: function(response){
-        console.log(response);
-      }
-    });
-  } else {
-    console.log("Nothing new");
-  }
 });
 </script>
 </body>

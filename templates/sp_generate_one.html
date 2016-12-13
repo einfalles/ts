@@ -48,7 +48,7 @@
   firebase.initializeApp(config);
   var d = new Date()
   var chat = firebase.database().ref('/chat');
-  var vistor = {'uid':{{user_id}},'email':"{{user_email}}",'name':"{{user_name}}",'avatar':'{{user_avatar}}','time':d.getTime(),'location':000}
+  var vistor = {'uid':{{user['id']}},'songs':["{{user['songs'][0]}}","{{user['songs'][1]}}"],'email':"{{user['email']}}",'name':"{{user['name']}}",'avatar':'{{user['avatar']}}','time':d.getTime(),'location':000}
   var vistorRef = chat.push(vistor);
   vistorRef.onDisconnect().remove();
 
@@ -56,8 +56,8 @@
     count = 0;
     chat.on('child_added',function (snapshot){
       var data = snapshot.val();
-      var one = {{user_id}};
-      var two = snapshot.val()['uid'];
+      var one = {{user['id']}};
+      var two = data['uid'];
       var first = 0;
       var second = 0;
       if (one > two) {
@@ -67,9 +67,10 @@
         first = two;
         second = one;
       }
-      var href = '/generate/two/'+ one.toString() +'/'+first+'/'+second;
+      console.log(two);
+      var href = '/generate/two/'+ one.toString()+'/'+"{{user['songs'][0]}}"+'/'+two+'/'+data['songs'][0];
       $('ul').append('<li id="'+ snapshot.key+'">'+'<img src="'+ data['avatar'] +'"/>'+'<a class="clickbait fs-7"'+"href='" +href+"'"+' data-email="'+ data['email']+'" data-id="'+data['uid'] +'"'+'>'+data['name']+'</a><span> > </span></li>');
-      if (data['uid'] == {{user_id}}){
+      if (data['uid'] == {{user['id']}}){
         $('ul li').filter('#'+snapshot.key).remove();
       }
       if (data['uid'] == undefined) {

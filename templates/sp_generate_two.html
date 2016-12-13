@@ -28,16 +28,9 @@
   <script src="https://www.gstatic.com/firebasejs/3.1.0/firebase.js"></script>
   <script>
   $(document).ready(function(){
-    if ({{first}} == {{user_id}}) {
-      var to = {{second}}
-    } else {
-      var to = {{first}}
-    }
     var postData = {
-      'first': {{first}},
-      'second': {{second}},
       'fr': {{user_id}},
-      'to': to,
+      'to': {{other_id}},
       'created_at': 1999
     };
     var config = {
@@ -72,9 +65,9 @@
         var data = snapshot.val();
         var href='';
         if (data['custom']['winner'] == true ) {
-          href = '/generate/three/{{user_id}}/win/'+to.toString();
+          href = '/generate/three/{{user_id}}/win/{{user_song}}/{{other_song}}/'+"{{other_id}}";
         } else {
-          href = '/generate/three/{{user_id}}/lose/'+to.toString();
+          href = '/generate/three/{{user_id}}/lose/{{user_song}}/{{other_song}}/'+"{{other_id}}";
         }
         notification.child(snapshot.key).remove();
         location.href = href;
