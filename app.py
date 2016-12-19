@@ -14,10 +14,16 @@ import sys
 import pprint
 import random
 import datetime
+<<<<<<< HEAD
 import time
 import moment
 import ts_authentication as tsa
 import ts_recommendation as tsr
+=======
+
+import ts_auth as tsa
+import ts_recommendations as tsr
+>>>>>>> parent of d2f02c1... the next step is to break out each of the spotify functions into separate apis and then get each screen to call each api.
 import ts_models as tsm
 import ts_utils as tsu
 from flask import Flask, request, session, redirect, render_template,jsonify
@@ -25,9 +31,31 @@ from flask import Flask, request, session, redirect, render_template,jsonify
 app = Flask(__name__, static_url_path='')
 app.config['DEBUG'] = True
 app.secret_key = 'duylamduylam'
+<<<<<<< HEAD
+=======
+app.config['OAUTH_CREDENTIALS'] = {
+    'google':{
+        'id':'423012525826-42ued2niiiecpuvrehd445n83kt16ano.apps.googleusercontent.com',
+        'secret':'e2oBEpfgl3HVwU94UjFolXL8'
+    }
+}
+# app.config['PROFILE'] = True
+# app.wsgi_app = ProfilerMiddleware(app.wsgi_app, restrictions=[30])
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 604800
+raygun = raygunprovider.RaygunSender("aR9aPioLxr1y42IN3HqSnw==")
+>>>>>>> parent of d2f02c1... the next step is to break out each of the spotify functions into separate apis and then get each screen to call each api.
 
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 604800
 
+<<<<<<< HEAD
+=======
+#
+# ROUTING
+#
+@app.route('/loaderio-c54d3912e32128c85bd19987caf3561e')
+def loaderio():
+    return send_file('/js/loaderio-c54d3912e32128c85bd19987caf3561e.txt', attachment_filename='loaderio-c54d3912e32128c85bd19987caf3561e.txt')
+>>>>>>> parent of d2f02c1... the next step is to break out each of the spotify functions into separate apis and then get each screen to call each api.
 
 @app.route('/')
 def index():
@@ -77,6 +105,7 @@ def auth_yt_login():
     oauth = tsa.OAuthSignIn.get_provider("google")
     return redirect(oauth.authorize())
 
+<<<<<<< HEAD
 @app.route('/auth/yt/authenticate')
 def auth_yt_authenticate():
     avatars = ['http://24.media.tumblr.com/Jjkybd3nSaqkbdxdY4fYtymI_500.jpg','http://25.media.tumblr.com/tumblr_m1287x1hpN1qjahcpo1_500.jpg','http://25.media.tumblr.com/tumblr_lu6ch9jMg51r4xjo2o1_1280.jpg']
@@ -150,6 +179,91 @@ def auth_sp_authenticate():
         session['credentials']['id_token']['ts_uid'] = user['id']
 
 
+=======
+# *************************
+# manage playlists
+# *************************
+@app.route('/users/<int:user_id>/playlists', methods=['GET'])
+def view_playlists(user_id):
+    return render_template('playlists_one.html',user_id=user_id)
+
+@app.route('/users/<int:user_id>/playlists/<int:playlist_id>/<url>/<name>', methods=['GET'])
+def view_playlist_songs(user_id,playlist_id,url,name):
+    return render_template('playlists_two.html',pid=playlist_id,user_id=user_id,name=name,url=url)
+
+# *************************
+# manage account
+# *************************
+@app.route('/users/<int:user_id>/profile', methods=['GET'])
+def view_profile(user_id):
+    return render_template('profile.html',user_avatar=session['credentials']['id_token']['avatar'],user_name=session['credentials']['id_token']['name'],user_id=user_id)
+
+@app.route('/users/<int:user_id>/profile/account', methods=['GET'])
+def view_profile_name(user_id):
+    return render_template('profile_name.html',user_id=user_id)
+
+@app.route('/users/<int:user_id>/profile/avatar', methods=['GET'])
+def view_profile_avatar(user_id):
+    return render_template('profile_avatars.html',user_id=user_id)
+
+@app.route('/users/<int:user_id>/profile/avatar/<gender>', methods=['GET'])
+def view_profile_avatar_gender(user_id,gender):
+    f  = list(range(0,20))
+    return render_template('profile_avatar_gender.html',user_id=user_id,gender=gender,f=f)
+
+# *************************
+# make a playlist
+# *************************
+@app.route('/generate/one/old', methods=['GET'])
+def generate_select():
+    return render_template('generate_one.html')
+
+@app.route('/generate/two/<int:user_id>',methods=['GET'])
+def generate_match(user_id):
+    match = tsm.get_user(uid=user_id)
+    return render_template('generate_two.html',match=match)
+
+@app.route('/generate/one/<int:user_id>', methods=['GET'])
+def generate_one(user_id):
+    return render_template('generate_one_1.html',user_avatar=session['credentials']['id_token']['avatar'],user_email=session['credentials']['id_token']['email'],user_name=session['credentials']['id_token']['name'],user_id=user_id)
+
+@app.route('/generate/two/<int:user_id>/<int:first>/<int:second>')
+def generate_two(user_id,first,second):
+    return render_template('generate_two_1.html',first=first,second=second,user_id=user_id)
+
+@app.route('/generate/three/<int:user_id>/<status>/<int:other_id>')
+def generate_three(user_id,status,other_id):
+    user = session['credentials']['id_token']
+    other = tsm.get_user(uid=other_id)
+    return render_template('generate_three_1.html',user_id=user_id,user_name=user['name'],user_email=user['email'],user_avatar=user['avatar'],status=status,other_email=other['email'],other_id=other['id'],other_name=other['name'])
+
+
+@app.route('/fcm', methods=['GET'])
+def fcm():
+    user = session['credentials']['id_token']
+    credentials = tsr.youtube_credentials(user['email'])
+    youtube = tsr.youtube_client(credentials)
+    hid = tsr.playlist_history_id(youtube)
+    return render_template('fcm.html',hid=hid,user_email=user['email'],user_id=user['ts_uid'])
+
+
+
+# $$$$$$$$$$$$$$$$$$$$$$$$ #
+#       RESTFUL API        #
+# $$$$$$$$$$$$$$$$$$$$$$$$ #
+
+@app.route('/ts/api/users/<int:user_id>/update', methods=['POST'])
+def avatar_update(user_id):
+    pprint.pprint(request.json['data'])
+    # time: start
+    t0 = time.time()
+    field = request.json['update']
+    data = request.json['data']
+    tsm.User.query.filter(tsm.User.id==user_id).update({field:data})
+    tsm.db.session.commit()
+    session['credentials']['id_token'][field] = data
+    tsm.db.session.close()
+>>>>>>> parent of d2f02c1... the next step is to break out each of the spotify functions into separate apis and then get each screen to call each api.
 
 @app.route('/new/step1')
 def view_new_one():

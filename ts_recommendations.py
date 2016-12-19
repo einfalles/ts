@@ -2,7 +2,6 @@ import spotipy
 import spotipy.oauth2 as oauth
 import httplib2
 import pprint
-import time
 import re
 import requests
 from apiclient.discovery import build
@@ -17,10 +16,7 @@ YOUTUBE_READ_WRITE_SCOPE = "https://www.googleapis.com/auth/youtube"
 YOUTUBE_API_SERVICE_NAME = "youtube"
 YOUTUBE_API_VERSION = "v3"
 YOUTUBE_API_KEY = "AIzaSyD8kls0eIplOLZ1B-Arf8_wlfQSnJkBFmg"
-SPOTIFY_INFO = {
-    'id':'4f8c3338b0b443a8895358db33763c6f',
-    'secret':'76cf6ff10bb041dbb0b11a3e7dd89fe1'
-}
+
 
 # ~~~~~~~~~~~~~~~~~
 #
@@ -42,6 +38,7 @@ def spotify_client():
     sp_token = oauth.SpotifyClientCredentials(client_id='4f8c3338b0b443a8895358db33763c6f',client_secret='76cf6ff10bb041dbb0b11a3e7dd89fe1')
     return spotipy.Spotify(auth=sp_token.get_access_token())
 
+<<<<<<< HEAD
 
 # def youtube_client_cli(email):
 #     CLIENT_SECRETS_FILE = "client_secrets.json"
@@ -53,6 +50,18 @@ def spotify_client():
 #         credentials = run_flow(flow, store)
 #     store.put(credentials)
 #     return credentials
+=======
+def youtube_client_cli(email):
+    CLIENT_SECRETS_FILE = "client_secrets.json"
+    flow = flow_from_clientsecrets(CLIENT_SECRETS_FILE, scope=YOUTUBE_READ_WRITE_SCOPE,message=MISSING_CLIENT_SECRETS_MESSAGE)
+    flow.params['access_type'] = 'offline'
+    store = oams.get_credential_storage(filename='multi.json',client_id=email,user_agent='app',scope=['https://www.googleapis.com/auth/youtube','https://www.googleapis.com/auth/userinfo.profile'])
+    credentials = store.get()
+    if credentials is None or credentials.invalid == True:
+        credentials = run_flow(flow, store)
+    store.put(credentials)
+    return credentials
+>>>>>>> parent of d2f02c1... the next step is to break out each of the spotify functions into separate apis and then get each screen to call each api.
 
 # ~~~~~~~~~~~~~~~~~
 #
