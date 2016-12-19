@@ -1,0 +1,122 @@
+{% include 'base_head.html' %}
+<div class="container">
+  <div class="mobile row h-100-vp">
+    <div class="twelve columns display-start h-100-vp">
+      <header class="header w-100 display-center">
+        <h2 class="page-header">TuneSmash</h2>
+      </header>
+      <main class="m-t-auto">
+        <form>
+          <input type='text' value="" class="w-100" placeholder="Recent song?" name='song'></input>
+          <input type='text' value="" class="w-100" placeholder="The song's artist" name='artist'></input>
+        </form>
+        <button id='check-song' class='show'>Continue></button>
+        <a id='submit-song' href='/' class='button-faux hidden'>Yes</a>
+      </main>
+      <footer class="h-0"></footer>
+    </div>
+  </div>
+</div>
+<style>
+.button-faux {
+  border: 1px solid grey;
+  padding:1rem;
+  text-decoration: none;
+  color: black;
+}
+.hidden {
+  display: none;
+}
+.show {
+  display: block;
+}
+</style>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script>
+$(document).ready(function(){
+  $('#check-song').on('click',function(){
+    var data = $('form').serializeArray();
+    var query = '';
+    for (i=0;i<data.length;i++){
+      if (data[i]['name'] == 'song'){
+        query = query + ' track:' + data[i]['value'];
+      }
+      else if (data[i]['name'] == 'artist'){
+        query = query + ' artist:' + data[i]['value'];
+      }
+    }
+    console.log(query)
+    $.ajax({
+      url: 'https://api.spotify.com/v1/search',
+      data: {
+        q: query,
+        type: 'track'
+      },
+      error: function(){
+        alert("Hmm. Didn't find the song. Check your spelling.");
+        location.href = '/';
+      },
+      success: function (response) {
+        var data = response['tracks'];
+        if (!('items' in data)){
+          alert("Hmm. Didn't find the song. Check your spelling.");
+          location.href = '/';
+        }
+        else {
+          var potential_songs = data['items'];
+          $('form').empty();
+          for (i=0; i<potential_songs.length;i++){
+            var song = {
+              'image': potential_songs[i]['album']['images'][0]['url'],
+              'name': potential_songs[i]['name'],
+              'artist': potential_songs[i]['artists'][0]['name'],
+              'preview': potential_songs[i]['preview_url'],
+              'spotify_id': potential_songs[i]['id']
+            }
+            $('form').append(
+              "<label>\
+                <input type='radio' name='user_song' value='"+song['spotify_id']+"' class='row' id=''/>\
+                <img width='20%' src='"+song['image']+"' />\
+                <p>"+ song['name']+"</p>\
+                <p>"+ song['artist']+"</p>\
+                <audio controls>\
+                  <source src="+song['preview']+" type='audio/mpeg'>\
+                Your browser does not support the audio element.\
+                </audio>\
+              </label>"
+            );
+          }
+        }
+      }
+    });
+  });
+  $('#check-song').on('click',function(){
+    $(this).removeClass('show').addClass('hidden');
+    $('#submit-song').addClass('show');
+  });
+  $('#submit-song').on('click',function(){
+    var spotify_id = $('input[name=user_song]:checked', 'form').val();
+    var postData = {
+      'user_id': {{user_id}},
+      'spotify_id': spotify_id
+    }
+    $.ajax({
+      async: true,
+      contentType:"application/json",
+      url: '/ts/api/user/history',
+      dataType: 'json',
+      data: JSON.stringify(postData),
+      error: function(){
+        alert("Hmm. Something didn't work. Could you try again?");
+        location.href = '/';
+      },
+      method: 'POST',
+      success: function (response) {
+          console.log(response)
+      }
+    }); // end ajax
+
+  }); // end submit event listern
+});
+</script>
+{% include 'base_foot.html' %}

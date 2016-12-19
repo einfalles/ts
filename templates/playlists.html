@@ -1,0 +1,77 @@
+<div class="container">
+    <div class="mobile-view">
+      <header class="w-100">
+        <a class="navigation-button" href="/">
+          <button class="navigation"><</button>
+        </a>
+        <h5>Your Playlists</h5>
+      </header>
+      <main class="w-100">
+        <ul class="w-100" id="playlist">
+        {% for result in user %}
+          <li style="font-size:12px;"><a href="{{result['url']}}">Playlist with {{result['recipient']['name']}}</a></li>
+        {% endfor %}
+        </ul>
+      </main>
+      <footer class="w-100 hide">
+        {{execution_time}}
+      </footer>
+    </div>
+  </div>
+  <style>
+    style { display:none;}
+    script { display:none;}
+    title {display:none;}
+    .hide {display:none;}
+  </style>
+  <link href='https://fonts.googleapis.com/css?family=Press+Start+2P' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="/css/normalize.css">
+  <link rel="stylesheet" href="/css/skeleton.css">
+  <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+  <script>
+  $(document).ready(function(){
+    // var postData = {
+    //   'user_id': "{{user['id']}}"
+    // };
+    // $.ajax({
+    //   async: true,
+    //   cache: true,
+    //   context: document.getElementById('playlist'),
+    //   url: '/ts/api/user/playlists',
+    //   dataType: 'json',
+    //   data: JSON.stringify(postData),
+    //   error: function(){
+    //     alert("Something went wrong. Please close the app and restart.");
+    //   },
+    //   method: 'POST',
+    //   statusCode: {
+    //     404: function(){
+    //       alert("Something is missing.");
+    //     },
+    //     500: function(){
+    //       alert("Server went down.");
+    //     }
+    //   },
+    //   success: function(response){
+    //     console.log(response);
+    //   }
+    // }).done(function(response){
+    //   var data = response['data'];
+    //   var list = $('#playlist');
+    //   for (var i = 0; i < data.length; i++){
+    //     list.append(
+    //       "<li>\
+    //         <div class='avatar-wrapper'>\
+    //         <img src='" + data[i]['other']['avatar'] +
+    //         "'></div>\
+    //         <div class='content-wrapper'>\
+    //           <a class='fs-7' href='/users/{{user_id}}/playlists/"+data[i]['pid']+"/"+ data[i]['url']+"/"+data[i]['other']['name']+"'>"
+    //           + data[i]['other']['name']+"</a><p class='text steel-grey fs-9'>Created on "+data[i]['time']+"</p>\
+    //           </div>\
+    //         </li>"
+    //     );
+    //   }
+    // });
+    return false;
+  });
+  </script>

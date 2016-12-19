@@ -16,13 +16,14 @@ date of last edit:
 Copyright (c) Rad Kitchen Inc. All rights reserved.
 
 """
+import pprint
 import psycopg2
 import datetime
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import exc
 PRODUCTION = 'postgres://ksualenqkvlhjj:h84hpFPOi4boL6QYl6EOwRyP6T@ec2-54-243-204-195.compute-1.amazonaws.com:5432/de1brda8ltt7bd'
-DEVELOPMENT = 'postgresql://localhost:5432/rachelgoree'
+DEVELOPMENT = 'postgresql://localhost:5432'
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = PRODUCTION
@@ -39,25 +40,44 @@ class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200))
-    email = db.Column(db.String(200),index=True)
     avatar = db.Column(db.String(200))
+    lost_login = db.Column(db.DateTime())
+    token_expiry = db.Column(db.DateTime())
 
-    def __init__ (self, name, email, avatar):
+    def __init__ (self, name, token_expiry,avatar , lost_login):
         self.name = name
-        self.email = email
         self.avatar = avatar
+        self.lost_login = lost_login
+        self.token_expiry = token_expiry
 
     def __repr__(self):
-        return '<User %r>' % (self.email)
+        return '<User %r>' % (self.name)
 
-    def is_authenticated(self):
-        return True
+    def get_id(self):
+        try:
+            return self.id  # python 2
+        except NameError:
+            return str(self.id)  # python 3
 
-    def is_active(self):
-        return True
+class UserService(db.Model):
+    __tablename__ = 'user_services'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'),index=True)
+    service = db.Column(db.String(200))
+    service_username = db.Column(db.String(300))
+    access_token = db.Column(db.String(300))
+    refresh_token = db.Column(db.String(300))
+    user_relationship = db.relationship('User', foreign_keys=[user_id])
 
-    def is_anonymous(self):
-        return False
+    def __init__ (self, user_id, service,service_username,access_token,refresh_token):
+        self.user_id = user_id
+        self.service = service
+        self.service_username = service_username
+        self.access_token = access_token
+        self.refresh_token = refresh_token
+
+    def __repr__(self):
+        return '<User %r>' % (self.user_relationship.name)
 
     def get_id(self):
         try:
@@ -68,42 +88,39 @@ class User(db.Model):
 
 class History(db.Model):
     __tablename__ = 'history'
-    h_id = db.Column(db.Integer, primary_key=True)
-    uid = db.Column(db.Integer, db.ForeignKey('users.id'),index=True)
-    surl = db.Column(db.Integer, db.ForeignKey('songs.yt_uri'))
-    user = db.relationship('User', foreign_keys=[uid])
-    song = db.relationship('Song', foreign_keys=[surl])
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'),index=True)
+    spotify_id = db.Column(db.String(300))
     created_at = db.Column(db.DateTime(timezone=True), nullable=False)
+    user_relationship = db.relationship('User', foreign_keys=[user_id])
 
-    def __init__ (self,uid,surl,created_at):
-        self.uid = uid
-        self.surl = surl
+    def __init__ (self,user_id,spotify_id,created_at):
+        self.user_id = user_id
+        self.spotify_id = spotify_id
         self.created_at = created_at
 
     def __repr__(self):
-        return repr((self.uid, self.created_at, self.song.track,self.song.artist,self.song.sp_uri))
+        return "hi"
 
 
 class Playlist(db.Model):
     __tablename__ = 'playlists'
-    p_id = db.Column(db.Sequence('playlists_p_id_seq'),autoincrement=True)
-    uo_id = db.Column(db.Integer, db.ForeignKey('users.id'),index=True)
-    ut_id = db.Column(db.Integer, db.ForeignKey('users.id'),index=True)
-    uone = db.relationship('User',foreign_keys=[uo_id])
-    utwo = db.relationship('User',foreign_keys=[ut_id])
+    id = db.Column(db.Integer, primary_key=True)
+    sender = db.Column(db.Integer, db.ForeignKey('users.id'),index=True)
+    recipient = db.Column(db.Integer, db.ForeignKey('users.id'),index=True)
+    sender_relationship = db.relationship('User',foreign_keys=[sender])
+    recipient_relationship = db.relationship('User',foreign_keys=[recipient])
     created_at = db.Column(db.DateTime(timezone=True), nullable=False)
-    location = db.Column(db.String(200))
-    url = db.Column(db.String(200),primary_key=True)
+    url = db.Column(db.String(800))
 
-    def __init__ (self,uo_id,ut_id,created_at,location,url):
-        self.uo_id = uo_id
-        self.ut_id = ut_id
+    def __init__ (self,sender,recipient,created_at,url):
+        self.sender = sender
+        self.recipient = recipient
         self.created_at = created_at
-        self.location = location
         self.url = url
 
     def __repr__(self):
-        return "User one: %r // User two: %r" % (self.uo_id, self.ut_id)
+        return "yeah"
 
 
 class PlaylistSong(db.Model):
@@ -157,120 +174,58 @@ class Bump(db.Model):
         return "Bump bump bump"
 
 # ~~~~~~~~~~~~~~~~~
-class Zistory(db.Model):
-    __tablename__ = 'zistory'
-    h_id = db.Column(db.Integer, primary_key=True)
-    uid = db.Column(db.Integer, db.ForeignKey('users.id'),index=True)
-    zurl = db.Column(db.Integer, db.ForeignKey('zongz.yt_uri'))
-    user = db.relationship('User', foreign_keys=[uid])
-    song = db.relationship('Zong', foreign_keys=[zurl])
-    created_at = db.Column(db.DateTime(timezone=True), nullable=False)
-
-    def __init__ (self,uid,zurl,created_at):
-        self.uid = uid
-        self.zurl = zurl
-        self.created_at = created_at
-
-    def __repr__(self):
-        return repr((self.uid, self.created_at, self.song.track,self.song.artist,self.song.sp_uri))
-
-
-
-class Pongz(db.Model):
-    __tablename__ = 'pongz'
-    id = db.Column(db.Integer, primary_key=True)
-    purl = db.Column(db.Integer, db.ForeignKey('playlists.url'), index=True)
-    zurl = db.Column(db.Integer, db.ForeignKey('zongz.yt_uri'))
-    playlist = db.relationship('Playlist', foreign_keys=[purl])
-    zong = db.relationship('Zong', foreign_keys=[zurl])
-
-    def __init__ (self,purl, zurl):
-        self.purl = purl
-        self.zurl = zurl
-
-    def __repr__(self):
-        return "playlist songs"
-
-
-class Zong(db.Model):
-    __tablename__ = 'zongz'
-    s_id = db.Column(db.Sequence('zongz_s_id_seq'),autoincrement=True)
-    sp_uri = db.Column(db.String(200),index=True)
-    track = db.Column(db.String(200))
-    artist = db.Column(db.String(200))
-    yt_uri = db.Column(db.String(200),primary_key=True)
-
-    def __init__ (self,sp_uri,track,artist,yt_uri):
-        self.sp_uri = sp_uri
-        self.track = track
-        self.artist = artist
-        self.yt_uri = yt_uri
-
-    def __repr__(self):
-        return "Song"
-
-
-# ~~~~~~~~~~~~~~~~~
 #
 # HELPER FUNCTIONS
 #
 # ~~~~~~~~~~~~~~~~~
-def get_user(email=None,uid=None):
+def get_user(uid=None,service_username=None):
 
-    if email:
-        user = User.query.filter(User.email==email).first()
     if uid:
         user = User.query.get(uid)
-    if user != None:
-        results = {
-            'id': user.id,
-            'avatar': user.avatar,
-            'email': user.email,
-            'name': user.name
-        }
-        return results
-    else:
-        return None
 
+        if user != None:
+            results = {
+                'id': user.id,
+                'avatar': user.avatar,
+                'token_expiry': user.token_expiry,
+                'name': user.name
+            }
+            return results
+        else:
+            return None
 
+def get_full_user(uid=None):
+    user = db.session.query(UserService).filter(UserService.user_id==uid).all()
+    song = db.session.query(History).filter(History.user_id==uid).first()
+    result = row2dict(user[0].user_relationship)
+    result['lost_login'] = user[0].user_relationship.lost_login
+    result['token_expiry'] = user[0].user_relationship.token_expiry
+    for i in user:
+        us = row2dict(i)
+        us.pop('id')
+        result[us['service']] = us
+    result['history'] = song.spotify_id
+    return result
+
+def row2dict(row):
+    d = {}
+    for column in row.__table__.columns:
+        d[column.name] = str(getattr(row, column.name))
+    return d
 def get_all_playlists(uid=None,user_email=None):
     playlists = []
     uid = int(uid)
     if uid:
-        result = Playlist.query.filter(db.or_(Playlist.uo_id==uid, Playlist.ut_id==uid)).all()
+        result = Playlist.query.filter(Playlist.sender==uid).all()
 
         for i in result:
-            if i.uone.id == uid:
-                other = {
-                    'id':i.utwo.id,
-                    'avatar':i.utwo.avatar,
-                    'email':i.utwo.email,
-                    'name':i.utwo.name
-                }
-            else:
-                other = {
-                'id':i.uone.id,
-                'avatar':i.uone.avatar,
-                'email':i.uone.email,
-                'name':i.uone.name
-                }
+            print(i)
             playlists.append({
-                    'pid': i.p_id,
+                    'playlist_id': i.id,
                     'url': i.url,
-                    'time':i.created_at.date().isoformat(),
-                    'other': other,
-                    'uone': {
-                        'id':i.uone.id,
-                        'avatar':i.uone.avatar,
-                        'email':i.uone.email,
-                        'name':i.uone.name
-                    },
-                    'utwo':{
-                        'id':i.utwo.id,
-                        'avatar':i.utwo.avatar,
-                        'email':i.utwo.email,
-                        'name':i.utwo.name
-                    }
+                    'created_at': i.created_at.isoformat(),
+                    'recipient': {'name':i.recipient_relationship.name},
+                    'sender': {'name':i.sender_relationship.name}
                 }
             )
         db.session.close()

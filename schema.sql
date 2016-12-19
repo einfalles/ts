@@ -11,28 +11,36 @@
 
 -- define a user, people with the app and people that are just numbers
 CREATE TABLE users (
-    id        SERIAL PRIMARY KEY NOT NULL,
-    name      varchar(100),
-    email     varchar(50) UNIQUE,
-    avatar    varchar(100)
+    id              SERIAL PRIMARY KEY NOT NULL,
+    name            varchar(200),
+    avatar          varchar(200),
+    lost_login      timestamptz,
+    token_expiry    timestamptz
 );
 
+CREATE TABLE user_services (
+    id                  SERIAL PRIMARY KEY NOT NULL,
+    user_id             integer REFERENCES users(id),
+    service             varchar(200),
+    service_username    varchar(300),
+    access_token        varchar(300),
+    refresh_token       varchar(300)
+);
 -- define a user, people with the app and people that are just numbers
 CREATE TABLE history (
-    h_id          SERIAL PRIMARY KEY NOT NULL,
-    uid           integer REFERENCES users(id),
-    surl           varchar REFERENCES songs(yt_uri),
+    id            SERIAL PRIMARY KEY NOT NULL,
+    user_id       integer REFERENCES users(id),
+    spotify_id    varchar(300),
     created_at    timestamptz
 );
 
 -- geospatial coordinates
 CREATE TABLE playlists (
-   p_id          SERIAL NOT NULL,
-   uo_id          integer REFERENCES users(id),
-   ut_id          integer REFERENCES users(id),
+   id          SERIAL PRIMARY KEY NOT NULL,
+   sender          integer REFERENCES users(id),
+   recipient          integer REFERENCES users(id),
    created_at    timestamptz NOT NULL,
-   url           varchar(200) PRIMARY KEY UNIQUE,
-   location      varchar(200)
+   url           varchar(800)
 );
 
 -- maintain a history of coordinates
@@ -59,26 +67,6 @@ CREATE TABLE songs (
   yt_uri    varchar(200)
 );
 
-CREATE TABLE zongz (
-  s_id      SERIAL NOT NULL,
-  sp_uri    varchar(200) UNIQUE NOT NULL,
-  track     varchar(200),
-  artist    varchar(200),
-  yt_uri    varchar(200) UNIQUE PRIMARY KEY
-);
-
-CREATE TABLE pongz (
-    id      SERIAL PRIMARY KEY NOT NULL,
-    purl    varchar REFERENCES playlists(url),
-    zurl    varchar REFERENCES zongz(yt_uri)
-);
-
-CREATE TABLE zistory (
-    h_id          SERIAL PRIMARY KEY NOT NULL,
-    uid           integer REFERENCES users(id),
-    zurl           varchar REFERENCES zongz(yt_uri),
-    created_at    timestamptz
-);
 
 INSERT INTO zongz (sp_uri,track,artist,yt_uri) VALUES ('1OAYKfE0YdrN7C1yLWaLJo','Hotline Bling','Drake','uxpDa-c-4Mc');
 INSERT INTO zistory (uid,zurl,created_at) VALUES (1,'uxpDa-c-4Mc','2016-08-24 21:34:17.553612+00');

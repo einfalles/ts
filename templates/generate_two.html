@@ -1,30 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>TuneSmash</title>
-  <meta name="description" content="">
-  <meta name="author" content="">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/png" href="images/favicon.png">
-</head>
-<body>
   <div class="container">
     <div class="mobile row h-100-vp">
-      <div class="twelve columns display-center h-100-vp" data-step="1">
-        <h4>searching</h4>
-      </div>
-      <div class="twelve columns display-center h-100-vp" data-step="2">
-        <h4>matched with {{match}}</h4>
-      </div>
-      <div class="twelve columns display-center h-100-vp" data-step="3">
-        <h4>melding your listening preferences</h4>
-      </div>
-      <div class="twelve columns display-center h-100-vp" data-step="4">
-        <h4>generating tunes</h4>
-      </div>
-      <div class="twelve columns display-center h-100-vp" data-step="5">
-        <h4>putting the mixtape on youtube</h4>
+      <div class="twelve columns display-center h-100-vp" data-step="1" id='message'>
+        <a href="/">Back</a>
+        <h4 style='padding-top:80px;'>searching {{user['bump']['to']}}</h4>
       </div>
     </div>
   </div>
@@ -33,90 +11,80 @@
     script { display:none;}
     title {display:none;}
   </style>
-  <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+  <link href='https://fonts.googleapis.com/css?family=Press+Start+2P' rel='stylesheet' type='text/css'>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/normalize.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/skeleton.css') }}">
-<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
-<script src="https://www.gstatic.com/firebasejs/3.1.0/firebase.js"></script>
-<script>
-var config = {
-  apiKey: "AIzaSyBKX1xmfY8JuhIbgOxhO2APg6f4VcCZWXI",
-  authDomain: "luminous-inferno-9831.firebaseapp.com",
-  databaseURL: "https://luminous-inferno-9831.firebaseio.com",
-  storageBucket: "luminous-inferno-9831.appspot.com",
-};
-firebase.initializeApp(config);
-var d = new Date();
-d = d.getTime();
-var startTime = d-300000;
-var bumps = firebase.database().ref('bumps/');
-var matches = firebase.database().ref('matches/');
-var notification = firebase.database().ref('notification');
-var from = 0;
-var to = 0;
-if ({{user_id}} > {{to_id}}) {
-  from = {{user_id}};
-  ef = "{{user_email}}";
-  to = {{to_id}};
-  et = "{{to_email}}";
-} else {
-  to = {{user_id}};
-  et = "{{user_email}}";
-  from = {{to_id}};
-  ef = "{{to_email}}";
-}
-bumps.orderByChild("time").startAt(startTime).on('child_added', function(snapshot) {
-  data = snapshot.val();
-  console.log(data);
-  if (data['to']['id'] == parseInt({{user_id}})) {
+  <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/3.1.0/firebase.js"></script>
+  <script>
+  $(document).ready(function(){
     var postData = {
-      'from': from,
-      'to': to,
-      'uone':{'id':from,'email':ef},
-      'utwo':{'id':to,'email':et},
-      'time': d,
-      'location': 'yup'
-    }
-    if (from == {{user_id}}){
-      alert('hello this belongs to ' + from);
-      matchPost = newMatch(postData).then(function(){
+      'fr': {{user['bump']['fr']}},
+      'to': {{user['bump']['to']}},
+      'songs': ["{{user['bump']['songs'][0]}}","{{user['bump']['songs'][1]}}"]
+    };
+    console.log(postData);
+    var config = {
+      apiKey: "AIzaSyBKX1xmfY8JuhIbgOxhO2APg6f4VcCZWXI",
+      authDomain: "luminous-inferno-9831.firebaseapp.com",
+      databaseURL: "https://luminous-inferno-9831.firebaseio.com",
+      storageBucket: "luminous-inferno-9831.appspot.com",
+    };
+    firebase.initializeApp(config);
+    var d = new Date();
+    d = d.getTime();
+    var startTime = d-300000;
+    var notification = firebase.database().ref('notification');
+    count = 0
+    notification.orderByChild("recipient").equalTo("{{user['bump']['fr']}}").on('child_added',function(snapshot){
+      count = count + 1;
+
+      var data = snapshot.val();
+      console.log(count);
+      console.log(data);
+      console.log('***');
+      $('#message').children().remove();
+      $('#message').append('<a href="/">Back</a><h4>'+data['message']+'</h4>');
+      if (count == 3){
+        $('#message').append('<a href="'+data['custom']['playlist_url']+'">Listen Now</h4>');
+      }
+      notification.child(snapshot.key).remove();
+    });
+
+    // POST TO BUMP ENDPOINT
+    $.ajax({
+      async: true,
+      contentType:"application/json",
+      url: '/ts/api/user/bump',
+      dataType: 'json',
+      data: JSON.stringify(postData),
+      error: function(error){
+        console.log(error);
+      },
+      method: 'POST',
+      success: function(response){
+        console.log("succes");
+      }
+    }).done(function(response){
+      var status = response['data']['winner']
+      // LISTEN FOR NOTIFICATIONS
+      if (status == true){
         $.ajax({
-          url: '/generate/three',
-          data: JSON.stringify(postData),
+          async: true,
           contentType:"application/json",
-          type: 'POST',
-          success: function(response) {
-            alert('Ready to Listen?');
-            console.log(response);
-            location.href = '/playlist/' + response.payload.toString();
-          },
-          error: function(error) {
-            alert('Close the app and restart');
+          url: '/ts/api/user/recommendation',
+          dataType: 'json',
+          data: JSON.stringify(postData),
+          error: function(error){
+            alert("Dang. Something went wrong.");
             console.log(error);
+          },
+          method: 'POST',
+          success: function(response){
+            console.log(response);
           }
         });
-      });
-    } else {
-      notification.orderByChild("from").equalTo(from).on('child_added',function(snapshot){
-        var d = snapshot.val();
-        if (d['to'] == to) {
-          alert('Ready to Listen?');
-          console.log(snapshot.key);
-          notification.child(snapshot.key).remove();
-          location.href = '/playlist/' + d['plid'].toString();
-        }
-      });
-    }
-  }
-});
-
-function newMatch(data) {
-  var updates = {};
-  var matchPostKey = firebase.database().ref().child('matches').push().key;
-  updates['/matches/' + matchPostKey] = data;
-  return firebase.database().ref().update(updates);
-}
-
-</script>
-</body>
-</html>
+      }
+    });
+    });
+  </script>
