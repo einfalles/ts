@@ -49,11 +49,55 @@ def index():
             return render_template('home.html')
     else:
         return render_template('index.html')
+
 @app.route('/playlists')
 def view_playlists():
     playlists = tsm.get_all_playlists(uid=session['user']['id'])
     pprint.pprint(playlists)
     return render_template('playlists.html',user=playlists)
+
+@app.route('/logout')
+def view_logout():
+    session.pop('user')
+    return redirect('/')
+
+@app.route('/account')
+def view_account():
+    user_transport = session['user']
+    if 'lost_login' in user_transport:
+        user_transport.pop('lost_login')
+    if 'token_expiry' in user_transport:
+        user_transport.pop('token_expiry')
+    return render_template('profile.html',user=user_transport)
+
+@app.route('/account/name')
+def view_account_name():
+    user_transport = session['user']
+    if 'lost_login' in user_transport:
+        user_transport.pop('lost_login')
+    if 'token_expiry' in user_transport:
+        user_transport.pop('token_expiry')
+    return render_template('profile_name.html',user=user_transport)
+
+@app.route('/account/avatar', methods=['GET'])
+def view_profile_avatar():
+    user_transport = session['user']
+    if 'lost_login' in user_transport:
+        user_transport.pop('lost_login')
+    if 'token_expiry' in user_transport:
+        user_transport.pop('token_expiry')
+    return render_template('profile_avatar_gender.html',user=user_transport)
+
+@app.route('/account/avatar/<gender>', methods=['GET'])
+def view_profile_avatar_gender(gender):
+    f  = list(range(0,20))
+    user_transport = session['user']
+    if 'lost_login' in user_transport:
+        user_transport.pop('lost_login')
+    if 'token_expiry' in user_transport:
+        user_transport.pop('token_expiry')
+    return render_template('profile_avatar_gender_pictures.html',user=user_transport,gender=gender,f=f)
+
 
 @app.route('/one')
 def view_generate_one():
@@ -81,6 +125,9 @@ def auth_yt_login():
 def auth_yt_authenticate():
     avatars = ['http://24.media.tumblr.com/Jjkybd3nSaqkbdxdY4fYtymI_500.jpg','http://25.media.tumblr.com/tumblr_m1287x1hpN1qjahcpo1_500.jpg','http://25.media.tumblr.com/tumblr_lu6ch9jMg51r4xjo2o1_1280.jpg']
     avatar = random.choice(avatars)
+    genders = random.choice(['female','male'])
+    avatars = random.choice(list(range(0,20)))
+    avatar = "/images/{0}/{1}.png".format(genders,avatars)
     # try:
     d = datetime.datetime.now(pytz.utc)
     session['user'] = {'lost_login':d}
@@ -114,6 +161,9 @@ def auth_sp_login():
 def auth_sp_authenticate():
     avatars = ['http://24.media.tumblr.com/Jjkybd3nSaqkbdxdY4fYtymI_500.jpg','http://25.media.tumblr.com/tumblr_m1287x1hpN1qjahcpo1_500.jpg','http://25.media.tumblr.com/tumblr_lu6ch9jMg51r4xjo2o1_1280.jpg']
     avatar = random.choice(avatars)
+    genders = random.choice(['female','male'])
+    avatars = random.choice(list(range(0,20)))
+    avatar = "/images/{0}/{1}.png".format(genders,avatars)
     # try:
     d = datetime.datetime.now(pytz.utc)
     session['user'] = {'lost_login':d}
@@ -281,6 +331,18 @@ def api_manage_playlist():
     tsm.db.session.close()
     return jsonify({'status':'ok','data':playlists})
 
+@app.route('/ts/api/user/update', methods=['POST'])
+def avatar_update():
+    pprint.pprint(request.json['data'])
+    field = request.json['update']
+    data = request.json['data']
+    user_id = request.json['user_id']
+    print("This is for user {0}".format(user_id))
+    tsm.User.query.filter(tsm.User.id==user_id).update({field:data})
+    tsm.db.session.commit()
+    tsm.db.session.close()
+    pprint.pprint('sending something back now!')
+    return jsonify({'status':'ok'})
 
 if __name__ == "__main__":
     app.run(debug = True)

@@ -1,3 +1,4 @@
+{% include 'base_head.html' %}
 <div class="container">
     <div class="mobile-view">
       <header class="w-100">
@@ -5,6 +6,7 @@
           <button class="navigation"><</button>
         </a>
         <h5>Your Playlists</h5>
+        <a href="/logout">Logout</a>
       </header>
       <main class="w-100">
         <ul class="w-100" id="playlist">
@@ -75,3 +77,4 @@
     return false;
   });
   </script>
+{% include 'base_foot.html' %}

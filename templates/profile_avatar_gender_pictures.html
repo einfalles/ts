@@ -1,0 +1,97 @@
+  <div class="container">
+    <div class="mobile-view">
+      <header class="w-100">
+        <a class="navigation-button" href="/account/avatar">
+          <button class="navigation"><</button>
+        </a>
+        <h5>Pick An Avatar</h5>
+      </header>
+      <main class="w-100">
+        <ul class="w-100" id="avatars">
+          {% for avatar in f%}
+            <li data-id="{{avatar}}">
+              <img src="/images/{{gender}}/{{avatar}}.png"/>
+            </li>
+          {% endfor %}
+        </ul>
+        <a class="secondary button" style="height: 40px;" href="/" id="submit">
+          <button>Continue ></button>
+        </a>
+      </main>
+      <footer class="w-100 hide">
+        {{execution_time}}
+      </footer>
+    </div>
+  </div>
+  <style>
+  ul {
+    display: flex;
+overflow: hidden;
+width: 100%;
+flex-wrap: wrap;
+  }
+
+  li {
+    margin-bottom: 1rem;
+    width: 84px;
+    height: 84px;
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  </style>
+  <style>
+    style { display:none;}
+    script { display:none;}
+    title {display:none;}
+    .hide {display:none;}
+  </style>
+  <link href='https://fonts.googleapis.com/css?family=Press+Start+2P' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="/css/normalize.css">
+  <link rel="stylesheet" href="/css/skeleton.css">
+  <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+  <script>
+  $(document).ready(function(){
+    $('li').on('click',function(){
+       $('li').removeClass('active');
+        $(this).addClass('active');
+    });
+    $('#submit').on('click',function(){
+      var id = $('.active').data('id');
+      var avatar = '/images/{{gender}}/'+id.toString()+'.png';
+
+      var postData = {
+        'user_id': {{user['id']}},
+        'update': 'avatar',
+        'data': avatar
+      };
+
+      $.ajax({
+        async: true,
+        contentType:"application/json",
+        url: '/ts/api/user/update',
+        dataType: 'json',
+        data: JSON.stringify(postData),
+        error: function(error){
+          console.log(error.status);
+        },
+        method: 'POST',
+        statusCode: {
+          404: function(){
+            alert("Something is missing.");
+          },
+          500: function(){
+            alert("Server went down.");
+          }
+        },
+        success: function(response){
+          alert('Woop');
+          location.href = '/';
+        }
+      });
+      // return false;
+    });
+  });
+  </script>

@@ -1,0 +1,27 @@
+{% include 'base_head.html' %}
+<div class="container">
+    <div class="mobile-view">
+      <header class="w-100">
+        <a class="navigation-button" href="/">
+          <button class="navigation"><</button>
+        </a>
+        <h5>Settings</h5>
+      </header>
+      <main class="w-100" id="profile">
+        <div class="avatar-wrapper mb-7">
+          <img src="{{user['avatar']}}" />
+        </div>
+
+        <a class="secondary button mb-2" href="/account/name">
+          <button>{{user['name']}} ></button>
+        </a>
+        <a class="primary button salmon-pink w-100" href="/account/avatar">
+          <button>New Avatar</button>
+        </a>
+      </main>
+      <footer class="w-100 hide">
+        <!-- {{execution_time}} -->
+      </footer>
+    </div>
+  </div>
+{% include 'base_foot.html' %}

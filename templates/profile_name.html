@@ -1,0 +1,58 @@
+<div class="container">
+  <div class="mobile-view">
+    <header class="w-100">
+      <a class="navigation-button" href="/account">
+        <button class="navigation"><</button>
+      </a>
+      <h5>What's Your Name?</h5>
+    </header>
+    <main class="w-100" id="profile">
+      <input type='text' value="" class="w-100"></input>
+      <a class="secondary button" href="" id="submit">
+        <button>Continue ></button>
+      </a>
+    </main>
+    <footer class="w-100 hide">
+      {{execution_time}}
+    </footer>
+  </div>
+</div>
+<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+<script>
+$(document).ready(function(){
+  $('#submit').on('click',function(){
+    var name = $('input').val();
+    var postData = {
+      'user_id': "{{user['id']}}",
+      'update': 'name',
+      'data': name
+    };
+
+    $.ajax({
+      async: true,
+      timeout: 100000,
+      contentType:"application/json",
+      url: '/ts/api/user/update',
+
+      data: JSON.stringify(postData),
+      error: function(error){
+        console.log(error.status);
+      },
+      method: 'POST',
+      statusCode: {
+        404: function(){
+          alert("Something is missing.");
+        },
+        500: function(){
+          alert("Server went down.");
+        }
+      },
+      success: function(response){
+        alert('successful change');
+        location.href = '/';
+      }
+    });
+    // return false;
+  });
+});
+</script>

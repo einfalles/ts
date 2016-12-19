@@ -29,6 +29,8 @@ YT_APP_AUTH = 'http://app.tunesmash.org/auth/yt/authenticate'
 YT_DEV_AUTH = 'http://localhost:5000/auth/yt/authenticate'
 SP_DEV_AUTH = 'http://localhost:5000/auth/sp/authenticate'
 SP_APP_AUTH = 'http://app.tunesmash.org/auth/sp/authenticate'
+YT_REDIRECT = YT_APP_AUTH
+SP_REDIRECT = SP_APP_AUTH
 KEY_CREDENTIALS = {
     'google':{
         'id':'423012525826-42ued2niiiecpuvrehd445n83kt16ano.apps.googleusercontent.com',
@@ -68,7 +70,7 @@ class OAuthSignIn(object):
 class GoogleSignIn(OAuthSignIn):
     def __init__(self):
         super(GoogleSignIn, self).__init__('google')
-        self.flow = OAuth2WebServerFlow(client_id=self.consumer_id,client_secret=self.consumer_secret,scope=['https://www.googleapis.com/auth/userinfo.profile','https://www.googleapis.com/auth/youtube'],redirect_uri=YT_DEV_AUTH,prompt='consent')
+        self.flow = OAuth2WebServerFlow(client_id=self.consumer_id,client_secret=self.consumer_secret,scope=['https://www.googleapis.com/auth/userinfo.profile','https://www.googleapis.com/auth/youtube'],redirect_uri=YT_REDIRECT,prompt='consent')
         self.flow.params['access_type'] = 'offline'
 
     def authorize(self):
@@ -84,7 +86,7 @@ class GoogleSignIn(OAuthSignIn):
 class SpotifySignIn(OAuthSignIn):
     def __init__(self):
         super(SpotifySignIn, self).__init__('spotify')
-        self.oauth = spoauth.SpotifyOAuth(self.consumer_id,self.consumer_secret,SP_DEV_AUTH,scope='user-read-private playlist-modify-public user-read-email user-library-read playlist-modify-private user-top-read',cache_path='spotify.json')
+        self.oauth = spoauth.SpotifyOAuth(self.consumer_id,self.consumer_secret,SP_REDIRECT,scope='user-read-private playlist-modify-public user-read-email user-library-read playlist-modify-private user-top-read',cache_path='spotify.json')
         self.spotify = spotipy
 
     def authorize(self):
