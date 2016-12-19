@@ -167,7 +167,7 @@ def view_profile_avatar_gender(user_id,gender):
 # ******************************************************************* #
 #                          make a playlist                            #
 # ******************************************************************* #
-@app.route('/generate/one', methods=['GET'])
+@app.route('/one', methods=['GET'])
 def generate_one():
     user = {
         'id': session['credentials']['id_token']['ts_uid'],

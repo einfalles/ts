@@ -7,10 +7,10 @@ import re
 import requests
 from apiclient.discovery import build
 from apiclient.errors import HttpError
-from oauth2client.contrib import multistore_file as oams
+# from oauth2client.contrib import multistore_file as oams
 from datetime import datetime, timedelta
 from apiclient.http import BatchHttpRequest
-
+# oauth2client.Credentials
 CLIENT_SECRETS_FILE = "client_secrets.json"
 MISSING_CLIENT_SECRETS_MESSAGE ="NO NO NO NO"
 YOUTUBE_READ_WRITE_SCOPE = "https://www.googleapis.com/auth/youtube"
@@ -27,16 +27,16 @@ SPOTIFY_INFO = {
 # Step 1
 #
 # ~~~~~~~~~~~~~~~~~
-def youtube_credentials(user_email):
-    store = oams.get_credential_storage(filename='multi.json',client_id=user_email,user_agent='app',scope=['https://www.googleapis.com/auth/userinfo.profile','https://www.googleapis.com/auth/youtube'])
-    credentials = store.get()
-    if credentials is None or credentials.invalid:
-        credentials.refresh(httplib2.Http())
-    return credentials
-
-def youtube_client(credentials):
-    youtube = build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION, http=credentials.authorize(httplib2.Http()))
-    return youtube
+# def youtube_credentials(user_email):
+#     store = oams.get_credential_storage(filename='multi.json',client_id=user_email,user_agent='app',scope=['https://www.googleapis.com/auth/userinfo.profile','https://www.googleapis.com/auth/youtube'])
+#     credentials = store.get()
+#     if credentials is None or credentials.invalid:
+#         credentials.refresh(httplib2.Http())
+#     return credentials
+#
+# def youtube_client(credentials):
+#     youtube = build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION, http=credentials.authorize(httplib2.Http()))
+#     return youtube
 
 def spotify_client():
     sp_token = oauth.SpotifyClientCredentials(client_id='4f8c3338b0b443a8895358db33763c6f',client_secret='76cf6ff10bb041dbb0b11a3e7dd89fe1')
@@ -70,16 +70,16 @@ def sp_create_user_playlist(sp,user_id,tracks_ids,user_name,other_name):
     playlist_tracks = sp.user_playlist_add_tracks(user=user_id, playlist_id=playlist['id'], tracks=tracks_ids, position=None)
     return playlist
 
-def youtube_client_cli(email):
-    CLIENT_SECRETS_FILE = "client_secrets.json"
-    flow = flow_from_clientsecrets(CLIENT_SECRETS_FILE, scope=YOUTUBE_READ_WRITE_SCOPE,message=MISSING_CLIENT_SECRETS_MESSAGE)
-    flow.params['access_type'] = 'offline'
-    store = oams.get_credential_storage(filename='multi.json',client_id=email,user_agent='app',scope=['https://www.googleapis.com/auth/youtube','https://www.googleapis.com/auth/userinfo.profile'])
-    credentials = store.get()
-    if credentials is None or credentials.invalid == True:
-        credentials = run_flow(flow, store)
-    store.put(credentials)
-    return credentials
+# def youtube_client_cli(email):
+#     CLIENT_SECRETS_FILE = "client_secrets.json"
+#     flow = flow_from_clientsecrets(CLIENT_SECRETS_FILE, scope=YOUTUBE_READ_WRITE_SCOPE,message=MISSING_CLIENT_SECRETS_MESSAGE)
+#     flow.params['access_type'] = 'offline'
+#     store = oams.get_credential_storage(filename='multi.json',client_id=email,user_agent='app',scope=['https://www.googleapis.com/auth/youtube','https://www.googleapis.com/auth/userinfo.profile'])
+#     credentials = store.get()
+#     if credentials is None or credentials.invalid == True:
+#         credentials = run_flow(flow, store)
+#     store.put(credentials)
+#     return credentials
 
 # ~~~~~~~~~~~~~~~~~
 #
