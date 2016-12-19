@@ -19,4 +19,49 @@
     </footer>
   </div>
 </div>
+<<<<<<< HEAD
 {% include 'base_foot.html' %}
+=======
+<style>
+  style { display:none;}
+  script { display:none;}
+  title {display:none;}
+</style>
+<link href='https://fonts.googleapis.com/css?family=Press+Start+2P' rel='stylesheet' type='text/css'>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/normalize.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/skeleton.css') }}">
+<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/3.1.0/firebase.js"></script>
+<script>
+$(document).ready(function(){
+  console.log({{execution_time}});
+  var postData = {
+    'id': {{user_id}},
+    'email': "{{user_email}}",
+    'hid': "{{hid}}"
+  };
+  if ("{{refresh}}" == "True"){
+    console.log("Getting new history");
+    // POST TO BUMP ENDPOINT
+    $.ajax({
+      async: true,
+      contentType:"application/json",
+      url: '/ts/api/users/update/history',
+      dataType: 'json',
+      data: JSON.stringify(postData),
+      error: function(error){
+        console.log(error);
+      },
+      method: 'POST',
+      success: function(response){
+        console.log(response);
+      }
+    });
+  } else {
+    console.log("Nothing new");
+  }
+});
+</script>
+</body>
+</html>
+>>>>>>> parent of ca995b0... what

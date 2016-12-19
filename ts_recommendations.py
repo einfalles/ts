@@ -42,33 +42,6 @@ def spotify_client():
     sp_token = oauth.SpotifyClientCredentials(client_id='4f8c3338b0b443a8895358db33763c6f',client_secret='76cf6ff10bb041dbb0b11a3e7dd89fe1')
     return spotipy.Spotify(auth=sp_token.get_access_token())
 
-# create spotify client specific to user
-def sp_user_client(user_auth_token):
-    sp_token = oauth.SpotifyClientCredentials(client_id='4f8c3338b0b443a8895358db33763c6f',client_secret='76cf6ff10bb041dbb0b11a3e7dd89fe1')
-    return spotipy.Spotify(auth=user_auth_token)
-
-def sp_get_user_top_tracks(sp):
-    top_tracks = sp.current_user_top_tracks(limit=2)
-    top_tracks = top_tracks['items']
-    top_tracks_ids = []
-    for i in top_tracks:
-        print(i)
-        top_tracks_ids.append(i['id'])
-    return top_tracks_ids
-
-def sp_get_user_recommendations(sp,seed_tracks):
-    print(seed_tracks)
-    recommendations = sp.recommendations(seed_tracks=seed_tracks,max_popularity=60,limit=12)
-    recommendations = recommendations['tracks']
-    recommendations_ids = []
-    for i in recommendations:
-        recommendations_ids.append(i['id'])
-    return recommendations_ids
-
-def sp_create_user_playlist(sp,user_id,tracks_ids,user_name,other_name):
-    playlist = sp.user_playlist_create(user_id,'{0} and {1}'.format(user_name,other_name))
-    playlist_tracks = sp.user_playlist_add_tracks(user=user_id, playlist_id=playlist['id'], tracks=tracks_ids, position=None)
-    return playlist
 
 # def youtube_client_cli(email):
 #     CLIENT_SECRETS_FILE = "client_secrets.json"
