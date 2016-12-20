@@ -9,6 +9,7 @@
 # change your avatar and name
 
 import pytz
+import maya
 import json
 import sys
 import pprint
@@ -311,7 +312,7 @@ def api_user_bump():
     sender = request.json['fr']
     recipient = request.json['to']
     time.sleep(2)
-    created_at = moment.utcnow().datetime
+    created_at = datetime.datetime.now(pytz.utc)
     delta = datetime.timedelta(minutes=1)
     limit = created_at - delta
     winner = False
@@ -404,8 +405,8 @@ def api_user_recommendation():
 
     tsu.fb_notification(recipient['id'], 'Playlist made! Check it out.',custom={'playlist_url':recipient_playlist})
     tsu.fb_notification(sender['id'], 'Playlist made! Check it out.',custom={'playlist_url':sender_playlist})
-    sender_commit_playlist = tsm.Playlist(sender=sender['id'],recipient=recipient['id'],created_at=datetime.datetime.utcnow(),url=sender_playlist)
-    recipient_commit_playlist = tsm.Playlist(sender=recipient['id'],recipient=sender['id'],created_at=datetime.datetime.utcnow(),url=recipient_playlist)
+    sender_commit_playlist = tsm.Playlist(sender=sender['id'],recipient=recipient['id'],created_at=datetime.datetime.now(pytz.utc),url=sender_playlist)
+    recipient_commit_playlist = tsm.Playlist(sender=recipient['id'],recipient=sender['id'],created_at=datetime.datetime.now(pytz.utc),url=recipient_playlist)
     tsm.db.session.add(sender_commit_playlist)
     tsm.db.session.add(recipient_commit_playlist)
     tsm.db.session.commit()
