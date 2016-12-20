@@ -90,16 +90,13 @@ class SpotifySignIn(OAuthSignIn):
         self.spotify = spotipy
 
     def authorize(self):
-        print('ts auth spotify authorize')
         return self.oauth.get_authorize_url()
 
     def callback(self):
-        print('ts auth spotify callback')
         if 'code' not in request.args:
             print('</3 BLEH </3>')
             return None, None, None
         code = request.args.get('code')
-        print(request.args)
         body = self.oauth.get_access_token(code)
         access_token = body['access_token']
         refresh_token = body['refresh_token']
@@ -115,7 +112,6 @@ class SpotifySignIn(OAuthSignIn):
             'expires_at': expires_at,
             'refresh_token': refresh_token
         }
-        print(results)
         self.results = results
         return "hello"
 

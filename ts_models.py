@@ -195,6 +195,12 @@ def get_user(uid=None,service_username=None):
         else:
             return None
 
+def does_user_exist(service_username=None):
+    a = db.session.query(UserService).filter(UserService.service_username==service_username).all()
+    if len(a) > 0:
+        return a[0].user_id
+    else:
+        return None
 def get_full_user(uid=None):
     user = db.session.query(UserService).filter(UserService.user_id==uid).all()
     song = db.session.query(History).filter(History.user_id==uid).first()

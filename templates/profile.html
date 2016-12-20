@@ -15,8 +15,14 @@
         <a class="secondary button mb-2" href="/account/name">
           <button>{{user['name']}} ></button>
         </a>
-        <a class="primary button salmon-pink w-100" href="/account/avatar">
+        <a class="primary button salmon-pink w-100 mb-8" href="/account/avatar">
           <button>New Avatar</button>
+        </a>
+        <a id="account-spotify" class="primary button periwinkle-purple w-100 mb-8" href="/auth/sp/login">
+          <button class="toggle">Add Spotify</button>
+        </a>
+        <a id="account-youtube" class="primary button salmon-pink w-100" href="/auth/yt/login">
+          <button class="toggle">Add YouTube</button>
         </a>
       </main>
       <footer class="w-100 hide">
@@ -24,4 +30,17 @@
       </footer>
     </div>
   </div>
+<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+<script>
+$(document).ready(function(){
+  var user = {{user|safe }};
+  if (user.hasOwnProperty('youtube')){
+    $('#account-youtube button').addClass('selected');
+  }
+  if (user.hasOwnProperty('spotify')){
+    $('#account-spotify button').addClass('selected');
+  }
+  console.log(user);
+});
+</script>
 {% include 'base_foot.html' %}

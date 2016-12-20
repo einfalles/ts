@@ -31,17 +31,17 @@ app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 604800
 
 @app.route('/')
 def index():
+    session.permanent = False
+    pprint.pprint(session)
     # session.pop('user')
     if 'user' in session:
         user = tsm.get_full_user(session['user']['id'])
         session['user'] = user
 
         d = datetime.datetime.now(pytz.utc)
-        print("Lost login before CHECK {0}".format(session['user']['lost_login']))
         session['user']['lost_login'] = d
         if (d - session['user']['lost_login']) > datetime.timedelta(minutes=1):
             session['user']['lost_login'] = d
-            print("Lost login before New Song {0}".format(session['user']['lost_login']))
             return render_template('new_song.html',user_id=session['user']['id'])
         else:
             session['user']['lost_login'] = d
@@ -53,12 +53,12 @@ def index():
 @app.route('/playlists')
 def view_playlists():
     playlists = tsm.get_all_playlists(uid=session['user']['id'])
-    pprint.pprint(playlists)
     return render_template('playlists.html',user=playlists)
 
 @app.route('/logout')
 def view_logout():
     session.pop('user')
+    print(session)
     return redirect('/')
 
 @app.route('/account')
@@ -112,9 +112,7 @@ def view_generate_two(user_id,user_song,other_id,other_song):
         'to': other_id,
         'songs': [user_song,other_song]
     }
-    print(user_transport['bump']['songs'])
     return render_template('generate_two.html',user=user_transport)
-
 
 @app.route('/auth/yt/login')
 def auth_yt_login():
@@ -123,20 +121,20 @@ def auth_yt_login():
 
 @app.route('/auth/yt/authenticate')
 def auth_yt_authenticate():
-    avatars = ['http://24.media.tumblr.com/Jjkybd3nSaqkbdxdY4fYtymI_500.jpg','http://25.media.tumblr.com/tumblr_m1287x1hpN1qjahcpo1_500.jpg','http://25.media.tumblr.com/tumblr_lu6ch9jMg51r4xjo2o1_1280.jpg']
-    avatar = random.choice(avatars)
+
     genders = random.choice(['female','male'])
     avatars = random.choice(list(range(0,20)))
     avatar = "/images/{0}/{1}.png".format(genders,avatars)
-    # try:
     d = datetime.datetime.now(pytz.utc)
-    session['user'] = {'lost_login':d}
+    # try:
+
     oauth = tsa.OAuthSignIn.get_provider("google")
     credentials = oauth.callback()
     json_credentials = json.loads(credentials.to_json())
-    pprint.pprint(json_credentials)
-    user = tsm.get_user(service_username=json_credentials['id_token']['email'])
-    if user == None:
+    user = tsm.does_user_exist(service_username=json_credentials['id_token']['email'])
+    current_user = 'user' in session
+
+    if user == None and current_user == False:
         new_user = tsm.User(json_credentials['id_token']['given_name'],json_credentials['token_expiry'], avatar, d)
         tsm.db.session.add(new_user)
         tsm.db.session.flush()
@@ -145,8 +143,52 @@ def auth_yt_authenticate():
         tsm.db.session.commit()
         session['user'] = {'id':new_user.id}
         return redirect('/new/step1')
-    else:
+    elif user == None and current_user == True:
+        print("**********************")
+        print(session)
+        new_user_service = tsm.UserService(session['user']['id'],'youtube',json_credentials['id_token']['email'],json_credentials['access_token'],json_credentials['refresh_token'])
+        tsm.db.session.add(new_user_service)
+        tsm.db.session.commit()
         return redirect('/')
+    elif user != None and current_user == False:
+        session['user'] = {'id':user}
+        session['user'] = {'lost_login':d}
+        return redirect('/')
+    elif user != None and current_user == True:
+        # this must then mean you are signing in from another account or you're clicking add youtube
+        current_user_id = session['user']['id']
+        if (int(user) == int(current_user_id)):
+            return redirect('/')
+        else:
+            smallest_id = min(int(user),int(current_user_id))
+            largest_id = max(int(user),int(current_user_id))
+            session['user']['id'] = smallest_id
+            bumps = tsm.Bump.query.filter(tsm.Bump.fr == largest_id).all()
+            for i in bumps:
+                i.fr = smallest_id
+            histories = tsm.History.query.filter(tsm.History.user_id == largest_id).all()
+            for j in histories:
+                j.user_id = smallest_id
+            playlists = tsm.Playlist.query.filter(tsm.Playlist.sender == largest_id).all()
+            for k in playlists:
+                k.sender = smallest_id
+            user_services = tsm.UserService.query.filter(tsm.UserService.user_id == largest_id).all()
+            for l in user_services:
+                l.user_id = smallest_id
+            old_user = tsm.User.query.filter(tsm.User.id == largest_id).first()
+            old_user.avatar = '/images/merged.jpg'
+            tsm.db.session.commit()
+            return redirect('/')
+        # what is the user id
+        # what is the current users id
+        # if they match then the person just clicked the add youtube button. so redirect them
+        # if they do not match then this is a collision
+        # take the earliest user id (smallest id) to use as the defacto
+        # find all rows in playlists, history, bumps, and user services and update to the smallest id
+        # set session user id as this smallest id
+        # update larger id with some bullshit so we know it's a booty ass account
+        print('user exists and is logged in')
+
     # except:
     #     e = sys.exc_info()
     #     print("NO {0}".format(e))
@@ -164,9 +206,11 @@ def auth_sp_authenticate():
     genders = random.choice(['female','male'])
     avatars = random.choice(list(range(0,20)))
     avatar = "/images/{0}/{1}.png".format(genders,avatars)
+    pprint.pprint("WHAT")
+    # pprint.pprint('this is the user {0}'.format(session['user']))
     # try:
+
     d = datetime.datetime.now(pytz.utc)
-    session['user'] = {'lost_login':d}
     oauth = tsa.OAuthSignIn.get_provider("spotify")
     oauth.callback()
 
@@ -177,8 +221,10 @@ def auth_sp_authenticate():
     user_name = oauth.results['name']
     user_spid_but_actually_its_their_email = oauth.results['email']
 
-    user = tsm.get_user(service_username=user_email)
-    if user == None:
+    user = tsm.does_user_exist(service_username=user_email)
+    current_user = 'user' in session
+
+    if user == None and current_user == False:
         new_user = tsm.User(user_name,datetime.datetime.fromtimestamp(user_refresh_expiration), avatar, d)
         tsm.db.session.add(new_user)
         tsm.db.session.flush()
@@ -187,17 +233,51 @@ def auth_sp_authenticate():
         tsm.db.session.commit()
         session['user'] = {'id':new_user.id}
         return redirect('/new/step1')
-    else:
+    elif user == None and current_user == True:
+        print("**********************")
+        new_user_service = tsm.UserService(session['user']['id'],'spotify',user_email,user_access_token,user_refresh_token)
+        tsm.db.session.add(new_user_service)
+        tsm.db.session.commit()
         return redirect('/')
 
-    if user == None:
-        user = tsm.User(user_name,user_email,'/images/female/0.png')
-        tsm.db.session.add(user)
-        tsm.db.session.flush()
-        session['credentials']['id_token']['ts_uid'] = user.id
-        tsm.db.session.commit()
-    else:
-        session['credentials']['id_token']['ts_uid'] = user['id']
+    elif user != None and current_user == False:
+        session['user'] = {'id':user}
+        session['user'] = {'lost_login':d}
+        return redirect('/')
+    elif user != None and current_user == True:
+        # this must then mean you are signing in from another account or you're clicking add youtube
+        current_user_id = session['user']['id']
+        if (int(user) == int(current_user_id)):
+            return redirect('/')
+        else:
+            smallest_id = min(int(user),int(current_user_id))
+            largest_id = max(int(user),int(current_user_id))
+            session['user']['id'] = smallest_id
+            bumps = tsm.Bump.query.filter(tsm.Bump.fr == largest_id).all()
+            for i in bumps:
+                i.fr = smallest_id
+            histories = tsm.History.query.filter(tsm.History.user_id == largest_id).all()
+            for j in histories:
+                j.user_id = smallest_id
+            playlists = tsm.Playlist.query.filter(tsm.Playlist.sender == largest_id).all()
+            for k in playlists:
+                k.sender = smallest_id
+            user_services = tsm.UserService.query.filter(tsm.UserService.user_id == largest_id).all()
+            for l in user_services:
+                l.user_id = smallest_id
+            old_user = tsm.User.query.filter(tsm.User.id == largest_id).first()
+            old_user.avatar = '/images/merged.jpg'
+            tsm.db.session.commit()
+            return redirect('/')
+        # what is the user id
+        # what is the current users id
+        # if they match then the person just clicked the add youtube button. so redirect them
+        # if they do not match then this is a collision
+        # take the earliest user id (smallest id) to use as the defacto
+        # find all rows in playlists, history, bumps, and user services and update to the smallest id
+        # set session user id as this smallest id
+        # update larger id with some bullshit so we know it's a booty ass account
+        print('user exists and is logged in')
 
 
 
@@ -236,7 +316,6 @@ def api_user_bump():
     )).scalar()
     # try:
     if match == True:
-        print('true!')
         winner = True
     bump = tsm.Bump(fr=sender,too=recipient,created_at=created_at.isoformat())
     tsm.db.session.add(bump)
@@ -333,15 +412,12 @@ def api_manage_playlist():
 
 @app.route('/ts/api/user/update', methods=['POST'])
 def avatar_update():
-    pprint.pprint(request.json['data'])
     field = request.json['update']
     data = request.json['data']
     user_id = request.json['user_id']
-    print("This is for user {0}".format(user_id))
     tsm.User.query.filter(tsm.User.id==user_id).update({field:data})
     tsm.db.session.commit()
     tsm.db.session.close()
-    pprint.pprint('sending something back now!')
     return jsonify({'status':'ok'})
 
 if __name__ == "__main__":
