@@ -31,7 +31,7 @@ app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 604800
 
 @app.route('/')
 def index():
-    session.permanent = False
+    session.permanent = True
     pprint.pprint(session)
     # session.pop('user')
     if 'user' in session:
@@ -133,8 +133,9 @@ def auth_yt_authenticate():
     json_credentials = json.loads(credentials.to_json())
     user = tsm.does_user_exist(service_username=json_credentials['id_token']['email'])
     current_user = 'user' in session
-
+    print(json_credentials['id_token']['email'])
     if user == None and current_user == False:
+        print('CURRENT USER OUT AND DOES NOT HAVE THIS SERVICE')
         new_user = tsm.User(json_credentials['id_token']['given_name'],json_credentials['token_expiry'], avatar, d)
         tsm.db.session.add(new_user)
         tsm.db.session.flush()
@@ -142,19 +143,23 @@ def auth_yt_authenticate():
         tsm.db.session.add(new_user_service)
         tsm.db.session.commit()
         session['user'] = {'id':new_user.id}
+        print('NEW USER {0}'.format(new_user.id))
         return redirect('/new/step1')
     elif user == None and current_user == True:
-        print("**********************")
-        print(session)
+        print('CURRENT USER IN AND DOES NOT HAVE THIS SERVICE')
         new_user_service = tsm.UserService(session['user']['id'],'youtube',json_credentials['id_token']['email'],json_credentials['access_token'],json_credentials['refresh_token'])
         tsm.db.session.add(new_user_service)
         tsm.db.session.commit()
         return redirect('/')
     elif user != None and current_user == False:
-        session['user'] = {'id':user}
-        session['user'] = {'lost_login':d}
+        print('CURRENT USER OUT AND DOES HAVE THIS SERVICE')
+        session['user'] = {'lost_login':d,'id':user}
+        print('THIS IS USER {0}'.format(user))
+        print(session)
+        print("*********************************************")
         return redirect('/')
     elif user != None and current_user == True:
+        print('CURRENT USER IN AND DOES HAVE THIS SERVICE')
         # this must then mean you are signing in from another account or you're clicking add youtube
         current_user_id = session['user']['id']
         if (int(user) == int(current_user_id)):
@@ -225,6 +230,7 @@ def auth_sp_authenticate():
     current_user = 'user' in session
 
     if user == None and current_user == False:
+        print('CURRENT USER OUT AND DOES NOT HAVE THIS SERVICE')
         new_user = tsm.User(user_name,datetime.datetime.fromtimestamp(user_refresh_expiration), avatar, d)
         tsm.db.session.add(new_user)
         tsm.db.session.flush()
@@ -234,6 +240,7 @@ def auth_sp_authenticate():
         session['user'] = {'id':new_user.id}
         return redirect('/new/step1')
     elif user == None and current_user == True:
+        print('CURRENT USER IN AND DOES NOT HAVE THIS SERVICE')
         print("**********************")
         new_user_service = tsm.UserService(session['user']['id'],'spotify',user_email,user_access_token,user_refresh_token)
         tsm.db.session.add(new_user_service)
@@ -241,10 +248,11 @@ def auth_sp_authenticate():
         return redirect('/')
 
     elif user != None and current_user == False:
-        session['user'] = {'id':user}
-        session['user'] = {'lost_login':d}
+        print('CURRENT USER OUT AND DOES HAVE THIS SERVICE')
+        session['user'] = {'lost_login':d,'id':user}
         return redirect('/')
     elif user != None and current_user == True:
+        print('CURRENT USER IN AND DOES HAVE THIS SERVICE')
         # this must then mean you are signing in from another account or you're clicking add youtube
         current_user_id = session['user']['id']
         if (int(user) == int(current_user_id)):
