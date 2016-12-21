@@ -9,7 +9,6 @@
 # change your avatar and name
 
 import pytz
-import maya
 import json
 import sys
 import pprint
