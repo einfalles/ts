@@ -27,7 +27,7 @@ DEVELOPMENT = 'postgresql://localhost:5432'
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = PRODUCTION
-app.config['SQLALCHEMY_DATABASE_URI'] = DEVELOPMENT
+# app.config['SQLALCHEMY_DATABASE_URI'] = DEVELOPMENT
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_POOL_SIZE'] = 20
 db = SQLAlchemy(app)
