@@ -205,6 +205,8 @@ def does_user_exist(service_username=None):
 def get_full_user(uid=None):
     user = db.session.query(UserService).filter(UserService.user_id==uid).all()
     song = db.session.query(History).filter(History.user_id==uid).first()
+    if len(user) == 0:
+        return 'error'
     result = row2dict(user[0].user_relationship)
     result['lost_login'] = user[0].user_relationship.lost_login
     result['token_expiry'] = user[0].user_relationship.token_expiry
@@ -212,7 +214,10 @@ def get_full_user(uid=None):
         us = row2dict(i)
         us.pop('id')
         result[us['service']] = us
-    result['history'] = song.spotify_id
+    if song == None:
+        result['history'] = None
+    else:
+        result['history'] = song.spotify_id
     return result
 
 def row2dict(row):

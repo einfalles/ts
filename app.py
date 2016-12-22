@@ -37,8 +37,13 @@ def index():
     # session.pop('user')
     if 'user' in session:
         user = tsm.get_full_user(session['user']['id'])
+        if user == 'error':
+            session.pop('user')
+            return redirect('/')
+            
         session['user'] = user
-
+        if session['user']['history'] == None:
+            return redirect('/new/step1')
         d = datetime.datetime.now(pytz.utc)
         session['user']['lost_login'] = d
         if (d - session['user']['lost_login']) > datetime.timedelta(minutes=1):
