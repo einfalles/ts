@@ -1,0 +1,24 @@
+{% include 'base_head.html' %}
+<div class="container">
+    <div class="mobile-view">
+      <header class="w-100">
+        <a class="navigation-button" href="/">
+          <button class="navigation"><</button>
+        </a>
+        <h3 style="font-weight:bold;">Delete Account</h3>
+      </header>
+      <main class="w-100" id="profile">
+        <h5 class="mb-2">Permanently delete your account, {{user['name']}}?</h5>
+        <a class="primary button blue-medium w-100 mb-8" href="/">
+          <button>NO! Keep it.</button>
+        </a>
+        <a class="primary button red-demon w-100" href="/delete/confirmed">
+          <button >Yes, delete it.</button>
+        </a>
+      </main>
+      <footer class="w-100 hide">
+        <!-- {{execution_time}} -->
+      </footer>
+    </div>
+  </div>
+{% include 'base_foot.html' %}

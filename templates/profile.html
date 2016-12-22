@@ -5,24 +5,27 @@
         <a class="navigation-button" href="/">
           <button class="navigation"><</button>
         </a>
-        <h5>Settings</h5>
+        <h3 style="font-weight:bold;">Settings</h3>
       </header>
       <main class="w-100" id="profile">
-        <div class="avatar-wrapper mb-7">
+        <div class="avatar-wrapper mb-9">
           <img src="{{user['avatar']}}" />
         </div>
 
-        <a class="secondary button mb-2" href="/account/name">
-          <button>{{user['name']}} ></button>
+        <a class="secondary button mb-4" href="/account/name">
+          <button style="font-size:1.25rem;">{{user['name']}} ></button>
         </a>
-        <a class="primary button salmon-pink w-100 mb-8" href="/account/avatar">
+        <a class="primary button blue-medium w-100 mb-8" href="/account/avatar">
           <button>New Avatar</button>
         </a>
         <a id="account-spotify" class="primary button periwinkle-purple w-100 mb-8" href="/auth/sp/login">
           <button class="toggle">Add Spotify</button>
         </a>
-        <a id="account-youtube" class="primary button salmon-pink w-100" href="/auth/yt/login">
+        <a id="account-youtube" class="primary button pink-light w-100 mb-8" href="/auth/yt/login">
           <button class="toggle">Add YouTube</button>
+        </a>
+        <a class="primary button red-demon w-100" href="/delete">
+          <button >Delete</button>
         </a>
       </main>
       <footer class="w-100 hide">

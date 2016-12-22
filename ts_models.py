@@ -19,6 +19,7 @@ Copyright (c) Rad Kitchen Inc. All rights reserved.
 import pprint
 import psycopg2
 import datetime
+from dateutil.parser import parse
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import exc
@@ -226,12 +227,11 @@ def get_all_playlists(uid=None,user_email=None):
         result = Playlist.query.filter(Playlist.sender==uid).all()
 
         for i in result:
-            print(i)
             playlists.append({
                     'playlist_id': i.id,
                     'url': i.url,
-                    'created_at': i.created_at.isoformat(),
-                    'recipient': {'name':i.recipient_relationship.name},
+                    'created_at': i.created_at.date().isoformat(),
+                    'recipient': {'name':i.recipient_relationship.name,'avatar':i.recipient_relationship.avatar},
                     'sender': {'name':i.sender_relationship.name}
                 }
             )

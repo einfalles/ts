@@ -16,6 +16,7 @@ import random
 import datetime
 import time
 import moment
+from dateutil.parser import parse
 import ts_authentication as tsa
 import ts_recommendation as tsr
 import ts_models as tsm
@@ -57,9 +58,25 @@ def view_playlists():
 
 @app.route('/logout')
 def view_logout():
-    session.pop('user')
     print(session)
+    if 'user' in session:
+        session.pop('user')
     return redirect('/')
+
+@app.route('/delete')
+def view_delete():
+    user_transport = session['user']
+    if 'lost_login' in user_transport:
+        user_transport.pop('lost_login')
+    if 'token_expiry' in user_transport:
+        user_transport.pop('token_expiry')
+    return render_template('delete.html',user=user_transport)
+
+@app.route('/delete/confirmed')
+def view_delete_forever():
+    # DELETE API
+    return redirect('/')
+
 
 @app.route('/account')
 def view_account():
@@ -91,12 +108,16 @@ def view_profile_avatar():
 @app.route('/account/avatar/<gender>', methods=['GET'])
 def view_profile_avatar_gender(gender):
     f  = list(range(0,20))
+    colors = ["252,104,230","252,104,104","17,123,201","129,201,252","252,163,162"]
+    k = []
+    for i in f:
+        k.append((i,random.choice(colors)))
     user_transport = session['user']
     if 'lost_login' in user_transport:
         user_transport.pop('lost_login')
     if 'token_expiry' in user_transport:
         user_transport.pop('token_expiry')
-    return render_template('profile_avatar_gender_pictures.html',user=user_transport,gender=gender,f=f)
+    return render_template('profile_avatar_gender_pictures.html',user=user_transport,gender=gender,f=k)
 
 
 @app.route('/one')
@@ -104,15 +125,17 @@ def view_generate_one():
     user_transport = session['user']
     return render_template('generate_one.html',user=user_transport)
 
-@app.route('/generate/two/<user_id>/<user_song>/<other_id>/<other_song>')
-def view_generate_two(user_id,user_song,other_id,other_song):
+@app.route('/generate/two/<user_id>/<user_song>/<other_id>/<other_song>/<name>')
+def view_generate_two(user_id,user_song,other_id,other_song,name):
+    name = name.split(' ')
+    name = name[0]
     user_transport = session['user']
     user_transport['bump'] = {
         'fr': user_id,
         'to': other_id,
         'songs': [user_song,other_song]
     }
-    return render_template('generate_two.html',user=user_transport)
+    return render_template('generate_two.html',user=user_transport,name=name)
 
 @app.route('/auth/yt/login')
 def auth_yt_login():

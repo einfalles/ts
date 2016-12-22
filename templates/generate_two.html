@@ -1,9 +1,7 @@
   <div class="container">
-    <div class="mobile row h-100-vp">
-      <div class="twelve columns display-center h-100-vp" data-step="1" id='message'>
-        <a href="/">Back</a>
-        <a href="/logout">Logout</a>
-        <h4 style='padding-top:80px;'>searching {{user['bump']['to']}}</h4>
+    <div class="mobile row h-100-vp" style="height:100%;">
+      <div class="super-special twelve columns display-center h-100-vp" style="height:100%;" data-step="1" id='message'>
+        <h4 style=''>Making a playlist with {{name}}</h4>
       </div>
     </div>
   </div>
@@ -11,8 +9,15 @@
     style { display:none;}
     script { display:none;}
     title {display:none;}
+    .super-special {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    }
   </style>
-  <link href='https://fonts.googleapis.com/css?family=Press+Start+2P' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Oxygen+Mono' rel='stylesheet' type='text/css'>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/normalize.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/skeleton.css') }}">
   <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
@@ -45,9 +50,14 @@
       console.log(data);
       console.log('***');
       $('#message').children().remove();
-      $('#message').append('<a href="/">Back</a><h4>'+data['message']+'</h4>');
+      $('#message').append('<h4>'+data['message']+'</h4>');
       if (count == 3){
-        $('#message').append('<a href="'+data['custom']['playlist_url']+'">Listen Now</h4>');
+        $('#message').append('<a id="playlist-button" target="_blank" class="primary button pink-light mb-6" href="'+data['custom']['playlist_url']+'"><button>Listen Now</button></a>');
+        $('#playlist-button').on('click',function(event){
+          $('#message').append('<a href="/" class="primary button blue-medium"><button>Home</button></a>')
+          $('#playlist-button').remove();
+
+        });
       }
       notification.child(snapshot.key).remove();
     });

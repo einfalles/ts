@@ -1,18 +1,21 @@
 {% include 'base_head.html' %}
 <div class="container">
-  <div class="mobile row h-100-vp">
+  <div class="mobile row h-100-vp w-100">
     <div class="twelve columns display-start h-100-vp">
-      <header class="header w-100 display-center">
-        <h2 class="page-header">TuneSmash</h2>
-        <a href="/logout">Logout</a>
+      <header class="w-100">
+        <h3 style="font-weight:bold;">Song you like?</h3>
       </header>
-      <main class="m-t-auto">
-        <form>
-          <input type='text' value="" class="w-100" placeholder="Recent song?" name='song'></input>
+      <main style="overflow:visible;" class="m-t-auto">
+        <form class="mb-2 w-100">
+          <input type='text' value="" class="w-100 mb-6" placeholder="Recent song?" name='song'></input>
           <input type='text' value="" class="w-100" placeholder="The song's artist" name='artist'></input>
         </form>
-        <button id='check-song' class='show'>Continue></button>
-        <a id='submit-song' href='/' class='button-faux hidden'>Yes</a>
+        <a id='check-song' class='primary button blue-medium show' href="">
+          <button  >Continue></button>
+        </a>
+        <a id='submit-song' href='/' class='primary button blue-medium hidden'>
+          <button>Yes></button>
+        </a>
       </main>
       <footer class="h-0"></footer>
     </div>
@@ -28,14 +31,49 @@
 .hidden {
   display: none;
 }
+.avatar-wrapper-special {
+  width: 64px;
+}
+.avatar-wrapper-special img {
+  width: 100%;
+  height: auto;
+}
 .show {
   display: block;
+}
+input[type=radio]{
+  position: absolute;
+}
+form label {
+  display: flex !important;
+  flex-direction: column;
+}
+.song-wrapper input[name='user_song'] {
+    right: -2rem;
+    bottom: 0;
+}
+.song-wrapper {
+  position: relative;
+}
+.song-wrapper p {
+  font-size: 1.2rem;
+  padding-left: 16px;
+  float: left;
+}
+.song-wrapper .avatar-wrapper-special {
+  float: left;
+    display: block;
+}
+input[name='user_song']:checked {
+  display: block;
+  right: -2rem;
 }
 </style>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 <script>
 $(document).ready(function(){
-  $('#check-song').on('click',function(){
+  $('#check-song').on('click',function(event){
+    event.preventDefault();
     var data = $('form').serializeArray();
     var query = '';
     for (i=0;i<data.length;i++){
@@ -46,6 +84,7 @@ $(document).ready(function(){
         query = query + ' artist:' + data[i]['value'];
       }
     }
+    // $('#check-song button').text('Searching now...');
     console.log(query)
     $.ajax({
       url: 'https://api.spotify.com/v1/search',
@@ -66,7 +105,13 @@ $(document).ready(function(){
         else {
           var potential_songs = data['items'];
           $('form').empty();
-          for (i=0; i<potential_songs.length;i++){
+          $('header h3').text('Which one?');
+          $('#check-song').removeClass('show').addClass('hidden');
+          $('#submit-song').addClass('show');
+          for (i=0; i<5;i++){
+            if (potential_songs[i] == undefined){
+              break;
+            }
             var song = {
               'image': potential_songs[i]['album']['images'][0]['url'],
               'name': potential_songs[i]['name'],
@@ -75,26 +120,28 @@ $(document).ready(function(){
               'spotify_id': potential_songs[i]['id']
             }
             $('form').append(
-              "<label>\
+              "<label class='mb-8'>\
+              <div class='song-wrapper'>\
                 <input type='radio' name='user_song' value='"+song['spotify_id']+"' class='row' id=''/>\
-                <img width='20%' src='"+song['image']+"' />\
-                <p>"+ song['name']+"</p>\
-                <p>"+ song['artist']+"</p>\
-                <audio controls>\
+                <div class='avatar-wrapper-special'>\
+                  <img width='20%' src='"+song['image']+"' />\
+                </div>\
+                <p>"+ song['name']+" by "+ song['artist']+"</p>\
+                </div>\
+                <audio controls style='width: 100%;'>\
                   <source src="+song['preview']+" type='audio/mpeg'>\
                 Your browser does not support the audio element.\
                 </audio>\
               </label>"
             );
+            var cw = $('.avatar-wrapper-special').width();
+            $('.avatar-wrapper-special').css({'height':cw+'px'});
           }
         }
       }
     });
   });
-  $('#check-song').on('click',function(){
-    $(this).removeClass('show').addClass('hidden');
-    $('#submit-song').addClass('show');
-  });
+
   $('#submit-song').on('click',function(){
     var spotify_id = $('input[name=user_song]:checked', 'form').val();
     var postData = {

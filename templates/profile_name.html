@@ -1,14 +1,15 @@
+{% include 'base_head.html' %}
 <div class="container">
   <div class="mobile-view">
     <header class="w-100">
-      <a class="navigation-button" href="/account">
+      <a class="navigation-button" href="/">
         <button class="navigation"><</button>
       </a>
-      <h5>What's Your Name?</h5>
+      <h3 style="font-weight:bold;">New name?</h3>
     </header>
     <main class="w-100" id="profile">
-      <input type='text' value="" class="w-100"></input>
-      <a class="secondary button" href="" id="submit">
+      <input type='text' value="" class="w-100 mb-2"></input>
+      <a class="primary button blue-medium hover-white" href="" id="submit">
         <button>Continue ></button>
       </a>
     </main>
@@ -30,7 +31,7 @@ $(document).ready(function(){
 
     $.ajax({
       async: true,
-      timeout: 100000,
+      // timeout: 100000,
       contentType:"application/json",
       url: '/ts/api/user/update',
 
@@ -48,11 +49,12 @@ $(document).ready(function(){
         }
       },
       success: function(response){
-        alert('successful change');
+        alert(name + " the artist formerly known as {{user['name']}}");
         location.href = '/';
       }
     });
-    // return false;
+    return false;
   });
 });
 </script>
+{% include 'base_foot.html' %}

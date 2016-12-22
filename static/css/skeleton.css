@@ -26,7 +26,7 @@ body {
   font-size: 1.5em; /* currently ems cause chrome bug misinterpreting rems on body element */
   line-height: 1.6;
   font-weight: 400;
-  font-family: "Press Start 2P", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: "Oxygen Mono", monospace, sans-serif !important;
   background-color: rgb(252,255,86);
   color: #222; }
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -63,7 +63,7 @@ header {
   background-color: none;
   text-align: center;
   position: relative;
-  padding: 1.5rem 0; }
+  padding: 2rem 0; }
 
 main {
   background-color: none;
@@ -121,7 +121,7 @@ input[type="button"] {
   font-weight: 600;
   line-height: 38px;
   letter-spacing: .1rem;
-  text-transform: uppercase;
+  /*text-transform: uppercase;*/
   text-decoration: none;
   white-space: nowrap;
   background-color: transparent;
@@ -182,28 +182,37 @@ button.toggle.selected {
 a.navigation-button {
   position: absolute;
   height: 40px;
-  padding: 0;
-  top: 1rem;
-  left: 0rem;
+  /*padding: 0;*/
+  /*top: 1rem;*/
+  /*left: 0rem;*/
 }
 button.navigation {
   position: absolute;
+  font-size:1.25rem;
+  font-weight: bold;
   color: black;
   height:100%;
   padding: 0;
 }
 a.button.primary {
   height: 68px;
-  border-left: 2px solid rgba(240,255,255,0.5);
+  /* this gives it an embossed feel*/
+  /*border-left: 2px solid rgba(240,255,255,0.5);
   border-top: 2px solid rgba(240,255,255,0.5);
   border-bottom: 2px solid rgba(100,100,100,0.5);
-  border-right: 2px solid rgba(100,100,100,0.5);
+  border-right: 2px solid rgba(100,100,100,0.5);*/
   box-shadow: 2px 3px 6px rgba(100,100,100,0.8);
+  border-radius: 4px;
+  font-weight: bold;
+
   width: 90%;
 }
 a.button.primary button {
+  font-size:1.25rem;
+  border-radius: 4px;
   width: 100%;
 }
+
 a.secondary.button button {
   color: black; }
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -292,11 +301,20 @@ h6 { font-size: 0.875rem; line-height: 1.6;  letter-spacing: 0; }
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 /* ~~~~~~~~~~~~ Colors ~~~~~~~~~~~~~ */
-.salmon-pink { background-color: rgba(251,106,143,1);}
+.pink-light { background-color: rgba(251,106,143,1);}
 .periwinkle-purple { background-color: rgba(106,119,249,1);}
 .clementine-orange { background-color: rgba(255,152,45,1);}
+.blue-light { background-color: rgba(129,201,252,1);}
+.blue-medium { background-color: rgba(24,112,175,1);}
+.blue-dark { background-color: rgba(30,60,90,1);}
+.red-demon {background-color: rgba(255,0,0,1);}
 .text { background-color: none;}
 .text.steel-grey { color: grey; }
+.black-black {background-color: rgba(0,0,0,1);}
+.blue-dark.hover-white button:hover,
+.blue-medium.hover-white button:hover {
+  color:white;
+}
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 /* ~~~~~~~~~~~~ States ~~~~~~~~~~~~~ */
@@ -317,19 +335,19 @@ h6 { font-size: 0.875rem; line-height: 1.6;  letter-spacing: 0; }
   margin-bottom:2px;
 }
 #avatars li.active { border:2px solid green;}
-#songs li:before,
+/*#songs li:before,
 #playlist li:before {
   content: '\a0';
-  /* display: flex; */
-  /* padding: 2px 0; */
-  /* line-height: 1px; */
+   display: flex;
+   padding: 2px 0;
+   line-height: 1px;
   border-bottom: 1px solid rgba(0,0,0,0.1);
   position: absolute;
   top: 76px;
   z-index: 999;
   height: 0;
   width: 100%;
-}
+}*/
 .avatar-wrapper {
   width: 64px;
   height: 64px;
@@ -373,6 +391,7 @@ h6 { font-size: 0.875rem; line-height: 1.6;  letter-spacing: 0; }
   align-items: flex-end;
   background-color: pink;
   position: relative;
+  border-radius: 8px;
 }
 #profile .avatar-wrapper img {
   width: 140px;

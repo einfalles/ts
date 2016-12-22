@@ -5,13 +5,24 @@
         <a class="navigation-button" href="/">
           <button class="navigation"><</button>
         </a>
-        <h5>Your Playlists</h5>
-        <a href="/logout">Logout</a>
+        <h3 style="font-weight:bold;">Your playlists</h3>
       </header>
       <main class="w-100">
         <ul class="w-100" id="playlist">
         {% for result in user %}
-          <li style="font-size:12px;"><a href="{{result['url']}}">Playlist with {{result['recipient']['name']}}</a></li>
+          <li>
+            <a style="margin-left: 0;" target="_blank" class="clickbait" href="{{result['url']}}">
+              <div class="avatar-wrapper">
+                <img width="20%" src="{{result['recipient']['avatar']}}"/>
+              </div>
+              <p style="font-size:1rem;">
+              Playlist with {{result['recipient']['name']}}
+              <br>
+              <span style="color: rgba(0,0,0,0.40);">{{result['created_at']}}</span>
+              </p>
+
+            </a>
+          </li>
         {% endfor %}
         </ul>
       </main>
@@ -25,12 +36,35 @@
     script { display:none;}
     title {display:none;}
     .hide {display:none;}
+  #playlist li a {
+    width:100%;
+    margin-left:0;
+    display: flex;
+    align-items: center;
+  }
+    #playlist li a p {
+    padding-left:1.25rem;
+    font-weight: bold;
+  }
+  .avatar-wrapper {
+    border-radius:8px;
+  }
+    #playlist li:after {
+    height: 1px;
+    display: block;
+    width: 100%;
+    background: #808080;
+    content: '';
+    position: absolute;
+    bottom: -16px;
+  }
   </style>
-  <link href='https://fonts.googleapis.com/css?family=Press+Start+2P' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Oxygen+Mono' rel='stylesheet' type='text/css'>
   <link rel="stylesheet" href="/css/normalize.css">
   <link rel="stylesheet" href="/css/skeleton.css">
   <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
   <script>
+var colors = ["252,104,230","252,104,104","17,123,201","129,201,252","252,163,162"]
   $(document).ready(function(){
     // var postData = {
     //   'user_id': "{{user['id']}}"
@@ -74,7 +108,14 @@
     //     );
     //   }
     // });
-    return false;
+    // return false;
+    var cw = $('.avatar-wrapper').width();
+    $('.avatar-wrapper').css({'height':cw+'px'});
+    $('.avatar-wrapper').css('background-color','rgb(' + choose(colors) + ')');
   });
+  function choose(choices) {
+  var index = Math.floor(Math.random() * choices.length);
+  return choices[index];
+}
   </script>
 {% include 'base_foot.html' %}

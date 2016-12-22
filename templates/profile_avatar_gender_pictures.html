@@ -1,21 +1,21 @@
   <div class="container">
     <div class="mobile-view">
       <header class="w-100">
-        <a class="navigation-button" href="/account/avatar">
+        <a class="navigation-button" href="/">
           <button class="navigation"><</button>
         </a>
-        <h5>Pick An Avatar</h5>
+        <h3 style="font-weight:bold;">Pick An Avatar</h3>
       </header>
       <main class="w-100">
-        <ul class="w-100" id="avatars">
+        <ul class="w-100 mb-2" style=""id="avatars">
           {% for avatar in f%}
-            <li data-id="{{avatar}}">
-              <img src="/images/{{gender}}/{{avatar}}.png"/>
+            <li style="border-radius: 8px;background-color: rgb({{avatar[1]}});" data-id="{{avatar[0]}}">
+              <img src="/images/{{gender}}/{{avatar[0]}}.png"/>
             </li>
           {% endfor %}
         </ul>
-        <a class="secondary button" style="height: 40px;" href="/" id="submit">
-          <button>Continue ></button>
+        <a class="primary button blue-light" href="/" id="submit">
+          <button>Done!</button>
         </a>
       </main>
       <footer class="w-100 hide">
@@ -29,6 +29,7 @@
 overflow: hidden;
 width: 100%;
 flex-wrap: wrap;
+margin-top:0;
   }
 
   li {
@@ -48,7 +49,7 @@ flex-wrap: wrap;
     title {display:none;}
     .hide {display:none;}
   </style>
-  <link href='https://fonts.googleapis.com/css?family=Press+Start+2P' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Oxygen+Mono' rel='stylesheet' type='text/css'>
   <link rel="stylesheet" href="/css/normalize.css">
   <link rel="stylesheet" href="/css/skeleton.css">
   <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
@@ -87,7 +88,7 @@ flex-wrap: wrap;
           }
         },
         success: function(response){
-          alert('Woop');
+          alert('Good choice!');
           location.href = '/';
         }
       });

@@ -2,30 +2,37 @@
   <div class="mobile-view">
     <main class="w-100 ">
     <header class="w-100">
-      <a class="navigation-button" href="/account">
-        <button class="navigation"><</button>
-      </a>
-      <h5 style="color: rgba(0,0,0,0);">Pick Your Avatar</h5>
+        <a class="navigation-button" href="/">
+          <button class="navigation"><</button>
+        </a>
+        <h3 style="font-weight:bold;">Pick A Gender</h3>
     </header>
       <div class="image-container mb-3" style="min-height: 220px;">
         <img data-gender="female" class="hide" src="/images/female_intro.png"/>
         <img data-gender="male" class="show" src="/images/male_intro.png"/>
       </div>
-      <button class="toggle salmon-pink mb-6" data-gender="female" data-href="/account/avatar/female">Female</button>
-      <button class="toggle periwinkle-purple selected mb-2" data-gender="male" data-href="/account/avatar/male">Male</button>
-      <a class="secondary button" href="/account/avatar/male" style="height: 50px;" id="submit">
+      <a class="prevent primary button periwinkle-purple w-100 mb-8" href="">
+        <button class="toggle pink-light mb-6" data-gender="female" data-href="/account/avatar/female">Female</button>
+      </a>
+      <a class="prevent primary button periwinkle-purple w-100 mb-2" href="">
+        <button class="toggle periwinkle-purple selected mb-2" data-gender="male" data-href="/account/avatar/male">Male</button>
+      </a>
+      <a class="primary button blue-dark hover-white" href="/account/avatar/male" id="submit">
         <button>Continue ></button>
       </a>
     </main>
     <footer class="w-100 hide"></footer>
   </div>
 </div>
-<link href='https://fonts.googleapis.com/css?family=Press+Start+2P' rel='stylesheet' type='text/css'>
+<link href='https://fonts.googleapis.com/css?family=Oxygen+Mono' rel='stylesheet' type='text/css'>
 <link rel="stylesheet" href="/css/normalize.css">
 <link rel="stylesheet" href="/css/skeleton.css">
 <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
 <script>
 $(document).ready(function(){
+  $('.prevent').on('click',function(event){
+    event.preventDefault();
+  });
   $('button.toggle').on('click',function(){
     $('button.toggle').removeClass('selected');
     $(this).addClass('selected');

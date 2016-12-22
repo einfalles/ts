@@ -1,29 +1,56 @@
+  <style>
+  .friend-search li a {
+    width:100%;
+    margin-left:0;
+    display: flex;
+    align-items: center;
+  }
+  .friend-search li a p {
+    padding-left:1.25rem;
+    font-weight: bold;
+  }
+  .friend-search li:after {
+    height: 1px;
+    display: block;
+    width: 100%;
+    background: #808080;
+    content: '';
+    position: absolute;
+    bottom: -16px;
+  }
+.friend-search li.nahhhhh:after {
+  display: none;
+}
+  .avatar-wrapper {
+    border-radius:8px;
+  }
+    style { display:none;}
+    script { display:none;}
+    title {display:none;}
+    .hide {display:none;}
+  </style>
   <div class="container">
     <div class="mobile-view w-100">
       <header class="w-100">
         <a class="navigation-button" href="/">
           <button class="navigation"><</button>
         </a>
-        <h5>Nearby Friends</h5>
-        <a href="/logout">Logout</a>
+        <h3 style="font-weight:bold;">Nearby Friends</h3>
       </header>
       <main class="w-100">
-        <ul class="w-100"></ul>
+        <ul class="w-100 friend-search">
+          <li class="nahhhhh"><h3>No friends nearby...</h3></li>
+        </ul>
       </main>
       <footer class="w-100 hide">
       </footer>
     </div>
   </div>
   <script src="https://www.gstatic.com/firebasejs/3.1.0/firebase.js"></script>
-  <link href='https://fonts.googleapis.com/css?family=Press+Start+2P' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Oxygen+Mono' rel='stylesheet' type='text/css'>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/normalize.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/skeleton.css') }}">
-  <style>
-    style { display:none;}
-    script { display:none;}
-    title {display:none;}
-    .hide {display:none;}
-  </style>
+
   <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
   <script type="text/javascript">
 
@@ -39,7 +66,7 @@
   var vistor = {'uid':{{user['id']}},'songs':"{{user['history']}}",'email':"{{user['email']}}",'name':"{{user['name']}}",'avatar':'{{user['avatar']}}','time':d.getTime(),'location':000}
   var vistorRef = chat.push(vistor);
   vistorRef.onDisconnect().remove();
-
+  var colors = ["252,104,230","252,104,104","17,123,201","129,201,252","252,163,162"];
   $(document).on('ready',function(){
     count = 0;
     chat.on('child_added',function (snapshot){
@@ -60,14 +87,23 @@
         $('ul li').filter('#'+snapshot.key).remove();
       }
       else if (data['uid']!=0){
-        var href = '/generate/two/'+ one.toString()+'/'+"{{user['history']}}"+'/'+two+'/'+data['songs'];
+        var href = '/generate/two/'+ one.toString()+'/'+"{{user['history']}}"+'/'+two+'/'+data['songs']+'/'+data['name'];
+        $('ul').empty();
         $('ul').append(
           '<li id="'+ snapshot.key+'">'+
+          '<a class="clickbait fs-7"'+"href='" +href+"'"+' data-email="'+ data['email']+'" data-id="'+data['uid'] +'"'+'>'+
+          '<div class="avatar-wrapper">'+
           '<img width="20%" src="'+ data['avatar'] +'"/>'+
-          '<a class="clickbait fs-7"'+"href='" +href+"'"+' data-email="'+ data['email']+'" data-id="'+data['uid'] +'"'+'>'+data['name']+'</a>\
-          <span> > </span>\
+          '</div>'+
+          '<p >'+data['name']+
+          '</p>'+
+          '<span> > </span>\
+          </a>\
           </li>'
         );
+        var cw = $('.avatar-wrapper').width();
+        $('.avatar-wrapper').css({'height':cw+'px'});
+        $('.avatar-wrapper').css('background-color','rgb(' + choose(colors) + ')');
       }
       if (data['uid'] == 0) {
         $('ul li').filter('#'+snapshot.key).remove();
@@ -84,4 +120,8 @@
     // if you are a winner then you make a post to recommendations
 
   });
+  function choose(choices) {
+  var index = Math.floor(Math.random() * choices.length);
+  return choices[index];
+}
   </script>
