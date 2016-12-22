@@ -348,9 +348,13 @@ h6 { font-size: 0.875rem; line-height: 1.6;  letter-spacing: 0; }
   height: 0;
   width: 100%;
 }*/
+#avatars li img {
+    width: 100%;
+    height: auto;
+}
 .avatar-wrapper {
-  width: 64px;
-  height: 64px;
+  /*width: 64px;*/
+  /*height: 64px;*/
   overflow: hidden;
   display: flex;
   justify-content: center;
@@ -383,8 +387,8 @@ h6 { font-size: 0.875rem; line-height: 1.6;  letter-spacing: 0; }
   margin-left: 1.5rem;
 }
 #profile .avatar-wrapper {
-  width: 200px;
-  height: 200px;
+  /*width: 200px;*/
+  /*height: 200px;*/
   overflow: hidden;
   display: flex;
   justify-content: center;

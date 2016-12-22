@@ -59,6 +59,19 @@ def view_playlists():
     tsm.db.session.close()
     return render_template('playlists.html',user=playlists)
 
+@app.route('/playlists/<playlist_id>')
+def view_delete_playlists(playlist_id):
+    user_name = session['user']['name']
+    return render_template('playlist_delete.html',playlist_id=playlist_id,user_name=user_name)
+
+@app.route('/playlists/<playlist_id>/delete/confirmed')
+def view_delete_playlist_forever(playlist_id):
+    tsm.Playlist.query.filter(tsm.Playlist.id == playlist_id).delete()
+    tsm.db.session.commit()
+    tsm.db.session.close()
+    return redirect('/')
+
+
 @app.route('/logout')
 def view_logout():
     print(session)
@@ -78,6 +91,13 @@ def view_delete():
 @app.route('/delete/confirmed')
 def view_delete_forever():
     # DELETE API
+    user_id = session['user']['id']
+    tsm.UserService.query.filter(tsm.UserService.user_id == user_id).delete()
+    tsm.History.query.filter(tsm.History.user_id == user_id).delete()
+    tsm.Playlist.query.filter(tsm.Playlist.sender == user_id).delete()
+    tsm.User.query.filter(tsm.User.id==user_id).update({'name':'DEACTIVATED ACCOUNT'})
+    tsm.db.session.commit()
+    session.pop('user')
     return redirect('/')
 
 

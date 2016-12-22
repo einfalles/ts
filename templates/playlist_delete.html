@@ -1,0 +1,24 @@
+{% include 'base_head.html' %}
+<div class="container">
+    <div class="mobile-view">
+      <header class="w-100">
+        <a class="navigation-button" href="/playlists">
+          <button class="navigation"><</button>
+        </a>
+        <h3 style="font-weight:bold;">Delete playlist</h3>
+      </header>
+      <main class="w-100" id="profile">
+        <h5 class="mb-2">Dang. Are you sure you want to delete this playlist, {{user_name}}?</h5>
+        <a class="primary button blue-medium w-100 mb-8" href="/playlists">
+          <button>NO! Keep it.</button>
+        </a>
+        <a class="primary button red-demon w-100" href="/playlists/{{playlist_id}}/delete/confirmed">
+          <button >Yes, delete it.</button>
+        </a>
+      </main>
+      <footer class="w-100 hide">
+        <!-- {{execution_time}} -->
+      </footer>
+    </div>
+  </div>
+{% include 'base_foot.html' %}

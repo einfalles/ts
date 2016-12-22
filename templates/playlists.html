@@ -10,8 +10,8 @@
       <main class="w-100">
         <ul class="w-100" id="playlist">
         {% for result in user %}
-          <li>
-            <a style="margin-left: 0;" target="_blank" class="clickbait" href="{{result['url']}}">
+          <li style="flex-direction: column;">
+            <a style="margin-left: 0;    position: relative;" target="_blank" class="clickbait mb-8" href="{{result['url']}}">
               <div class="avatar-wrapper">
                 <img width="20%" src="{{result['recipient']['avatar']}}"/>
               </div>
@@ -19,9 +19,10 @@
               Playlist with {{result['recipient']['name']}}
               <br>
               <span style="color: rgba(0,0,0,0.40);">{{result['created_at']}}</span>
+              <span style="    position: absolute;  top: 40%;right: 0;"> > </span>
               </p>
-
             </a>
+            <a class="delete-button" style="font-size: 12px;font-weight: bold; color: pink;" href="/playlists/{{result['playlist_id']}}">Delete</a>
           </li>
         {% endfor %}
         </ul>

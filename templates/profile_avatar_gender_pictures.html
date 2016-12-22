@@ -9,7 +9,7 @@
       <main class="w-100">
         <ul class="w-100 mb-2" style=""id="avatars">
           {% for avatar in f%}
-            <li style="border-radius: 8px;background-color: rgb({{avatar[1]}});" data-id="{{avatar[0]}}">
+            <li style="border-radius: 8px;" data-id="{{avatar[0]}}">
               <img src="/images/{{gender}}/{{avatar[0]}}.png"/>
             </li>
           {% endfor %}
@@ -35,7 +35,7 @@ margin-top:0;
   li {
     margin-bottom: 1rem;
     width: 84px;
-    height: 84px;
+    /*height: 84px;*/
     flex-grow: 1;
     display: flex;
     justify-content: center;
