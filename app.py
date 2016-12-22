@@ -43,10 +43,12 @@ def index():
         session['user']['lost_login'] = d
         if (d - session['user']['lost_login']) > datetime.timedelta(minutes=1):
             session['user']['lost_login'] = d
+            tsm.db.session.close()
             return render_template('new_song.html',user_id=session['user']['id'])
         else:
             session['user']['lost_login'] = d
             user_transport = session['user']
+            tsm.db.session.close()
             return render_template('home.html')
     else:
         return render_template('index.html')
@@ -54,6 +56,7 @@ def index():
 @app.route('/playlists')
 def view_playlists():
     playlists = tsm.get_all_playlists(uid=session['user']['id'])
+    tsm.db.session.close()
     return render_template('playlists.html',user=playlists)
 
 @app.route('/logout')
@@ -167,12 +170,14 @@ def auth_yt_authenticate():
         tsm.db.session.commit()
         session['user'] = {'id':new_user.id}
         print('NEW USER {0}'.format(new_user.id))
+        tsm.db.session.close()
         return redirect('/new/step1')
     elif user == None and current_user == True:
         print('CURRENT USER IN AND DOES NOT HAVE THIS SERVICE')
         new_user_service = tsm.UserService(session['user']['id'],'youtube',json_credentials['id_token']['email'],json_credentials['access_token'],json_credentials['refresh_token'])
         tsm.db.session.add(new_user_service)
         tsm.db.session.commit()
+        tsm.db.session.close()
         return redirect('/')
     elif user != None and current_user == False:
         print('CURRENT USER OUT AND DOES HAVE THIS SERVICE')
@@ -180,12 +185,14 @@ def auth_yt_authenticate():
         print('THIS IS USER {0}'.format(user))
         print(session)
         print("*********************************************")
+        tsm.db.session.close()
         return redirect('/')
     elif user != None and current_user == True:
         print('CURRENT USER IN AND DOES HAVE THIS SERVICE')
         # this must then mean you are signing in from another account or you're clicking add youtube
         current_user_id = session['user']['id']
         if (int(user) == int(current_user_id)):
+            tsm.db.session.close()
             return redirect('/')
         else:
             smallest_id = min(int(user),int(current_user_id))
@@ -206,6 +213,7 @@ def auth_yt_authenticate():
             old_user = tsm.User.query.filter(tsm.User.id == largest_id).first()
             old_user.avatar = '/images/merged.jpg'
             tsm.db.session.commit()
+            tsm.db.session.close()
             return redirect('/')
         # what is the user id
         # what is the current users id
@@ -261,6 +269,7 @@ def auth_sp_authenticate():
         tsm.db.session.add(new_user_service)
         tsm.db.session.commit()
         session['user'] = {'id':new_user.id}
+        tsm.db.session.close()
         return redirect('/new/step1')
     elif user == None and current_user == True:
         print('CURRENT USER IN AND DOES NOT HAVE THIS SERVICE')
@@ -268,17 +277,20 @@ def auth_sp_authenticate():
         new_user_service = tsm.UserService(session['user']['id'],'spotify',user_email,user_access_token,user_refresh_token)
         tsm.db.session.add(new_user_service)
         tsm.db.session.commit()
+        tsm.db.session.close()
         return redirect('/')
 
     elif user != None and current_user == False:
         print('CURRENT USER OUT AND DOES HAVE THIS SERVICE')
         session['user'] = {'lost_login':d,'id':user}
+        tsm.db.session.close()
         return redirect('/')
     elif user != None and current_user == True:
         print('CURRENT USER IN AND DOES HAVE THIS SERVICE')
         # this must then mean you are signing in from another account or you're clicking add youtube
         current_user_id = session['user']['id']
         if (int(user) == int(current_user_id)):
+            tsm.db.session.close()
             return redirect('/')
         else:
             smallest_id = min(int(user),int(current_user_id))
@@ -299,6 +311,7 @@ def auth_sp_authenticate():
             old_user = tsm.User.query.filter(tsm.User.id == largest_id).first()
             old_user.avatar = '/images/merged.jpg'
             tsm.db.session.commit()
+            tsm.db.session.close()
             return redirect('/')
         # what is the user id
         # what is the current users id
@@ -432,6 +445,7 @@ def api_user_recommendation():
     tsm.db.session.add(sender_commit_playlist)
     tsm.db.session.add(recipient_commit_playlist)
     tsm.db.session.commit()
+    tsm.db.session.close()
     return jsonify({'status':'ok','sender_playlist':sender_playlist,'recipient_playlist':recipient_playlist})
 
 @app.route('/ts/api/user/playlists', methods=['POST'])
