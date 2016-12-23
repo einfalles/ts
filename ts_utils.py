@@ -10,7 +10,7 @@ fdb = firebase.database()
 
 
 def fb_notification(recipient=None,message=None,created_at=None,custom={},step=0):
-
+    custom['ignore'] = True
     fdbdata = {
         'recipient':recipient,
         'message': message,

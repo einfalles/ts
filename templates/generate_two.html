@@ -51,7 +51,7 @@
       console.log('***');
       $('#message').children().remove();
       $('#message').append('<h4>'+data['message']+'</h4>');
-      if (count == 3){
+      if (data['custom']['playlist_url']){
         $('#message').append('<a id="playlist-button" target="_blank" class="primary button pink-light mb-6" href="'+data['custom']['playlist_url']+'"><button>Listen Now</button></a>');
         $('#playlist-button').on('click',function(event){
           $('#message').append('<a href="/" class="primary button blue-medium"><button>Home</button></a>')
