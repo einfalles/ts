@@ -120,4 +120,5 @@ class SpotifySignIn(OAuthSignIn):
     def refresh(self,refresh_token):
         # r = requests.post('https://accounts.spotify.com/api/token',json.dumps({'grant_type':'refresh_token','refresh_token':refresh_token}),auth=(SPOTIFY_INFO['id'],SPOTIFY_INFO['secret']))
         token_info = self.oauth._refresh_access_token(refresh_token=refresh_token)
+        print(token_info)
         return token_info
