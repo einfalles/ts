@@ -40,7 +40,7 @@ def index():
         if user == 'error':
             session.pop('user')
             return redirect('/')
-            
+
         session['user'] = user
         if session['user']['history'] == None:
             return redirect('/new/step1')
@@ -437,7 +437,7 @@ def api_user_recommendation():
         oauth = tsa.OAuthSignIn.get_provider("spotify")
         new_token = oauth.refresh(refresh_token=recipient['spotify']['refresh_token'])
         sp = tsr.sp_user_client(sender['spotify']['access_token'])
-        playlist = tsr.sp_create_user_playlist(sp,recipient['spotify']['service_username'],recommendations_ids,recipient['name'],sender['name'])
+        playlist = tsr.sp_create_user_playlist(sp,recipient['spotify']['service_username'],recommendation_ids,recipient['name'],sender['name'])
         recipient_playlist = playlist['external_urls']['spotify']
         tsu.fb_notification(recipient['id'], 'Creating playlist')
 
