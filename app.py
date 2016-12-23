@@ -436,7 +436,7 @@ def api_user_recommendation():
         tsu.fb_notification(recipient['id'], 'Generating songs now')
         oauth = tsa.OAuthSignIn.get_provider("spotify")
         new_token = oauth.refresh(refresh_token=recipient['spotify']['refresh_token'])
-        sp = tsr.sp_user_client(recipient['spotify']['access_token'])
+        sp = tsr.sp_user_client(new_token)
         playlist = tsr.sp_create_user_playlist(sp,recipient['spotify']['service_username'],recommendation_ids,sender['name'],recipient['name'])
         recipient_playlist = playlist['external_urls']['spotify']
         tsu.fb_notification(recipient['id'], 'Creating playlist')
@@ -458,7 +458,7 @@ def api_user_recommendation():
         tsu.fb_notification(sender['id'], 'Generating songs now')
         oauth = tsa.OAuthSignIn.get_provider("spotify")
         new_token = oauth.refresh(refresh_token=sender['spotify']['refresh_token'])
-        sp = tsr.sp_user_client(sender['spotify']['access_token'])
+        sp = tsr.sp_user_client(new_token)
         playlist = tsr.sp_create_user_playlist(sp,sender['spotify']['service_username'],recommendation_ids,recipient['name'],sender['name'])
         sender_playlist = playlist['external_urls']['spotify']
         tsu.fb_notification(sender['id'], 'Creating playlist')
