@@ -175,6 +175,26 @@ class Bump(db.Model):
     def __repr__(self):
         return "Bump bump bump"
 
+class Dashboard(db.Model):
+    __tablename__ = 'dashboard'
+    id = db.Column(db.Integer, primary_key=True)
+    valence = db.Column(db.Float)
+    energy = db.Column(db.Float, db.ForeignKey('users.id'), index=True)
+    popularity = db.Column(db.Integer)
+    dancebility = db.Column(db.Float)
+    created_at = db.Column(db.DateTime(timezone=True), nullable=False)
+
+    def __init__ (self,valence,energy,popularity,dancebility,created_at):
+        self.valence = valence
+        self.energy = energy
+        self.popularity = popularity
+        self.dancebility = dancebility
+        self.created_at = created_at
+
+    def __repr__(self):
+        return "surfboart"
+
+
 # ~~~~~~~~~~~~~~~~~
 #
 # HELPER FUNCTIONS
@@ -219,7 +239,17 @@ def get_full_user(uid=None):
     else:
         result['history'] = song.spotify_id
     return result
+def get_dashboard():
+    dashboard = db.session.query(Dashboard).order_by('created_at desc').first()
 
+    results = {
+        'valence': dashboard.valence,
+        'energy': dashboard.energy,
+        'popularity': dashboard.popularity,
+        'danceability': dashboard.dancebility
+    }
+    print(results)
+    return results
 def row2dict(row):
     d = {}
     for column in row.__table__.columns:

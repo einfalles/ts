@@ -67,6 +67,14 @@ CREATE TABLE songs (
   yt_uri    varchar(200)
 );
 
+CREATE TABLE dashboard (
+    id              SERIAL PRIMARY KEY NOT NULL,
+    valence         float4,
+    energy          float4,
+    popularity      integer,
+    dancebility     float4,
+    created_at    timestamptz NOT NULL
+);
 
 INSERT INTO zongz (sp_uri,track,artist,yt_uri) VALUES ('1OAYKfE0YdrN7C1yLWaLJo','Hotline Bling','Drake','uxpDa-c-4Mc');
 INSERT INTO zistory (uid,zurl,created_at) VALUES (1,'uxpDa-c-4Mc','2016-08-24 21:34:17.553612+00');

@@ -57,6 +57,10 @@ def index():
             return render_template('home.html')
     else:
         return render_template('index.html')
+@app.route('/dashboard')
+def view_dashboard():
+    dashboard = tsm.get_dashboard()
+    return render_template('dashboard.html',valence=dashboard['valence'],energy=dashboard['energy'],popularity=dashboard['popularity'],dancebility=dashboard['danceability'])
 
 @app.route('/playlists')
 def view_playlists():
@@ -405,7 +409,9 @@ def api_user_recommendation():
     recipient = request.json['to']
     sp = tsr.spotify_client()
     # recommendation_songs = tsr.sp_get_user_recommendations(sp,seeds)
-    recommendation_songs = tsr.recommendations(seeds,50,sp)
+    dashboard = tsm.get_dashboard()
+    print(dashboard)
+    recommendation_songs = tsr.recommendations(seeds,dashboard['popularity'],dashboard['danceability'],dashboard['valence'],dashboard['energy'],sp)
     recommendation_searches = []
     recommendation_ids = []
     for i in range(len(recommendation_songs)):
@@ -489,6 +495,20 @@ def avatar_update():
     tsm.db.session.commit()
     tsm.db.session.close()
     return jsonify({'status':'ok'})
+
+@app.route('/ts/api/dashboard', methods=['POST'])
+def api_dashboard():
+    valence = request.json['valence']
+    energy = request.json['energy']
+    popularity = request.json['popularity']
+    dancebility = request.json['danceability']
+    print(valence)
+    d = datetime.datetime.now(pytz.utc)
+    new_dashboard = tsm.Dashboard(valence,energy,popularity,dancebility,d)
+    tsm.db.session.add(new_dashboard)
+    tsm.db.session.commit()
+    return jsonify({'status':'ok'})
+
 
 if __name__ == "__main__":
     app.run(debug = True)

@@ -159,10 +159,10 @@ def latest_song(user_email=None,hid=None,youtube=None,spotify=None):
 # Step 3
 #
 # ~~~~~~~~~~~~~~~~~
-def recommendations(seeds,limit,spotify):
+def recommendations(seeds,popularity,energy,danceability,valence,spotify):
     recommendations = []
     unireq = {}
-    results = spotify.recommendations(seed_tracks=seeds,max_popularity=limit,limit=60)
+    results = spotify.recommendations(seed_tracks=seeds,max_popularity=popularity,max_danceability=danceability,max_valence=valence,max_energy=energy,limit=60)
     results = results['tracks']
     for song in results:
         if song['artists'][0]['name'] in unireq:
