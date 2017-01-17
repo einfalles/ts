@@ -77,6 +77,9 @@ def sp_get_user_recommendations(sp,seed_tracks):
 
 def sp_create_user_playlist(sp,user_id,tracks_ids,user_name,other_name):
     playlist = sp.user_playlist_create(user_id,'{0} and {1}'.format(user_name,other_name))
+    print('***error???***')
+    print(user_id)
+    print(tracks_ids)
     playlist_tracks = sp.user_playlist_add_tracks(user=user_id, playlist_id=playlist['id'], tracks=tracks_ids, position=None)
     return playlist
 

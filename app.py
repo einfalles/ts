@@ -414,27 +414,31 @@ def api_user_recommendation():
     recommendation_songs = tsr.recommendations(seeds,dashboard['popularity'],dashboard['danceability'],dashboard['valence'],dashboard['energy'],sp)
     recommendation_searches = []
     recommendation_ids = []
+    if len(recommendation_songs) == 0:
+        print('Bad parameters')
+        recommendation_songs = tsr.recommendations(seeds,100,1,1,1,sp)
+        recommendation_ids.append('51ayJ1r626si5LUBuOV5GR')
+
     for i in range(len(recommendation_songs)):
         recommendation_searches.append(recommendation_songs[i][0:2])
         recommendation_ids.append(recommendation_songs[i][2])
-
     print("Just generated your recommendations {0}".format(recommendation_songs))
     sender = tsm.get_full_user(uid=sender)
     recipient = tsm.get_full_user(uid=recipient)
     recipient_playlist = None
     sender_playlist = None
 
-    if ('youtube' in recipient) and ('spotify' not in recipient):
-        print('recipient has youtube')
-        # OAUTH SHIT
-        credentials = tsr.youtube_credentials(recipient['youtube']['access_token'],recipient['youtube']['refresh_token'],recipient['token_expiry'])
-        youtube = tsr.youtube_client(credentials)
-        tsu.fb_notification(recipient['id'], 'Generating songs now')
-        video_ids = tsr.yt_search_songs(youtube, recommendation_searches)
-        playlist_id = tsr.yt_create_playlist(youtube,sender['name'])
-        tsr.yt_create_playlist_songs(youtube,playlist_id,video_ids)
-        tsu.fb_notification(recipient['id'], 'Creating playlist')
-        recipient_playlist = 'https://www.youtube.com/playlist?list={0}'.format(playlist_id)
+    # if ('youtube' in recipient) and ('spotify' not in recipient):
+    #     print('recipient has youtube')
+    #     # OAUTH SHIT
+    #     credentials = tsr.youtube_credentials(recipient['youtube']['access_token'],recipient['youtube']['refresh_token'],recipient['token_expiry'])
+    #     youtube = tsr.youtube_client(credentials)
+    #     tsu.fb_notification(recipient['id'], 'Generating songs now')
+    #     video_ids = tsr.yt_search_songs(youtube, recommendation_searches)
+    #     playlist_id = tsr.yt_create_playlist(youtube,sender['name'])
+    #     tsr.yt_create_playlist_songs(youtube,playlist_id,video_ids)
+    #     tsu.fb_notification(recipient['id'], 'Creating playlist')
+    #     recipient_playlist = 'https://www.youtube.com/playlist?list={0}'.format(playlist_id)
 
 
     if 'spotify' in recipient:
@@ -447,17 +451,17 @@ def api_user_recommendation():
         recipient_playlist = playlist['external_urls']['spotify']
         tsu.fb_notification(recipient['id'], 'Creating playlist')
 
-    if ('youtube' in sender) and ('spotify' not in sender):
-        print('sender has youtube')
-        # OAUTH SHIT
-        credentials = tsr.youtube_credentials(sender['youtube']['access_token'],sender['youtube']['refresh_token'],sender['token_expiry'])
-        youtube = tsr.youtube_client(credentials)
-        tsu.fb_notification(sender['id'], 'Generating songs now')
-        video_ids = tsr.yt_search_songs(youtube, recommendation_searches)
-        playlist_id = tsr.yt_create_playlist(youtube,recipient['name'])
-        tsr.yt_create_playlist_songs(youtube,playlist_id,video_ids)
-        tsu.fb_notification(sender['id'], 'Creating playlist')
-        sender_playlist = 'https://www.youtube.com/playlist?list={0}'.format(playlist_id)
+    # if ('youtube' in sender) and ('spotify' not in sender):
+    #     print('sender has youtube')
+    #     # OAUTH SHIT
+    #     credentials = tsr.youtube_credentials(sender['youtube']['access_token'],sender['youtube']['refresh_token'],sender['token_expiry'])
+    #     youtube = tsr.youtube_client(credentials)
+    #     tsu.fb_notification(sender['id'], 'Generating songs now')
+    #     video_ids = tsr.yt_search_songs(youtube, recommendation_searches)
+    #     playlist_id = tsr.yt_create_playlist(youtube,recipient['name'])
+    #     tsr.yt_create_playlist_songs(youtube,playlist_id,video_ids)
+    #     tsu.fb_notification(sender['id'], 'Creating playlist')
+    #     sender_playlist = 'https://www.youtube.com/playlist?list={0}'.format(playlist_id)
 
     if 'spotify' in sender:
         print('sender has spotify')
