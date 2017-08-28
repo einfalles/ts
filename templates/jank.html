@@ -1,0 +1,170 @@
+{% include 'base_head.html' %}
+<div class="container">
+  <div class="mobile row h-100-vp w-100">
+    <div class="twelve columns display-start h-100-vp">
+      <header class="w-100">
+        <h3 style="font-weight:bold;">Welcome!</h3>
+      </header>
+      <main style="overflow:visible;" class="m-t-auto">
+        <form class="mb-2 w-100">
+          <input type='text' value="" class="w-100 mb-6" placeholder="Name?" name='name'></input>
+          <input type='text' value="" class="w-100" placeholder="The song's artist" name='artist'></input>
+        </form>
+        <a id='check-song' class='primary button blue-medium show' href="">
+          <button  >Continue></button>
+        </a>
+        <a id='submit-song' href='/' class='primary button blue-medium hidden'>
+          <button>Yes></button>
+        </a>
+      </main>
+      <footer class="h-0"></footer>
+    </div>
+  </div>
+</div>
+<style>
+.button-faux {
+  border: 1px solid grey;
+  padding:1rem;
+  text-decoration: none;
+  color: black;
+}
+.hidden {
+  display: none;
+}
+.avatar-wrapper-special {
+  width: 64px;
+}
+.avatar-wrapper-special img {
+  width: 100%;
+  height: auto;
+}
+.show {
+  display: block;
+}
+input[type=radio]{
+  position: absolute;
+}
+form label {
+  display: flex !important;
+  flex-direction: column;
+}
+.song-wrapper input[name='user_song'] {
+    right: -2rem;
+    bottom: 0;
+}
+.song-wrapper {
+  position: relative;
+}
+.song-wrapper p {
+  font-size: 1.2rem;
+  padding-left: 16px;
+  float: left;
+}
+.song-wrapper .avatar-wrapper-special {
+  float: left;
+    display: block;
+}
+input[name='user_song']:checked {
+  display: block;
+  right: -2rem;
+}
+</style>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script>
+$(document).ready(function(){
+  $('#check-song').on('click',function(event){
+    event.preventDefault();
+    var data = $('form').serializeArray();
+    var query = '';
+    for (i=0;i<data.length;i++){
+      if (data[i]['name'] == 'song'){
+        query = query + ' track:' + data[i]['value'];
+      }
+      else if (data[i]['name'] == 'artist'){
+        query = query + ' artist:' + data[i]['value'];
+      }
+    }
+    // $('#check-song button').text('Searching now...');
+    console.log(query)
+    $.ajax({
+      url: 'https://api.spotify.com/v1/search',
+      data: {
+        q: query,
+        type: 'track'
+      },
+      error: function(){
+        alert("Hmm. Didn't find the song. Check your spelling.");
+        location.href = '/';
+      },
+      success: function (response) {
+        var data = response['tracks'];
+        if (!('items' in data)){
+          alert("Hmm. Didn't find the song. Check your spelling.");
+          location.href = '/';
+        }
+        else {
+          var potential_songs = data['items'];
+          $('form').empty();
+          $('header h3').text('Which one?');
+          $('#check-song').removeClass('show').addClass('hidden');
+          $('#submit-song').addClass('show');
+          for (i=0; i<5;i++){
+            if (potential_songs[i] == undefined){
+              break;
+            }
+            var song = {
+              'image': potential_songs[i]['album']['images'][0]['url'],
+              'name': potential_songs[i]['name'],
+              'artist': potential_songs[i]['artists'][0]['name'],
+              'preview': potential_songs[i]['preview_url'],
+              'spotify_id': potential_songs[i]['id']
+            }
+            $('form').append(
+              "<label class='mb-8'>\
+              <div class='song-wrapper'>\
+                <input type='radio' name='user_song' value='"+song['spotify_id']+"' class='row' id=''/>\
+                <div class='avatar-wrapper-special'>\
+                  <img width='20%' src='"+song['image']+"' />\
+                </div>\
+                <p>"+ song['name']+" by "+ song['artist']+"</p>\
+                </div>\
+                <audio controls style='width: 100%;'>\
+                  <source src="+song['preview']+" type='audio/mpeg'>\
+                Your browser does not support the audio element.\
+                </audio>\
+              </label>"
+            );
+            var cw = $('.avatar-wrapper-special').width();
+            $('.avatar-wrapper-special').css({'height':cw+'px'});
+          }
+        }
+      }
+    });
+  });
+
+  $('#submit-song').on('click',function(){
+    var spotify_id = $('input[name=user_song]:checked', 'form').val();
+    var postData = {
+      'user_id': {{user_id}},
+      'spotify_id': spotify_id
+    }
+    $.ajax({
+      async: true,
+      contentType:"application/json",
+      url: '/ts/api/user/history',
+      dataType: 'json',
+      data: JSON.stringify(postData),
+      error: function(){
+        alert("Hmm. Something didn't work. Could you try again?");
+        location.href = '/';
+      },
+      method: 'POST',
+      success: function (response) {
+          console.log(response)
+      }
+    }); // end ajax
+
+  }); // end submit event listern
+});
+</script>
+{% include 'base_foot.html' %}

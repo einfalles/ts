@@ -259,6 +259,7 @@ def auth_yt_authenticate():
     #     print("NO {0}".format(e))
     #     return "BIG PROBLEM BUD"
 
+
 @app.route('/auth/sp/login')
 def auth_sp_login():
     oauth = tsa.OAuthSignIn.get_provider("spotify")
@@ -353,7 +354,9 @@ def auth_sp_authenticate():
         print('user exists and is logged in')
 
 
-
+@app.route('/new/jank')
+def jank_signin():
+    return render_template('jank.html')
 @app.route('/new/step1')
 def view_new_one():
     return render_template('new_song.html',user_id=session['user']['id'])

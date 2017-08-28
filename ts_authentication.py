@@ -31,8 +31,8 @@ SP_DEV_AUTH = 'http://localhost:5000/auth/sp/authenticate'
 SP_APP_AUTH = 'http://app.tunesmash.org/auth/sp/authenticate'
 YT_REDIRECT = YT_DEV_AUTH
 SP_REDIRECT = SP_DEV_AUTH
-YT_REDIRECT = YT_APP_AUTH
-SP_REDIRECT = SP_APP_AUTH
+# YT_REDIRECT = YT_APP_AUTH
+# SP_REDIRECT = SP_APP_AUTH
 KEY_CREDENTIALS = {
     'google':{
         'id':'423012525826-42ued2niiiecpuvrehd445n83kt16ano.apps.googleusercontent.com',
